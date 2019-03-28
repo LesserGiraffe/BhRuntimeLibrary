@@ -89,6 +89,10 @@ public class Util {
 		return true;
 	}
 
+	public byte toByte(int num) {
+		return (byte)num;
+	}
+
 
 	public class Platform {
 

@@ -20,23 +20,71 @@ repositories {
 	jcenter()
 }
 
-dependencies {}
+dependencies {
+	compile group: 'org.mozilla', name: 'rhino', version: '1.7.10'
+}
 
 // Define the main class for the application
 ext.jarName = 'BhProgramExecEnvironment.jar'
 ext.mainClass = 'net.seapanda.bunnyhop.programexecenv.BhProgramExecEnvironment'
-ext.SYS_HOME = System.getenv('HOME')
-ext.JDK_VER = 11
-ext.fs = File.pathSeparator
+ext.USR_HOME = System.getProperty('user.home')
+ext.JDK_VER = 8
+ext.ps = File.pathSeparator
 ext.projName = 'BhProgramExecEnvironment'
+
+// Rhinoライブラリの配置
+task prepareRhino {
+
+	doFirst {
+		String rhinoModName = 'rhino'
+		String rhinoModJar = 'rhinoMod.jar'
+		String rhinoLibJar = null
+		
+		// rhinoモジュール作成
+		if (!file("$projectDir/mlib/$rhinoModJar").exists()) {
+
+			files(configurations.default).each {File file ->
+
+				if (file.name ==~ /^rhino.+\.jar$/) {
+					ant.copy(todir: "$projectDir/mlib") {
+						fileset(file: file.absolutePath)
+					}
+					rhinoLibJar = file.name
+				}
+			}
+
+			exec {
+				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jdeps'),
+							'--generate-module-info', "$projectDir/mlib", "$projectDir/mlib/$rhinoLibJar")
+			}
+			exec {
+				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/javac'),
+							'--patch-module', "$rhinoModName=$projectDir/mlib/$rhinoLibJar", "$projectDir/mlib/$rhinoModName/module-info.java")
+			}
+			exec {
+				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jar'),
+							 'uf', "$projectDir/mlib/$rhinoLibJar", '-C', "$projectDir/mlib/$rhinoModName", 'module-info.class')
+			}
+			ant.move(tofile: "$projectDir/mlib/$rhinoModJar") {
+				fileset(file: "$projectDir/mlib/$rhinoLibJar")
+			}
+			delete "$projectDir/mlib/$rhinoModName"
+		}
+	}
+}
+
+// ライブラリの準備
+task prepareLibs {
+	dependsOn 'prepareRhino'
+}
 
 compileJava {
 
 	doFirst {
 
 		options.fork = true
-		options.forkOptions.executable = SYS_HOME + '/java/' + JDK_VER + '/jdk/bin/javac'
-		
+		options.forkOptions.executable = USR_HOME + '/java/' + JDK_VER + '/jdk/bin/javac'
+
 		if (JDK_VER >= 11) {
 			options.sourcepath = files("$projectDir/src/main/java")
 			options.compilerArgs = [
@@ -70,10 +118,10 @@ task createJar(type:Exec) {
 
 	dependsOn 'compileJava'
 	doFirst {
-	
+
 		ant.mkdir(dir:"$projectDir/$JDK_VER")
 		if (JDK_VER >= 11) {
-			commandLine ((SYS_HOME + '/java/' + JDK_VER +'/jdk/bin/jar'),
+			commandLine ((USR_HOME + '/java/' + JDK_VER +'/jdk/bin/jar'),
 						'--create',
 						'--file', "$projectDir/$JDK_VER/$jarName",
 						'--main-class', "$mainClass",
@@ -81,7 +129,7 @@ task createJar(type:Exec) {
 						'-C', "$projectDir/build/classes/java/main", '.')
 		}
 		else {
-			commandLine ((SYS_HOME + '/java/' + JDK_VER +'/jdk/bin/jar'),
+			commandLine ((USR_HOME + '/java/' + JDK_VER +'/jdk/bin/jar'),
 						'cfe',
 						"$projectDir/$JDK_VER/$jarName",
 						"$mainClass",
@@ -94,10 +142,11 @@ task runApp(type: JavaExec) {
 
 	dependsOn 'createJar'
 	doFirst {
-		executable = SYS_HOME + '/java/' + JDK_VER + '/jdk/bin/java'
+		executable = USR_HOME + '/java/' + JDK_VER + '/jdk/bin/java'
 		main = ''
 		jvmArgs = [
-			'-jar', "$projectDir/$JDK_VER/$jarName",
+			'-cp', ("$projectDir/mlib/*" + ps + "$projectDir/$JDK_VER/$jarName"),
+			"$mainClass"
 		]
 		classpath = files()
 	}

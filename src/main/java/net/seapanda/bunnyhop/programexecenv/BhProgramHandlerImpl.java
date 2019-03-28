@@ -15,13 +15,11 @@
  */
 package net.seapanda.bunnyhop.programexecenv;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -29,13 +27,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Script;
+import org.mozilla.javascript.ScriptableObject;
 
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramData;
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramHandler;
 import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
@@ -53,7 +50,8 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 	private final BlockingQueue<BhProgramData> recvDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);	//!< from BunnyHop
 	private final AtomicBoolean connected = new AtomicBoolean(false);	//!< BunnyHopとの通信が有効な場合true
 	private final ScriptInOut scriptIO = new ScriptInOut(sendDataList, connected);	//!< BhProgramの入出力用オブジェクト
-	ScriptEngine engine;
+	ScriptableObject bhAppScope;
+	Script bhAppScript;
 
 	public BhProgramHandlerImpl(){}
 
@@ -65,6 +63,10 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 		recvDataProcessor.submit(() ->{
 			processRecvData();
 		});
+
+		Context cx = ContextFactory.getGlobal().enterContext();
+		bhAppScope = cx.initStandardObjects();
+		Context.exit();
 		return true;
 	}
 
@@ -73,31 +75,33 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 
 		Path scriptPath = Paths.get(Util.INSTANCE.EXEC_PATH, BhParams.Path.SCRIPT_DIR, fileName);
 		boolean success = true;
+		Context context = ContextFactory.getGlobal().enterContext();
 
-		try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(scriptPath, StandardOpenOption.READ));){
-			byte[] fileData = new byte[(int)Files.size(scriptPath)];
-			is.read(fileData);
-			String srcCode = new String(fileData, StandardCharsets.UTF_8);
+		try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)){
+
+			context.setLanguageVersion(Context.VERSION_ES6);
+			context.setOptimizationLevel(9);
+			bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
 			bhProgramExec.submit(() -> {
 				try {
-					engine = (new NashornScriptEngineFactory()).getScriptEngine("--language=es6");
-					Bindings binding = engine.createBindings();
-					binding.put(BhParams.JsKeyword.KEY_BH_INOUT, scriptIO);
-					binding.put(BhParams.JsKeyword.KEY_BH_NODE_UTIL, Util.INSTANCE);
-					engine.setBindings(binding, ScriptContext.ENGINE_SCOPE);
-					engine.eval(srcCode);
-					Invocable invocable = (Invocable)engine;
-					invocable.invokeFunction(data.fireEventFuncName, data.event.toString());
+					Context cx = ContextFactory.getGlobal().enterContext();
+					ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_INOUT, scriptIO);
+					ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_NODE_UTIL, Util.INSTANCE);
+					bhAppScript.exec(cx, bhAppScope);
+					Function main = (Function)bhAppScope.get(data.fireEventFuncName);
+					main.call(cx, bhAppScope, bhAppScope, new String[] {data.event.toString()});
+					Context.exit();
 				}
-				catch (ScriptException | NoSuchMethodException e) {
+				catch (Exception e) {
 					LogManager.INSTANCE.errMsgForDebug("runScript 1 " +  e.toString() + " " + fileName);
 				}
 			});
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			LogManager.INSTANCE.errMsgForDebug("runScript 2 " +  e.toString() + " " + fileName);
 			success = false;
 		}
+		Context.exit();
 		return success;
 	}
 
@@ -168,14 +172,16 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 	 * */
 	private void fireEvent(BhProgramData data) {
 
-		if (engine == null)
+		if (bhAppScript == null)
 			return;
 
 		try {
-			Invocable invocable = (Invocable)engine;
-			invocable.invokeFunction(data.fireEventFuncName, data.event.toString());
+			Context cx = ContextFactory.getGlobal().enterContext();
+			Function main = (Function)bhAppScope.get(data.fireEventFuncName);
+			main.call(cx, bhAppScope, bhAppScope, new String[] {data.event.toString()});
+			Context.exit();
 		}
-		catch ( ScriptException | NoSuchMethodException e) {
+		catch (Exception e) {
 			LogManager.INSTANCE.errMsgForDebug(BhProgramHandlerImpl.class.getSimpleName() + "::fireEvent\n" + e.toString());
 		}
 	}

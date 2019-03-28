@@ -1,8 +1,12 @@
 # Ignore Gradle project-specific cache directory
 .gradle
+.classpath
+.project
 
 # Ignore Gradle build output directory
 build
 mlib
 8
 11
+bin
+.settings

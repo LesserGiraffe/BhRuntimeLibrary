@@ -15,8 +15,9 @@
  */
 module net.seapanda.bhprogramexecenv {
 	requires java.rmi;
-	requires jdk.scripting.nashorn;
 	requires java.base;
+    requires java.desktop;	//for javax.audio in the bhAppScript
+	requires rhino;
 
 	exports net.seapanda.bunnyhop.programexecenv;
 	exports net.seapanda.bunnyhop.programexecenv.socket;
