@@ -26,20 +26,20 @@ public class BhProgramData implements Serializable {
 	public final TYPE type;
 	public final String str;
 	public final EVENT event;
-	public final String fireEventFuncName;
+	public final String funcNameToCall;
 
 	public BhProgramData(TYPE type, String str) {
 		this.type = type;
 		this.str = str;
 		this.event = null;
-		this.fireEventFuncName = null;
+		this.funcNameToCall = null;
 	}
 
-	public BhProgramData(TYPE type, EVENT event, String fireEventFuncName) {
+	public BhProgramData(TYPE type, EVENT event, String funcNameToCall) {
 		this.type = type;
 		this.str = null;
 		this.event = event;
-		this.fireEventFuncName = fireEventFuncName;
+		this.funcNameToCall = funcNameToCall;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class BhProgramData implements Serializable {
 		KEY_X_PRESSED,
 		KEY_Y_PRESSED,
 		KEY_Z_PRESSED,
-		PROGRAM_START,
+		PROGRAM_START,	//!< プログラムの開始時に必ず1回発行されるイベント
 	}
 }
 

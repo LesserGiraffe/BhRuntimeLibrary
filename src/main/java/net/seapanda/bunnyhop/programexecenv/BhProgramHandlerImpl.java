@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -44,12 +45,13 @@ import net.seapanda.bunnyhop.programexecenv.tools.Util;
  */
 public class BhProgramHandlerImpl implements BhProgramHandler {
 
-	private final ExecutorService bhProgramExec = Executors.newSingleThreadExecutor();
+	private final ExecutorService bhProgramExec = Executors.newFixedThreadPool(16);
 	private final ExecutorService recvDataProcessor = Executors.newSingleThreadExecutor();
 	private final BlockingQueue<BhProgramData> sendDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);	//!< to BunnyHop
 	private final BlockingQueue<BhProgramData> recvDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);	//!< from BunnyHop
 	private final AtomicBoolean connected = new AtomicBoolean(false);	//!< BunnyHopとの通信が有効な場合true
 	private final ScriptInOut scriptIO = new ScriptInOut(sendDataList, connected);	//!< BhProgramの入出力用オブジェクト
+	private final AtomicBoolean isBhAppInitialized = new AtomicBoolean(false);
 	ScriptableObject bhAppScope;
 	Script bhAppScript;
 
@@ -74,35 +76,47 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 	public boolean runScript(String fileName, BhProgramData data) {
 
 		Path scriptPath = Paths.get(Util.INSTANCE.EXEC_PATH, BhParams.Path.SCRIPT_DIR, fileName);
-		boolean success = true;
-		Context context = ContextFactory.getGlobal().enterContext();
 
 		try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)){
 
+			Context context = ContextFactory.getGlobal().enterContext();
 			context.setLanguageVersion(Context.VERSION_ES6);
 			context.setOptimizationLevel(9);
 			bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
-			bhProgramExec.submit(() -> {
-				try {
-					Context cx = ContextFactory.getGlobal().enterContext();
-					ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_INOUT, scriptIO);
-					ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_NODE_UTIL, Util.INSTANCE);
-					bhAppScript.exec(cx, bhAppScope);
-					Function main = (Function)bhAppScope.get(data.fireEventFuncName);
-					main.call(cx, bhAppScope, bhAppScope, new String[] {data.event.toString()});
-					Context.exit();
-				}
-				catch (Exception e) {
-					LogManager.INSTANCE.errMsgForDebug("runScript 1 " +  e.toString() + " " + fileName);
-				}
-			});
+			Executors.newSingleThreadExecutor().submit(() -> startBhApp(data, fileName));
 		}
 		catch (Exception e) {
 			LogManager.INSTANCE.errMsgForDebug("runScript 2 " +  e.toString() + " " + fileName);
-			success = false;
+			return false;
 		}
-		Context.exit();
-		return success;
+		finally {
+			Context.exit();
+		}
+
+		return true;
+	}
+
+	/**
+	 * BHプログラムを実行する.
+	 * */
+	private void startBhApp(BhProgramData data, String fileName) {
+
+		try {
+			// 初期化
+			Context cx = ContextFactory.getGlobal().enterContext();
+			ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_INOUT, scriptIO);
+			ScriptableObject.putProperty(bhAppScope, BhParams.JsKeyword.KEY_BH_NODE_UTIL, Util.INSTANCE);
+			bhAppScript.exec(cx, bhAppScope);
+			isBhAppInitialized.set(true);
+			// 自動実行する関数を実行
+			fireEvent(data);
+		}
+		catch (Exception e) {
+			LogManager.INSTANCE.errMsgForDebug("runScript 1 " +  e.toString() + " " + fileName);
+		}
+		finally {
+			Context.exit();
+		}
 	}
 
 	@Override
@@ -118,6 +132,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 
 	@Override
 	public BhProgramData recvDataFromScript() {
+
 		BhProgramData data = null;
 		try {
 			data = sendDataList.poll(BhParams.POP_SEND_DATA_TIMEOUT, TimeUnit.SECONDS);
@@ -154,7 +169,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 
 			switch (data.type) {
 				case INPUT_STR:
-					scriptIO.addStdInData(data.str);
+					scriptIO.addStdinData(data.str);
 					break;
 
 				case INPUT_EVENT:
@@ -170,21 +185,50 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 	 * BhProgram のイベントハンドラを呼び出す
 	 * @param data イベント情報の入ったデータ
 	 * */
-	private void fireEvent(BhProgramData data) {
+	synchronized private void fireEvent(BhProgramData data) {
 
-		if (bhAppScript == null)
+		if (!isBhAppInitialized.get())
 			return;
 
 		try {
 			Context cx = ContextFactory.getGlobal().enterContext();
-			Function main = (Function)bhAppScope.get(data.fireEventFuncName);
-			main.call(cx, bhAppScope, bhAppScope, new String[] {data.event.toString()});
-			Context.exit();
+			Function getEventHandlers = (Function)bhAppScope.get(data.funcNameToCall);
+			NativeArray funcNameList =
+				(NativeArray)getEventHandlers.call(cx, bhAppScope, bhAppScope, new String[] {data.event.toString()});
+
+			for (Object funcName : funcNameList)
+				callAsync((String)funcName, bhAppScope);
 		}
 		catch (Exception e) {
-			LogManager.INSTANCE.errMsgForDebug(BhProgramHandlerImpl.class.getSimpleName() + "::fireEvent\n" + e.toString());
+			LogManager.INSTANCE.errMsgForDebug(BhProgramHandlerImpl.class.getSimpleName() + "::fireEvent\n" + e);
+		}
+		finally {
+			Context.exit();
 		}
 	}
+
+	/**
+	 * 非同期的に Javascript の関数を呼ぶ.
+	 * */
+	private void callAsync(String funcName, ScriptableObject scope) {
+
+		bhProgramExec.submit(() -> {
+			try {
+				Context cx = ContextFactory.getGlobal().enterContext();
+				Function func = (Function)bhAppScope.get(funcName);
+				func.call(cx, bhAppScope, bhAppScope, new Object[0]);
+			}
+			catch (Throwable e) {
+				scriptIO.println("Script err: " + funcName + "  " + e);
+				LogManager.INSTANCE.errMsgForDebug(
+					BhProgramHandlerImpl.class.getSimpleName() + "::callAsync(" + funcName + ")\n" + e);
+			}
+			finally {
+				Context.exit();
+			}
+		});
+	}
+
 }
 
 

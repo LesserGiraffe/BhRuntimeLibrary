@@ -28,7 +28,7 @@ dependencies {
 ext.jarName = 'BhProgramExecEnvironment.jar'
 ext.mainClass = 'net.seapanda.bunnyhop.programexecenv.BhProgramExecEnvironment'
 ext.USR_HOME = System.getProperty('user.home')
-ext.JDK_VER = 8
+ext.JDK_VER = 11 //8 or 11
 ext.ps = File.pathSeparator
 ext.projName = 'BhProgramExecEnvironment'
 

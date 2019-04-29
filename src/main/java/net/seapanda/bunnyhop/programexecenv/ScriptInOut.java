@@ -29,7 +29,7 @@ import net.seapanda.bunnyhop.bhprogram.common.BhProgramData;
 public class ScriptInOut {
 
 	private final BlockingQueue<BhProgramData> sendDataList;	//!< BunnyHopへの送信データキュー
-	private final BlockingQueue<String> stdInDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
+	private final BlockingQueue<String> stdinDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
 	private final AtomicBoolean connected;	//!< BunnyHopとの接続状況を取得する関数
 
 	/**
@@ -74,8 +74,8 @@ public class ScriptInOut {
 	 * 標準入力に入力された文字をリストに追加する
 	 * @param input 標準入力に入力された文字
 	 */
-	public void addStdInData(String input) {
-		stdInDataList.offer(input);
+	public void addStdinData(String input) {
+		stdinDataList.offer(input);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class ScriptInOut {
 
 		String data = "";
 		try {
-			data = stdInDataList.take();
+			data = stdinDataList.take();
 		}
 		catch(InterruptedException e) {
 			Thread.currentThread().interrupt();
