@@ -40,7 +40,7 @@ public class BhProgramExecEnvironment {
 		if (args.length >= 1) {
 			local = args[0].equals("true");
 			if (args[0].equals("--version")) {
-				System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + BhParams.APP_VERSION);
+				System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
 				return;
 			}
 		}
