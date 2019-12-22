@@ -27,7 +27,7 @@ public interface BhProgramHandler extends Remote {
 	/**
 	 * 引数で指定したスクリプトを実行する
 	 * @param fileName 実行ファイル名
-	 * @param data プログラム開始時に送信するデータ
+	 * @param data 実行時にスクリプトに渡すイベントデータ
 	 * @return 実行に成功した場合true
 	 */
 	public boolean runScript(String fileName, BhProgramData data) throws RemoteException;
@@ -44,7 +44,7 @@ public interface BhProgramHandler extends Remote {
 
 	/**
 	 * スクリプト実行環境に向けてデータを送る
-	 * @param data 送信するデータ. nullは駄目.
+	 * @param data 送信するデータ. null 不可.
 	 * @return 送信に成功した場合true
 	 */
 	public boolean sendDataToScript(BhProgramData data) throws RemoteException;

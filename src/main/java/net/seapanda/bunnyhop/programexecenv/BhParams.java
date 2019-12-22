@@ -29,15 +29,10 @@ public class BhParams {
 
 	public static class BhProgram {
 		public static final String RIM_TCP_PORT_SUFFIX = "@RmiTcpPort";	//BhProgram実行環境との通信に使うRMIオブジェクトを探す際のTCPポート
+		public static final String STDIN_PREFIX = "i:";
+		public static final String EVENT_INPUT_PREFIX = "e:";
 	}
 
-	/**
-	 * JavaScript コードに内部でも使うキーワード
-	 * */
-	public static class JsKeyword {
-		public static final String KEY_BH_INOUT = "bhInout";
-		public static final String KEY_BH_NODE_UTIL = "bhUtil";
-	}
 	/**
 	 * ファイルパス関連のパラメータ
 	 */

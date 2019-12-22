@@ -6,6 +6,16 @@
  * User Manual available at https://docs.gradle.org/5.2.1/userguide/tutorial_java_projects.html
  */
 
+//============================= How to Compile =============================
+// cd directory-this-file-is-in
+// ./gradlew prepareJFX  # if not use Liberica JDK, excute this
+// ./gradlew prepareLibs
+// ./gradlew runApp
+//==========================================================================
+
+import java.util.regex.*
+import java.nio.file.*
+
 plugins {
 	// Apply the java plugin to add support for Java
 	id 'java'
@@ -21,7 +31,7 @@ repositories {
 }
 
 dependencies {
-	compile group: 'org.mozilla', name: 'rhino', version: '1.7.10'
+	compile group: 'org.mozilla', name: 'rhino', version: '1.7.11'
 }
 
 // Define the main class for the application
@@ -30,52 +40,78 @@ ext.mainClass = 'net.seapanda.bunnyhop.programexecenv.BhProgramExecEnvironment'
 ext.USR_HOME = System.getProperty('user.home')
 ext.JDK_VER = 11 //8 or 11
 ext.ps = File.pathSeparator
+ext.fs = File.separator
 ext.projName = 'BhProgramExecEnvironment'
 
-// Rhinoライブラリの配置
-task prepareRhino {
 
-	doFirst {
-		String rhinoModName = 'rhino'
-		String rhinoModJar = 'rhinoMod.jar'
-		String rhinoLibJar = null
-		
-		// rhinoモジュール作成
-		if (!file("$projectDir/mlib/$rhinoModJar").exists()) {
+/**
+ * JARライブラリからモジュールを作成する
+ * @param libFilePath Modular JAR にしたい JAR ファイルのパス
+ */
+def createModFromJar(libFilePath) {
+	
+	def libFileName = Paths.get(libFilePath).getFileName()
+	println libFileName
+	def modFileName = libFileName
+	
+	// モジュールファイルが存在する場合は実行しない
+	if (!file("$projectDir/mlib/$modFileName").exists()) {
 
-			files(configurations.default).each {File file ->
-
-				if (file.name ==~ /^rhino.+\.jar$/) {
-					ant.copy(todir: "$projectDir/mlib") {
-						fileset(file: file.absolutePath)
-					}
-					rhinoLibJar = file.name
-				}
-			}
-
-			exec {
-				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jdeps'),
-							'--generate-module-info', "$projectDir/mlib", "$projectDir/mlib/$rhinoLibJar")
-			}
-			exec {
-				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/javac'),
-							'--patch-module', "$rhinoModName=$projectDir/mlib/$rhinoLibJar", "$projectDir/mlib/$rhinoModName/module-info.java")
-			}
-			exec {
-				commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jar'),
-							 'uf', "$projectDir/mlib/$rhinoLibJar", '-C', "$projectDir/mlib/$rhinoModName", 'module-info.class')
-			}
-			ant.move(tofile: "$projectDir/mlib/$rhinoModJar") {
-				fileset(file: "$projectDir/mlib/$rhinoLibJar")
-			}
-			delete "$projectDir/mlib/$rhinoModName"
+		def output = new ByteArrayOutputStream()
+		exec {
+			commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jdeps'),
+						'--module-path', "$projectDir/lib",
+						'--generate-module-info', "$projectDir/lib/moduleInfo", "$libFilePath")
+			standardOutput = output
 		}
+		
+		// [writing to PATH/モジュール名/module-info.java] と出力される行からモジュール名を抜き出す
+		def line = (output.toString() =~ /^.+module-info.java/)[0]
+		def modName = line.split(Pattern.quote(fs))[-2]
+		
+		exec {
+			commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/javac'),
+						'--patch-module', "$modName=$libFilePath",
+						'--module-path', "$projectDir/lib",
+						"$projectDir/lib/moduleInfo/$modName/module-info.java")
+		}
+		ant.copy(tofile: "$projectDir/mlib/$modFileName") {
+			fileset(file: "$libFilePath")
+		}
+		exec {
+			commandLine ((USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jar'),
+						 'uf', "$projectDir/mlib/$modFileName", '-C', "$projectDir/lib/moduleInfo/$modName", 'module-info.class')
+		}
+
+		delete "$projectDir/lib/moduleInfo/$modName"
+	}
+}
+
+task copyDependencies(type: Copy) {
+
+	from configurations.default
+	into 'lib'
+	
+	doFirst {
+		delete "$projectDir/lib/"
+		delete "$projectDir/mlib/"
 	}
 }
 
 // ライブラリの準備
 task prepareLibs {
-	dependsOn 'prepareRhino'
+
+	dependsOn 'copyDependencies'
+	
+	doFirst {
+		FileTree ftree = fileTree("$projectDir/lib")
+		ftree.visit {element ->
+			def filePath = element.file.toString()
+			if (filePath ==~ /.+\.jar$/) {
+				createModFromJar(filePath)
+			}
+		}
+	}
 }
 
 compileJava {

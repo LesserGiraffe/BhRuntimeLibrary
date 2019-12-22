@@ -20,10 +20,13 @@ import net.seapanda.bunnyhop.programexecenv.BhParams;
 public class LogManager {
 
 	public static final LogManager INSTANCE = new LogManager();	//!< シングルトンインスタンス
+	private boolean isLocal = false;
 
 	private LogManager() {}
 
-	public boolean init() {
+	public boolean init(boolean isLocal) {
+
+		this.isLocal = isLocal;
 		initLogSystem();	//ログシステムがエラーでも処理は続ける
 		return true;
 	}
@@ -56,23 +59,29 @@ public class LogManager {
 	 * デバッグ用メッセージ出力メソッド
 	 * */
 	public void errMsgForDebug(String msg) {
-		msg = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")).format(Calendar.getInstance().getTime()) + "  ERR : " + msg;
-		writeMsgToLogFile(msg + "\n");
+		String logMsg = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")).format(Calendar.getInstance().getTime())
+			+ "  ERR : " + msg + "\n";
+		writeMsgToLogFile(logMsg);
+		if (isLocal)
+			System.err.println(msg + "\n");
 	}
 
 	/**
 	 * デバッグ用メッセージ出力メソッド
 	 * */
 	public void msgForDebug(String msg) {
-		msg = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")).format(Calendar.getInstance().getTime()) + "  MSG : " + msg;
-		writeMsgToLogFile(msg + "\n");
+		String logMsg = (new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")).format(Calendar.getInstance().getTime())
+			+ "  MSG : " + msg + "\n";
+		writeMsgToLogFile(logMsg);
+		if (isLocal)
+			System.out.println(msg);
 	}
 
 	/**
 	 * ログファイルにメッセージを書き込む
 	 * @param msg ログファイルに書き込むメッセージ
 	 */
-	private void writeMsgToLogFile(String msg) {
+	private synchronized void writeMsgToLogFile(String msg) {
 
 		try(OutputStream logOutputStream =
 				Files.newOutputStream(
@@ -110,6 +119,7 @@ public class LogManager {
 	}
 
 	private Path genLogFilePath(int fileNo) {
+
 		String numStr = ("0000" + fileNo);
 		numStr = numStr.substring(numStr.length() - 4, numStr.length());
 		String logFileName = BhParams.Path.LOG_FILE_NAME + numStr + ".log";

@@ -21,6 +21,6 @@ module net.seapanda.bhprogramexecenv {
 
 	exports net.seapanda.bunnyhop.programexecenv;
 	exports net.seapanda.bunnyhop.programexecenv.socket;
-	exports net.seapanda.bunnyhop.programexecenv.tools;
+	exports net.seapanda.bunnyhop.programexecenv.script;
 	exports net.seapanda.bunnyhop.bhprogram.common;
 }

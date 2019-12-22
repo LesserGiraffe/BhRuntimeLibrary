@@ -28,8 +28,6 @@ public class Util {
 
 	public static final Util INSTANCE = new Util();		//!< シングルトンインスタンス
 	public final String EXEC_PATH;
-	private final String OS_NAME = System.getProperty("os.name").toLowerCase();
-	public final Platform PLATFORM = this.new Platform();
 
 	private Util() {
 
@@ -87,21 +85,5 @@ public class Util {
 			return false;
 		}
 		return true;
-	}
-
-	public byte toByte(int num) {
-		return (byte)num;
-	}
-
-
-	public class Platform {
-
-		public boolean isWindows() {
-			return OS_NAME.startsWith("windows");
-		}
-
-		public boolean isLinux() {
-			return OS_NAME.startsWith("linux");
-		}
 	}
 }

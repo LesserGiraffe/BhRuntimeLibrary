@@ -22,9 +22,11 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 
+import net.seapanda.bunnyhop.bhprogram.common.BhProgramData;
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramHandler;
 import net.seapanda.bunnyhop.bhprogram.common.LocalClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.RemoteClientSocketFactory;
+import net.seapanda.bunnyhop.programexecenv.script.ScriptParams;
 import net.seapanda.bunnyhop.programexecenv.socket.LocalServerSocketFactory;
 import net.seapanda.bunnyhop.programexecenv.socket.RemoteServerSocketFactory;
 import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
@@ -36,32 +38,41 @@ public class BhProgramExecEnvironment {
 
 	public static void main(String[] args) {
 
-		boolean local = true;
 		if (args.length >= 1) {
-			local = args[0].equals("true");
+
 			if (args[0].equals("--version")) {
 				System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
 				return;
 			}
+			else if (args[0].equals("-run") && args.length >= 2) {
+				LogManager.INSTANCE.init(true);
+				executeScript(args[1]);
+			}
+			else {
+				LogManager.INSTANCE.init(false);
+				exportRmiObject(Boolean.valueOf(args[0]));
+			}
 		}
 
-		LogManager.INSTANCE.init();
+	}
+
+	/**
+	 * BunnyHop と通信するための RMI オブジェクトをエクスポートする
+	 */
+	private static void exportRmiObject(boolean isLocal) {
 
 		try {
 			BhProgramHandlerImpl programHandler = new BhProgramHandlerImpl();
-			programHandler.init();
-			Remote remote =
-				UnicastRemoteObject.exportObject(
-					programHandler,
-					0,
-					local ? new LocalClientSocketFactory(0) : new RemoteClientSocketFactory(0),
-					local ? new LocalServerSocketFactory(0) : new RemoteServerSocketFactory(0));
-			RMIServerSocketFactory socketFactory = local ? new LocalServerSocketFactory(1) : new RemoteServerSocketFactory(1);
-			Registry registry =
-				LocateRegistry.createRegistry(
-					0,
-					RMISocketFactory.getDefaultSocketFactory(),
-					socketFactory);
+			Remote remote = UnicastRemoteObject.exportObject(
+				programHandler,
+				0,
+				isLocal ? new LocalClientSocketFactory(0) : new RemoteClientSocketFactory(0),
+				isLocal ? new LocalServerSocketFactory(0) : new RemoteServerSocketFactory(0));
+			RMIServerSocketFactory socketFactory = isLocal ? new LocalServerSocketFactory(1) : new RemoteServerSocketFactory(1);
+			Registry registry = LocateRegistry.createRegistry(
+				0,
+				RMISocketFactory.getDefaultSocketFactory(),
+				socketFactory);
 			registry.rebind(BhProgramHandler.class.getSimpleName(), remote);
 
 			if (socketFactory instanceof LocalServerSocketFactory) {
@@ -77,4 +88,36 @@ public class BhProgramExecEnvironment {
 		}
 	}
 
+	/**
+	 * 引数で指定したスクリプトを実行する
+	 * @param fileName スクリプトファイル名
+	 */
+	private static void executeScript(String fileName) {
+
+		LocalBhProgramHandler programHandler = new LocalBhProgramHandler();
+		BhProgramData data = new BhProgramData(
+			BhProgramData.EVENT.PROGRAM_START,
+			ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES);
+		programHandler.runScript(fileName, data);
+	}
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

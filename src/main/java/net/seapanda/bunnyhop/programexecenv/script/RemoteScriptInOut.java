@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.seapanda.bunnyhop.programexecenv;
+package net.seapanda.bunnyhop.programexecenv.script;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -21,33 +21,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramData;
+import net.seapanda.bunnyhop.programexecenv.BhParams;
 
 /**
- * 実行時スクリプトの入出力を取り扱うクラス
+ * リモート通信用 BhProgream 入出力クラス
  * @author K.Koike
  */
-public class ScriptInOut {
+public class RemoteScriptInOut implements ScriptInOut {
 
-	private final BlockingQueue<BhProgramData> sendDataList;	//!< BunnyHopへの送信データキュー
+	private final BlockingQueue<BhProgramData> sendDataList;	//!< 送信データキュー
 	private final BlockingQueue<String> stdinDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
-	private final AtomicBoolean connected;	//!< BunnyHopとの接続状況を取得する関数
+	private final AtomicBoolean connected;	//!< リモート環境との接続状態フラグ
 
 	/**
-	 * @param sendDataList BunnyHopへの送信データキュー
-	 * @param connected BunnyHopとの接続状況を取得する関数
+	 * コンストラクタ
+	 * @param sendDataList 送信データキュー
+	 * @param connected リモート環境との接続状態フラグ
 	 */
-	public ScriptInOut(
-		BlockingQueue<BhProgramData> sendDataList,
-		AtomicBoolean connected) {
+	public RemoteScriptInOut(BlockingQueue<BhProgramData> sendDataList, AtomicBoolean connected) {
 
 		this.sendDataList = sendDataList;
 		this.connected = connected;
 	}
 
-	/**
-	 * BunnyHop側で出力するデータを送信データキューに追加する
-	 * @param str 出力する文字列
-	 */
+	@Override
 	public void println(String str) {
 
 		if (!connected.get())
@@ -70,19 +67,8 @@ public class ScriptInOut {
 		}
 	}
 
-	/**
-	 * 標準入力に入力された文字をリストに追加する
-	 * @param input 標準入力に入力された文字
-	 */
-	public void addStdinData(String input) {
-		stdinDataList.offer(input);
-	}
-
-	/**
-	 * 標準入力のデータを読み取って返す
-	 * @return 標準入力に入力された文字
-	 */
-	public String scan() {
+	@Override
+	public String scanln() {
 
 		String data = "";
 		try {
@@ -93,4 +79,41 @@ public class ScriptInOut {
 		}
 		return data;
 	}
+
+	/**
+	 * BhProgram の標準入力にデータを追加する
+	 * @param input 標準入力に入力する文字
+	 */
+	public void putLineToStdin(String input) {
+		stdinDataList.offer(input);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
