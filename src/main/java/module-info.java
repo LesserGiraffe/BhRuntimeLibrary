@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 module net.seapanda.bhprogramexecenv {
-	requires java.rmi;
-	requires java.base;
-    requires java.desktop;	//for javax.audio in the bhAppScript
-	requires rhino;
+  requires java.rmi;
+  requires java.base;
+  requires java.desktop;  //for javax.audio in the bhAppScript
+  requires rhino;
+  requires javafx.fxml;
 
-	exports net.seapanda.bunnyhop.programexecenv;
-	exports net.seapanda.bunnyhop.programexecenv.socket;
-	exports net.seapanda.bunnyhop.programexecenv.script;
-	exports net.seapanda.bunnyhop.programexecenv.lib;
-	exports net.seapanda.bunnyhop.bhprogram.common;
+  exports net.seapanda.bunnyhop.programexecenv;
+  exports net.seapanda.bunnyhop.programexecenv.socket;
+  exports net.seapanda.bunnyhop.programexecenv.script;
+  exports net.seapanda.bunnyhop.programexecenv.lib;
+  exports net.seapanda.bunnyhop.bhprogram.common;
 }

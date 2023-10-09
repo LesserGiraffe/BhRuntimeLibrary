@@ -36,109 +36,109 @@ import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
  */
 public class LocalBhProgramHandler {
 
-	private final ExecutorService outputExecutor = Executors.newSingleThreadExecutor();
-	private final ExecutorService inoutputExecutor = Executors.newSingleThreadExecutor();
-	private final BlockingQueue<BhProgramData> sendDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
-	private final RemoteScriptInOut scriptIO = new RemoteScriptInOut(sendDataList, new AtomicBoolean(true));
-	private final BhProgramExecutor executor = new BhProgramExecutor(scriptIO, sendDataList);
+  private final ExecutorService outputExecutor = Executors.newSingleThreadExecutor();
+  private final ExecutorService inoutputExecutor = Executors.newSingleThreadExecutor();
+  private final BlockingQueue<BhProgramData> sendDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
+  private final RemoteScriptInOut scriptIO = new RemoteScriptInOut(sendDataList, new AtomicBoolean(true));
+  private final BhProgramExecutor executor = new BhProgramExecutor(scriptIO, sendDataList);
 
-	LocalBhProgramHandler() {
-		outputExecutor.submit(() -> outputSendData());
-		inoutputExecutor.submit(() -> input());
-	}
+  LocalBhProgramHandler() {
+    outputExecutor.submit(() -> outputSendData());
+    inoutputExecutor.submit(() -> input());
+  }
 
-	/**
-	 * 引数で指定したスクリプトを実行する
-	 * @param fileName 実行ファイル名
-	 * @param data 実行時にスクリプトに渡すイベントデータ
-	 * @return 実行に成功した場合true
-	 */
-	public boolean runScript(String fileName, BhProgramData data) {
-		return executor.runScript(fileName, data);
-	}
+  /**
+   * 引数で指定したスクリプトを実行する
+   * @param fileName 実行ファイル名
+   * @param data 実行時にスクリプトに渡すイベントデータ
+   * @return 実行に成功した場合true
+   */
+  public boolean runScript(String fileName, BhProgramData data) {
+    return executor.runScript(fileName, data);
+  }
 
 
-	private void outputSendData() {
+  private void outputSendData() {
 
-		while(true) {
-			try {
-				BhProgramData data = sendDataList.take();
-				switch (data.type) {
-					case OUTPUT_EXCEPTION :
-						System.out.println(data.exception.getMessage() + "\n");
-						System.out.println(data.exception.getScriptEngineMsg() + "\n");
-						Iterator<BhNodeInstanceID> iter = data.exception.getCallStack().descendingIterator();
-						while (iter.hasNext())
-							System.out.println("	" + iter.next().toString() + "\n");
-						break;
+    while(true) {
+      try {
+        BhProgramData data = sendDataList.take();
+        switch (data.type) {
+          case OUTPUT_EXCEPTION :
+            System.out.println(data.exception.getMessage() + "\n");
+            System.out.println(data.exception.getScriptEngineMsg() + "\n");
+            Iterator<BhNodeInstanceID> iter = data.exception.getCallStack().descendingIterator();
+            while (iter.hasNext())
+              System.out.println("  " + iter.next().toString() + "\n");
+            break;
 
-					case OUTPUT_STR :
-						System.out.println(data.str);
+          case OUTPUT_STR :
+            System.out.println(data.str);
 
-					default:
-						break;
-				}
-			}
-			catch(InterruptedException e) {
-				break;
-			}
-		}
-	}
+          default:
+            break;
+        }
+      }
+      catch(InterruptedException e) {
+        break;
+      }
+    }
+  }
 
-	/**
-	 * BhProgram への入力を処理する
-	 */
-	private void input() {
+  /**
+   * BhProgram への入力を処理する
+   */
+  private void input() {
 
         try (Scanner scan = new Scanner(System.in)){
-			while(true) {
-				String line = scan.nextLine();
-				if (line.startsWith(BhParams.BhProgram.STDIN_PREFIX))
-					putToStdin(line);
-				else if (line.startsWith(BhParams.BhProgram.EVENT_INPUT_PREFIX))
-					fireEvent(line);
-				else
-					printCmdFormat();
-			}
-		}
-		catch(Exception e) {
-			LogManager.INSTANCE.errMsgForDebug(getClass().getSimpleName() + "  input  " + e.toString());
-			e.printStackTrace();
-		}
-	}
+      while(true) {
+        String line = scan.nextLine();
+        if (line.startsWith(BhParams.BhProgram.STDIN_PREFIX))
+          putToStdin(line);
+        else if (line.startsWith(BhParams.BhProgram.EVENT_INPUT_PREFIX))
+          fireEvent(line);
+        else
+          printCmdFormat();
+      }
+    }
+    catch(Exception e) {
+      LogManager.INSTANCE.errMsgForDebug(getClass().getSimpleName() + "  input  " + e.toString());
+      e.printStackTrace();
+    }
+  }
 
-	private void putToStdin(String line) {
+  private void putToStdin(String line) {
 
-		String[] splited = line.split("\\:");
-		if (splited.length >= 2)
-			scriptIO.putLineToStdin(splited[1]);
-		else
-			scriptIO.putLineToStdin("");
-	}
+    String[] splited = line.split("\\:");
+    if (splited.length >= 2)
+      scriptIO.putLineToStdin(splited[1]);
+    else
+      scriptIO.putLineToStdin("");
+  }
 
-	private void fireEvent(String line) {
+  private void fireEvent(String line) {
 
-		String[] splited = line.split("\\:");
-		if (splited.length >= 2) {
-			String eventName = splited[1];
-			try {
-				EVENT event = EVENT.valueOf(eventName);
-				executor.fireEvent(new BhProgramData(event, ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES));
-			}
-			catch (Exception e) {
-				System.err.println("invalid event name  " + eventName);
-			}
-		}
-		else {
-			System.err.println("An event name must be specified.");
-		}
-	}
+    String[] splited = line.split("\\:");
+    if (splited.length >= 2) {
+      String eventName = splited[1];
+      try {
+        EVENT event = EVENT.valueOf(eventName);
+        executor.fireEvent(new BhProgramData(event, ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES));
+      }
+      catch (Exception e) {
+        System.err.println("invalid event name  " + eventName);
+      }
+    }
+    else {
+      System.err.println("An event name must be specified.");
+    }
+  }
 
-	private void printCmdFormat() {
+  private void printCmdFormat() {
 
-		System.out.println("Input command format");
-		System.out.println("	i:input string to stdin");
-		System.out.println("	e:EVENT_NAME");
-		System.out.println();
-	}
+    System.out.println("Input command format");
+    System.out.println("  i:input string to stdin");
+    System.out.println("  e:EVENT_NAME");
+    System.out.println();
+  }
 }

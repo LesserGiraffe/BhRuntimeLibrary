@@ -29,64 +29,64 @@ import net.seapanda.bunnyhop.programexecenv.BhParams;
  */
 public class RemoteScriptInOut implements ScriptInOut {
 
-	private final BlockingQueue<BhProgramData> sendDataList;	//!< 送信データキュー
-	private final BlockingQueue<String> stdinDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
-	private final AtomicBoolean connected;	//!< リモート環境との接続状態フラグ
+  private final BlockingQueue<BhProgramData> sendDataList;  //!< 送信データキュー
+  private final BlockingQueue<String> stdinDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);
+  private final AtomicBoolean connected;  //!< リモート環境との接続状態フラグ
 
-	/**
-	 * コンストラクタ
-	 * @param sendDataList 送信データキュー
-	 * @param connected リモート環境との接続状態フラグ
-	 */
-	public RemoteScriptInOut(BlockingQueue<BhProgramData> sendDataList, AtomicBoolean connected) {
+  /**
+   * コンストラクタ
+   * @param sendDataList 送信データキュー
+   * @param connected リモート環境との接続状態フラグ
+   */
+  public RemoteScriptInOut(BlockingQueue<BhProgramData> sendDataList, AtomicBoolean connected) {
 
-		this.sendDataList = sendDataList;
-		this.connected = connected;
-	}
+    this.sendDataList = sendDataList;
+    this.connected = connected;
+  }
 
-	@Override
-	public void println(String str) {
+  @Override
+  public void println(String str) {
 
-		if (!connected.get())
-			return;
+    if (!connected.get())
+      return;
 
-		boolean add = false;
-		BhProgramData data = new BhProgramData(BhProgramData.TYPE.OUTPUT_STR, str);
-		while (!add) {
-			try {
-				add = sendDataList.offer(data, BhParams.PUSH_SEND_DATA_TIMEOUT, TimeUnit.SECONDS);
-				if (!connected.get()) {
-					sendDataList.clear();
-					return;
-				}
-			}
-			catch(InterruptedException e) {
-				Thread.currentThread().interrupt();
-				break;
-			}
-		}
-	}
+    boolean add = false;
+    BhProgramData data = new BhProgramData(BhProgramData.TYPE.OUTPUT_STR, str);
+    while (!add) {
+      try {
+        add = sendDataList.offer(data, BhParams.PUSH_SEND_DATA_TIMEOUT, TimeUnit.SECONDS);
+        if (!connected.get()) {
+          sendDataList.clear();
+          return;
+        }
+      }
+      catch(InterruptedException e) {
+        Thread.currentThread().interrupt();
+        break;
+      }
+    }
+  }
 
-	@Override
-	public String scanln() {
+  @Override
+  public String scanln() {
 
-		String data = "";
-		try {
-			data = stdinDataList.take();
-		}
-		catch(InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		return data;
-	}
+    String data = "";
+    try {
+      data = stdinDataList.take();
+    }
+    catch(InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+    return data;
+  }
 
-	/**
-	 * BhProgram の標準入力にデータを追加する
-	 * @param input 標準入力に入力する文字
-	 */
-	public void putLineToStdin(String input) {
-		stdinDataList.offer(input);
-	}
+  /**
+   * BhProgram の標準入力にデータを追加する
+   * @param input 標準入力に入力する文字
+   */
+  public void putLineToStdin(String input) {
+    stdinDataList.offer(input);
+  }
 }
 
 

@@ -26,44 +26,44 @@ import java.rmi.server.RMIServerSocketFactory;
  */
 public class LocalServerSocketFactory implements RMIServerSocketFactory {
 
-	private int localPort;
-	private int id;	//!< 同一性確認のためのID
+  private int localPort;
+  private int id;  //!< 同一性確認のためのID
 
-	/**
-	 * コンストラクタ
-	 * @param id オブジェクトの同一性確認のためのID
-	 */
-	public LocalServerSocketFactory(int id) {
-		this.id = id;
-	}
+  /**
+   * コンストラクタ
+   * @param id オブジェクトの同一性確認のためのID
+   */
+  public LocalServerSocketFactory(int id) {
+    this.id = id;
+  }
 
-	@Override
-	public ServerSocket createServerSocket(int port) throws IOException {
-		ServerSocket serverSocket = null;
-		try {
-			serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
-		}
-		catch(IOException e) {
-			throw new IOException();
-		}
-		localPort = serverSocket.getLocalPort();
-		return serverSocket;
-	}
+  @Override
+  public ServerSocket createServerSocket(int port) throws IOException {
+    ServerSocket serverSocket = null;
+    try {
+      serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
+    }
+    catch(IOException e) {
+      throw new IOException();
+    }
+    localPort = serverSocket.getLocalPort();
+    return serverSocket;
+  }
 
-	@Override
-	public int hashCode() {
-		return id;
+  @Override
+  public int hashCode() {
+    return id;
     }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		return (getClass() == obj.getClass()) && (id == ((LocalServerSocketFactory)obj).id);
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null)
+      return false;
+    return (getClass() == obj.getClass()) && (id == ((LocalServerSocketFactory)obj).id);
     }
 
-	public int getLocalPort() {
-		return localPort;
-	}
+  public int getLocalPort() {
+    return localPort;
+  }
 }
 

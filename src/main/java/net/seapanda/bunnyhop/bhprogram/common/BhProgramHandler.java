@@ -24,34 +24,34 @@ import java.rmi.RemoteException;
  */
 public interface BhProgramHandler extends Remote {
 
-	/**
-	 * 引数で指定したスクリプトを実行する
-	 * @param fileName 実行ファイル名
-	 * @param data 実行時にスクリプトに渡すイベントデータ
-	 * @return 実行に成功した場合true
-	 */
-	public boolean runScript(String fileName, BhProgramData data) throws RemoteException;
+  /**
+   * 引数で指定したスクリプトを実行する
+   * @param fileName 実行ファイル名
+   * @param data 実行時にスクリプトに渡すイベントデータ
+   * @return 実行に成功した場合true
+   */
+  public boolean runScript(String fileName, BhProgramData data) throws RemoteException;
 
-	/**
-	 * BunnyHopとの通信を切断する
-	 */
-	public void disconnect() throws RemoteException;
+  /**
+   * BunnyHopとの通信を切断する
+   */
+  public void disconnect() throws RemoteException;
 
-	/**
-	 * BunnyHopとの通信を始める
-	 */
-	public void connect() throws RemoteException;
+  /**
+   * BunnyHopとの通信を始める
+   */
+  public void connect() throws RemoteException;
 
-	/**
-	 * スクリプト実行環境に向けてデータを送る
-	 * @param data 送信するデータ. null 不可.
-	 * @return 送信に成功した場合true
-	 */
-	public boolean sendDataToScript(BhProgramData data) throws RemoteException;
+  /**
+   * スクリプト実行環境に向けてデータを送る
+   * @param data 送信するデータ. null 不可.
+   * @return 送信に成功した場合true
+   */
+  public boolean sendDataToScript(BhProgramData data) throws RemoteException;
 
-	/**
-	 * スクリプト実行環境からデータを受信する
-	 * @return 受信データ. 受信に失敗した場合もしくは受信データがなかった場合null
-	 */
-	public BhProgramData recvDataFromScript() throws RemoteException;
+  /**
+   * スクリプト実行環境からデータを受信する
+   * @return 受信データ. 受信に失敗した場合もしくは受信データがなかった場合null
+   */
+  public BhProgramData recvDataFromScript() throws RemoteException;
 }

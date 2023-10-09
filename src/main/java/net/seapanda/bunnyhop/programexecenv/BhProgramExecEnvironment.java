@@ -36,70 +36,74 @@ import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
  */
 public class BhProgramExecEnvironment {
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		if (args.length >= 1) {
+    if (args.length >= 1) {
 
-			if (args[0].equals("--version")) {
-				System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
-				return;
-			}
-			else if (args[0].equals("-run") && args.length >= 2) {
-				LogManager.INSTANCE.init(true);
-				executeScript(args[1]);
-			}
-			else {
-				LogManager.INSTANCE.init(false);
-				exportRmiObject(Boolean.valueOf(args[0]));
-			}
-		}
+      if (args[0].equals("--version")) {
+        System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
+        return;
+      }
+      else if (args[0].equals("-run") && args.length >= 2) {
+        LogManager.INSTANCE.init(true);
+        executeScript(args[1]);
+      }
+      else {
+        LogManager.INSTANCE.init(false);
+        exportRmiObject(Boolean.valueOf(args[0]));
+      }
+    }
 
-	}
+  }
 
-	/**
-	 * BunnyHop と通信するための RMI オブジェクトをエクスポートする
-	 */
-	private static void exportRmiObject(boolean isLocal) {
+  /**
+   * BunnyHop と通信するための RMI オブジェクトをエクスポートする
+   */
+  private static void exportRmiObject(boolean isLocal) {
 
-		try {
-			BhProgramHandlerImpl programHandler = new BhProgramHandlerImpl();
-			Remote remote = UnicastRemoteObject.exportObject(
-				programHandler,
-				0,
-				isLocal ? new LocalClientSocketFactory(0) : new RemoteClientSocketFactory(0),
-				isLocal ? new LocalServerSocketFactory(0) : new RemoteServerSocketFactory(0));
-			RMIServerSocketFactory socketFactory = isLocal ? new LocalServerSocketFactory(1) : new RemoteServerSocketFactory(1);
-			Registry registry = LocateRegistry.createRegistry(
-				0,
-				RMISocketFactory.getDefaultSocketFactory(),
-				socketFactory);
-			registry.rebind(BhProgramHandler.class.getSimpleName(), remote);
+    try {
+      BhProgramHandlerImpl programHandler = new BhProgramHandlerImpl();
+      Remote remote = UnicastRemoteObject.exportObject(
+        programHandler,
+        0,
+        isLocal ? new LocalClientSocketFactory(0) : new RemoteClientSocketFactory(0),
+        isLocal ? new LocalServerSocketFactory(0) : new RemoteServerSocketFactory(0));
+      RMIServerSocketFactory socketFactory = isLocal ? new LocalServerSocketFactory(1) : new RemoteServerSocketFactory(1);
+      Registry registry = LocateRegistry.createRegistry(
+        0,
+        RMISocketFactory.getDefaultSocketFactory(),
+        socketFactory);
+      registry.rebind(BhProgramHandler.class.getSimpleName(), remote);
 
-			if (socketFactory instanceof LocalServerSocketFactory) {
-				System.out.println("\n" + ((LocalServerSocketFactory)socketFactory).getLocalPort() + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);	//don't remove
-			}
-			else {
-				System.out.println("\n" + ((RemoteServerSocketFactory)socketFactory).getLocalPort() + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);	//don't remove
-			}
-		}
-		catch(Exception e){
-			System.out.println("\n" + "null" + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);	//don't remove
-			LogManager.INSTANCE.msgForDebug("main " + e.toString());
-		}
-	}
+      if (socketFactory instanceof LocalServerSocketFactory) {
+        System.out.println("\n" + (
+          (LocalServerSocketFactory)socketFactory).getLocalPort() 
+          + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      }
+      else {
+        System.out.println("\n" + 
+          ((RemoteServerSocketFactory)socketFactory).getLocalPort() 
+          + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      }
+    }
+    catch(Exception e){
+      System.out.println("\n" + "null" + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      LogManager.INSTANCE.msgForDebug("main " + e.toString());
+    }
+  }
 
-	/**
-	 * 引数で指定したスクリプトを実行する
-	 * @param fileName スクリプトファイル名
-	 */
-	private static void executeScript(String fileName) {
+  /**
+   * 引数で指定したスクリプトを実行する
+   * @param fileName スクリプトファイル名
+   */
+  private static void executeScript(String fileName) {
 
-		LocalBhProgramHandler programHandler = new LocalBhProgramHandler();
-		BhProgramData data = new BhProgramData(
-			BhProgramData.EVENT.PROGRAM_START,
-			ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES);
-		programHandler.runScript(fileName, data);
-	}
+    LocalBhProgramHandler programHandler = new LocalBhProgramHandler();
+    BhProgramData data = new BhProgramData(
+      BhProgramData.EVENT.PROGRAM_START,
+      ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES);
+    programHandler.runScript(fileName, data);
+  }
 
 }
 

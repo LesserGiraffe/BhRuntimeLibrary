@@ -21,20 +21,20 @@ package net.seapanda.bunnyhop.programexecenv.script;
  */
 public class ScriptParams {
 
-	/**
-	 * Javascript オブジェクトのプロパティ名
-	 */
-	public static class Properties {
-		public static final String BH_INOUT = "bhInout";
-		public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
-		public static final String CALL_STACK = "_callStack";
-		public static final String ADDITIONAL_ERROR_MSGS = "_additionalErrorMsgs";
-	}
+  /**
+   * Javascript オブジェクトのプロパティ名
+   */
+  public static class Properties {
+    public static final String BH_INOUT = "bhInout";
+    public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
+    public static final String CALL_STACK = "_callStack";
+    public static final String ADDITIONAL_ERROR_MSGS = "_additionalErrorMsgs";
+  }
 
-	/**
-	 * BhProgram 内の関数名
-	 */
-	public static class Funcs {
-		public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
-	}
+  /**
+   * BhProgram 内の関数名
+   */
+  public static class Funcs {
+    public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
+  }
 }

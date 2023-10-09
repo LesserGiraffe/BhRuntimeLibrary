@@ -32,84 +32,84 @@ import net.seapanda.bunnyhop.programexecenv.script.RemoteScriptInOut;
  */
 public class BhProgramHandlerImpl implements BhProgramHandler {
 
-	private final ExecutorService recvDataProcessor = Executors.newSingleThreadExecutor();
-	private final BlockingQueue<BhProgramData> sendDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);	//!< to BunnyHop
-	private final BlockingQueue<BhProgramData> recvDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);	//!< from BunnyHop
-	private final AtomicBoolean connected = new AtomicBoolean(false);	//!< BunnyHopとの通信が有効な場合true
-	private final RemoteScriptInOut scriptIO = new RemoteScriptInOut(sendDataList, connected);	//!< BhProgramの入出力用オブジェクト
-	private final BhProgramExecutor executor = new BhProgramExecutor(scriptIO, sendDataList);
+  private final ExecutorService recvDataProcessor = Executors.newSingleThreadExecutor();
+  private final BlockingQueue<BhProgramData> sendDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);  //!< to BunnyHop
+  private final BlockingQueue<BhProgramData> recvDataList = new ArrayBlockingQueue<>(BhParams.MAX_QUEUE_SIZE);  //!< from BunnyHop
+  private final AtomicBoolean connected = new AtomicBoolean(false);  //!< BunnyHopとの通信が有効な場合true
+  private final RemoteScriptInOut scriptIO = new RemoteScriptInOut(sendDataList, connected);  //!< BhProgramの入出力用オブジェクト
+  private final BhProgramExecutor executor = new BhProgramExecutor(scriptIO, sendDataList);
 
-	public BhProgramHandlerImpl() {
-		recvDataProcessor.submit(() -> processRecvData());
-	}
+  public BhProgramHandlerImpl() {
+    recvDataProcessor.submit(() -> processRecvData());
+  }
 
-	@Override
-	public boolean runScript(String fileName, BhProgramData data) {
-		return executor.runScript(fileName, data);
-	}
+  @Override
+  public boolean runScript(String fileName, BhProgramData data) {
+    return executor.runScript(fileName, data);
+  }
 
-	@Override
-	public boolean sendDataToScript(BhProgramData data) {
+  @Override
+  public boolean sendDataToScript(BhProgramData data) {
 
-		boolean success = false;
-		try {
-			success = recvDataList.offer(data, BhParams.PUSH_RECV_DATA_TIMEOUT, TimeUnit.SECONDS);
-		}
-		catch(InterruptedException e) {}
-		return success;
-	}
+    boolean success = false;
+    try {
+      success = recvDataList.offer(data, BhParams.PUSH_RECV_DATA_TIMEOUT, TimeUnit.SECONDS);
+    }
+    catch(InterruptedException e) {}
+    return success;
+  }
 
-	@Override
-	public BhProgramData recvDataFromScript() {
+  @Override
+  public BhProgramData recvDataFromScript() {
 
-		BhProgramData data = null;
-		try {
-			data = sendDataList.poll(BhParams.POP_SEND_DATA_TIMEOUT, TimeUnit.SECONDS);
-		}
-		catch(InterruptedException e) {}
+    BhProgramData data = null;
+    try {
+      data = sendDataList.poll(BhParams.POP_SEND_DATA_TIMEOUT, TimeUnit.SECONDS);
+    }
+    catch(InterruptedException e) {}
 
-		return data;
-	}
+    return data;
+  }
 
-	@Override
-	public void connect() {
-		connected.set(true);
-	}
+  @Override
+  public void connect() {
+    connected.set(true);
+  }
 
-	@Override
-	public void disconnect() {
-		connected.set(false);
-		sendDataList.clear();
-	}
+  @Override
+  public void disconnect() {
+    connected.set(false);
+    sendDataList.clear();
+  }
 
-	/**
-	 * BunnyHopから受信したデータを処理し続ける
-	 */
-	private void processRecvData() {
+  /**
+   * BunnyHopから受信したデータを処理し続ける
+   */
+  private void processRecvData() {
 
-		while(true) {
+    while(true) {
 
-			BhProgramData data = null;
-			try {
-				data = recvDataList.take();
-			}
-			catch(InterruptedException e) {
-				break;
-			}
+      BhProgramData data = null;
+      try {
+        data = recvDataList.take();
+      }
+      catch(InterruptedException e) {
+        break;
+      }
 
-			switch (data.type) {
-				case INPUT_STR:
-					scriptIO.putLineToStdin(data.str);
-					break;
+      switch (data.type) {
+        case INPUT_STR:
+          scriptIO.putLineToStdin(data.str);
+          break;
 
-				case INPUT_EVENT:
-					executor.fireEvent(data);
-					break;
+        case INPUT_EVENT:
+          executor.fireEvent(data);
+          break;
 
-				default:
-			}
-		}
-	}
+        default:
+      }
+    }
+  }
 }
 
 
