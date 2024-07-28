@@ -48,13 +48,13 @@ public class Util {
       EXEC_PATH = root + jarPath.subpath(0, jarPath.getNameCount()).toString();
     }
     else {
-      EXEC_PATH = root + jarPath.subpath(0, jarPath.getNameCount() - 1).toString();
+      EXEC_PATH = root + jarPath.subpath(0, jarPath.getNameCount() - 2).toString();
     }
   }
 
-
   /**
-   * 引数で指定したパスのファイルが存在しない場合作成する
+   * 引数で指定したパスのファイルが存在しない場合作成する.
+   *
    * @param filePath 作成するファイルのパス
    * @return 作成に失敗した場合false. 作成しなかった場合はtrue
    */
@@ -71,7 +71,8 @@ public class Util {
   }
 
   /**
-   * 引数で指定したパスのディレクトリが存在しない場合作成する
+   * 引数で指定したパスのディレクトリが存在しない場合作成する.
+   *
    * @param dirPath 作成するファイルのパス
    * @return 作成に失敗した場合false. 作成しなかった場合はtrue
    */

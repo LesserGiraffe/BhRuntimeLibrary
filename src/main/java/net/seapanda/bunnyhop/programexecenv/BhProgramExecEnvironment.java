@@ -37,11 +37,10 @@ import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
 public class BhProgramExecEnvironment {
 
   public static void main(String[] args) {
-
     if (args.length >= 1) {
-
       if (args[0].equals("--version")) {
-        System.out.println(BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
+        System.out.println(
+          BhProgramExecEnvironment.class.getSimpleName() + " version " + VersionInfo.APP_VERSION);
         return;
       }
       else if (args[0].equals("-run") && args.length >= 2) {
@@ -53,11 +52,10 @@ public class BhProgramExecEnvironment {
         exportRmiObject(Boolean.valueOf(args[0]));
       }
     }
-
   }
 
   /**
-   * BunnyHop と通信するための RMI オブジェクトをエクスポートする
+   * BunnyHop と通信するための RMI オブジェクトをエクスポートする.
    */
   private static void exportRmiObject(boolean isLocal) {
 
