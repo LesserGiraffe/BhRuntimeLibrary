@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.io.IOException;
@@ -22,18 +23,17 @@ import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
 
 /**
- * ローカルのアクセスのみ許すソケットを作成するファクトリ
+ * ローカルのアクセスのみ許すソケットを作成するファクトリ.
+ *
  * @author K.Koike
  */
 public class LocalClientSocketFactory implements RMIClientSocketFactory, Serializable {
 
   private static final long serialVersionUID = 1L;
-  private int id;  //!< 同一性確認のためのID
+  /** オブジェクトごとに一意な ID. */
+  private int id;
 
-  /**
-   * コンストラクタ
-   * @param id オブジェクトの同一性確認のためのID
-   */
+  /** コンストラクタ. */
   public LocalClientSocketFactory(int id) {
     this.id = id;
   }
@@ -43,8 +43,7 @@ public class LocalClientSocketFactory implements RMIClientSocketFactory, Seriali
     Socket socket = null;
     try {
       socket = new Socket(InetAddress.getLoopbackAddress(), port);
-    }
-    catch(IOException e) {
+    } catch (IOException e) {
       throw new IOException();
     }
     return socket;
@@ -53,13 +52,13 @@ public class LocalClientSocketFactory implements RMIClientSocketFactory, Seriali
   @Override
   public int hashCode() {
     return id;
-    }
+  }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null)
+    if (obj == null) {
       return false;
-    return (getClass() == obj.getClass()) && (id == ((LocalClientSocketFactory)obj).id);
     }
+    return (getClass() == obj.getClass()) && (id == ((LocalClientSocketFactory) obj).id);
+  }
 }
-

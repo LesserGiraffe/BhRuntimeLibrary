@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.programexecenv.tools;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,16 +23,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
+ *ユーティリティクラス.
  *
  * @author K.Koike
  */
 public class Util {
 
   public static final Util INSTANCE = new Util(); //!< シングルトンインスタンス
-  public final String EXEC_PATH;
+  public final String execPath;
 
   private Util() {
-
     boolean isModulePath = true;
     String pathStr = System.getProperty("jdk.module.path");
     if (pathStr == null) {
@@ -43,12 +45,10 @@ public class Util {
     File jarFile = new File(pathStr);
     Path jarPath = Paths.get(jarFile.getAbsolutePath());
     String root = (jarPath.getRoot() == null) ? "" : jarPath.getRoot().toString();
-
     if (isModulePath) {
-      EXEC_PATH = root + jarPath.subpath(0, jarPath.getNameCount()).toString();
-    }
-    else {
-      EXEC_PATH = root + jarPath.subpath(0, jarPath.getNameCount() - 2).toString();
+      execPath = root + jarPath.subpath(0, jarPath.getNameCount()).toString();
+    } else {
+      execPath = root + jarPath.subpath(0, jarPath.getNameCount() - 2).toString();
     }
   }
 
@@ -60,10 +60,10 @@ public class Util {
    */
   public boolean createFileIfNotExists(Path filePath) {
     try {
-      if (!Files.exists(filePath))
+      if (!Files.exists(filePath)) {
         Files.createFile(filePath);
-    }
-    catch (IOException e) {
+      }
+    } catch (IOException e) {
       LogManager.INSTANCE.msgForDebug("create file err " + filePath + "\n" + e.toString());
       return false;
     }
@@ -78,10 +78,10 @@ public class Util {
    */
   public boolean createDirectoryIfNotExists(Path dirPath) {
     try {
-      if (!Files.isDirectory(dirPath))
+      if (!Files.isDirectory(dirPath)) {
         Files.createDirectory(dirPath);
-    }
-    catch (IOException e) {
+      }
+    } catch (IOException e) {
       LogManager.INSTANCE.msgForDebug("create dir err " + dirPath + "\n" + e.toString());
       return false;
     }

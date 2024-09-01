@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.programexecenv.socket;
 
 import java.io.IOException;
@@ -20,17 +21,19 @@ import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 
 /**
- * ローカルのアクセスのみ許すソケットを作成するファクトリ
+ * ローカルのアクセスのみ許すソケットを作成するファクトリ.
+ *
  * @author K.Koike
  */
 public class RemoteServerSocketFactory implements RMIServerSocketFactory {
 
   private int localPort;
-  private int id;  //!< 同一性確認のためのID
+  private int id;
 
   /**
-   * コンストラクタ
-   * @param id オブジェクトの同一性確認のためのID
+   * コンストラクタ.
+   *
+   * @param id オブジェクトを識別するための ID
    */
   public RemoteServerSocketFactory(int id) {
     this.id = id;
@@ -41,8 +44,7 @@ public class RemoteServerSocketFactory implements RMIServerSocketFactory {
     ServerSocket serverSocket = null;
     try {
       serverSocket = new ServerSocket(port);
-    }
-    catch(IOException e) {
+    } catch (IOException e) {
       throw new IOException();
     }
     localPort = serverSocket.getLocalPort();
@@ -52,17 +54,17 @@ public class RemoteServerSocketFactory implements RMIServerSocketFactory {
   @Override
   public int hashCode() {
     return id;
-    }
+  }
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null)
+    if (obj == null) {
       return false;
-    return (getClass() == obj.getClass()) && (id == ((RemoteServerSocketFactory)obj).id);
     }
+    return (getClass() == obj.getClass()) && (id == ((RemoteServerSocketFactory) obj).id);
+  }
 
   public int getLocalPort() {
     return localPort;
   }
 }
-

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.programexecenv.script;
 
 /**
- * BhProgram 内で使用するキーワード
+ * BhProgram 内で使用するキーワード.
+ *
  * @author K.Koike
  */
 public class ScriptParams {
 
-  /**
-   * Javascript オブジェクトのプロパティ名
-   */
+  /** Javascript オブジェクトのプロパティ名. */
   public static class Properties {
     public static final String BH_INOUT = "bhInout";
     public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
@@ -31,9 +31,7 @@ public class ScriptParams {
     public static final String ADDITIONAL_ERROR_MSGS = "_additionalErrorMsgs";
   }
 
-  /**
-   * BhProgram 内の関数名
-   */
+  /** BhProgram に定義された関数名. */
   public static class Funcs {
     public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
   }

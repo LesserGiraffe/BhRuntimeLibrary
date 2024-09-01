@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,39 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.programexecenv.script;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceID;
+import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramException;
 import net.seapanda.bunnyhop.programexecenv.tools.Util;
 
 /**
- * BhProgram が実行時に使用するヘルパークラス
+ * BhProgram の実行時に使用するヘルパークラス.
+ *
  * @author K.Koike
  */
 public class ScriptHelper {
 
-  private final String OS_NAME = System.getProperty("os.name").toLowerCase();
-  public final Platform PLATFORM = this.new Platform();
+  private final String osName = System.getProperty("os.name").toLowerCase();
+  public final Platform platform = this.new Platform();
   public static final ScriptHelper INSTANCE = new ScriptHelper();
 
   private ScriptHelper() {}
 
   /**
-   * BhNodeInstanceID を作成して返す
+   * {@link BhNodeInstanceId} オブジェクトを作成して返す.
+   *
    * @param id 作成するIDの文字列表現
-   * @return BhNodeInstanceID オブジェクト
+   * @return {@link BhNodeInstanceId} オブジェクト
    */
-  public BhNodeInstanceID newBhNodeInstanceID(String id) {
-    return new BhNodeInstanceID(id);
+  public BhNodeInstanceId newBhNodeInstanceId(String id) {
+    return new BhNodeInstanceId(id);
   }
 
   /**
-   * BhNodeException を作成して返す
+   * {@link BhProgramException} オブジェクトを作成して返す.
+   *
    * @param callStack 例外発生時のコールスタック
    * @param msg 例外メッセージ
    * @return 例外オブジェクト
@@ -55,40 +58,39 @@ public class ScriptHelper {
   }
 
   /**
-   * BhNodeException を作成して返す
+   * {@link BhProgramException} オブジェクトを作成して返す.
+   *
    * @param callStack 例外発生時のコールスタック
    * @param msg 例外メッセージ
    * @param scriptEngineMsg BhProgram の実行エンジンから返されたエラーメッセージ
    * @return 例外オブジェクト
    */
-  public BhProgramException newBhProgramException(List<?> callStack, String msg, String scriptEngineMsg) {
-
-    ArrayList<BhNodeInstanceID> funcCallStack = callStack.stream()
-      .map(nodeInstanceID -> newBhNodeInstanceID(nodeInstanceID.toString()))
-      .collect(Collectors.toCollection(ArrayList::new));
+  public BhProgramException newBhProgramException(
+      List<?> callStack, String msg, String scriptEngineMsg) {
+    ArrayList<BhNodeInstanceId> funcCallStack = callStack.stream()
+        .map(nodeInstanceID -> newBhNodeInstanceId(nodeInstanceID.toString()))
+        .collect(Collectors.toCollection(ArrayList::new));
 
     return new BhProgramException(funcCallStack, msg, scriptEngineMsg);
   }
 
-  /**
-   * 実行ファイルがあるディレクトリのパスを取得する
-   */
+  /** 実行ファイルがあるディレクトリのパスを取得する. */
   public String getExecPath() {
-    return Util.INSTANCE.EXEC_PATH;
+    return Util.INSTANCE.execPath;
   }
 
   public byte toByte(int num) {
-    return (byte)num;
+    return (byte) num;
   }
 
+  /** OS を識別するためのクラス. */
   public class Platform {
-
     public boolean isWindows() {
-      return OS_NAME.startsWith("windows");
+      return osName.startsWith("windows");
     }
 
     public boolean isLinux() {
-      return OS_NAME.startsWith("linux");
+      return osName.startsWith("linux");
     }
   }
 }

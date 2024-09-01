@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,44 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * スクリプトとBunnyHop間でデータを送受信するクラス
+ * BhProgram の実行環境との通信を行うクラス.
+ *
  * @author K.Koike
  */
 public interface BhProgramHandler extends Remote {
 
   /**
-   * 引数で指定したスクリプトを実行する
+   * 引数で指定した BhProgram を実行する.
+   *
    * @param fileName 実行ファイル名
-   * @param data 実行時にスクリプトに渡すイベントデータ
+   * @param data プログラム開始時に送信するデータ
    * @return 実行に成功した場合true
    */
   public boolean runScript(String fileName, BhProgramData data) throws RemoteException;
 
-  /**
-   * BunnyHopとの通信を切断する
-   */
+  /** BunnyHopとの通信を切断する. */
   public void disconnect() throws RemoteException;
 
-  /**
-   * BunnyHopとの通信を始める
-   */
+  /** BunnyHopとの通信を始める. */
   public void connect() throws RemoteException;
 
   /**
-   * スクリプト実行環境に向けてデータを送る
-   * @param data 送信するデータ. null 不可.
-   * @return 送信に成功した場合true
+   * BhProgram の実行環境にデータを送信する.
+   *
+   * @param data 送信するデータ. null不可.
+   * @return 送信に成功した場合 true
    */
   public boolean sendDataToScript(BhProgramData data) throws RemoteException;
 
   /**
-   * スクリプト実行環境からデータを受信する
+   * BhProgram の実行環境からデータを受信する.
+   *
    * @return 受信データ. 受信に失敗した場合もしくは受信データがなかった場合null
    */
   public BhProgramData recvDataFromScript() throws RemoteException;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,57 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.bhprogram.common;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 
 /**
- * BhProgam 実行時に発生した例外情報を保持するクラス
+ * BhProgam 実行時に発生した例外情報を保持するクラス.
+ *
+ * @author K.Koike
  */
-public class BhProgramException extends RuntimeException implements Serializable {
+public class BhProgramException extends RuntimeException {
 
-  private final Deque<BhNodeInstanceID> callStack;
+  private final Deque<BhNodeInstanceId> callStack;
   private final String scriptEngineMsg;
 
   /**
-   * コンストラクタ
+   * コンストラクタ.
+   *
    * @param callStack 例外が発生した時のコールスタック
    * @param msg 例外メッセージ
    */
-  public BhProgramException(Collection<BhNodeInstanceID> callStack, String msg) {
-
+  public BhProgramException(Collection<BhNodeInstanceId> callStack, String msg) {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     scriptEngineMsg = "";
   }
 
   /**
-   * コンストラクタ
+   * コンストラクタ.
+   *
    * @param callStack 例外が発生した時のコールスタック
    * @param msg 例外メッセージ
    * @param scriptEngineMsg BhProgram の実行エンジンから返されたエラーメッセージ
    */
-  public BhProgramException(Collection<BhNodeInstanceID> callStack, String msg, String scriptEngineMsg) {
-
+  public BhProgramException(
+      Collection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg) {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     this.scriptEngineMsg = scriptEngineMsg;
   }
 
-  /**
-   * BhProgram の実行エンジンから返されたエラーメッセージを取得する
-   */
+  /** BhProgram の実行エンジンから返されたエラーメッセージを取得する. */
   public String getScriptEngineMsg() {
     return scriptEngineMsg;
   }
 
-  /**
-   * 例外が発生した時のコールスタックを取得する
-   */
-  public Deque<BhNodeInstanceID> getCallStack() {
+  /** 例外が発生した時のコールスタックを取得する. */
+  public Deque<BhNodeInstanceId> getCallStack() {
     return new LinkedList<>(callStack);
   }
 }

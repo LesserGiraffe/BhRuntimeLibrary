@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2017 K.Koike
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.io.Serializable;
 
 /**
- * BunnyHopとスクリプトの実行環境間で送受信されるデータ
+ * BunnyHopと BhProgram の実行環境間で送受信されるデータ.
+ *
  * @author K.Koike
  */
 public class BhProgramData implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  public final TYPE type;
+  public final Type type;
   public final String str;
-  public final EVENT event;
+  public final Event event;
   public final String eventHandlerResolver;
   public final BhProgramException exception;
 
-  public BhProgramData(TYPE type, String str) {
+  /** コンストラクタ. */
+  public BhProgramData(Type type, String str) {
 
     this.type = type;
     this.str = str;
@@ -39,35 +42,40 @@ public class BhProgramData implements Serializable {
     this.exception = null;
   }
 
-  public BhProgramData(EVENT event, String eventHandlerResolver) {
+  /** コンストラクタ. */
+  public BhProgramData(Event event, String eventHandlerResolver) {
 
-    this.type = TYPE.INPUT_EVENT;
+    this.type = Type.INPUT_EVENT;
     this.str = null;
     this.event = event;
     this.eventHandlerResolver = eventHandlerResolver;
     this.exception = null;
   }
 
+  /** コンストラクタ. */
   public BhProgramData(BhProgramException exception) {
 
-    this.type = TYPE.OUTPUT_EXCEPTION;
+    this.type = Type.OUTPUT_EXCEPTION;
     this.str = null;
     this.event = null;
     this.eventHandlerResolver = null;
     this.exception = exception;
   }
 
-  /**
-   * データの種類
-   */
-  public enum TYPE {
-    OUTPUT_STR,  //!< BhProgramからの出力文字列
-    INPUT_STR, //!< BhProgram への入力文字列
-    INPUT_EVENT, //!<BhProgram への入力イベント
-    OUTPUT_EXCEPTION, //!< BhProgram からの例外
+  /** データの種類. */
+  public enum Type {
+    /** BhProgramからの出力文字列. */
+    OUTPUT_STR,
+    /** BhProgram への入力文字列. */
+    INPUT_STR,
+    /** BhProgram への入力イベント. */
+    INPUT_EVENT,
+    /** BhProgram からの例外. */
+    OUTPUT_EXCEPTION,
   }
 
-  public enum EVENT {
+  /** BunnyHopと BhProgram の実行環境間で送受信されるイベント. */
+  public enum Event {
     KEY_DIGIT0_PRESSED,
     KEY_DIGIT1_PRESSED,
     KEY_DIGIT2_PRESSED,
@@ -112,7 +120,8 @@ public class BhProgramData implements Serializable {
     KEY_X_PRESSED,
     KEY_Y_PRESSED,
     KEY_Z_PRESSED,
-    PROGRAM_START,  //!< プログラムの開始時に必ず1回発行されるイベント
+    /** プログラムの開始時に必ず1回発行されるイベント. */
+    PROGRAM_START,
   }
 }
 
