@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.script;
+package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
-import net.seapanda.bunnyhop.bhprogram.common.BhProgramException;
-import net.seapanda.bunnyhop.programexecenv.tools.Util;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
+import net.seapanda.bunnyhop.runtime.lib.SynchronizingTimer;
+import net.seapanda.bunnyhop.runtime.tools.Util;
 
 /**
- * BhProgram の実行時に使用するヘルパークラス.
+ * BhProgram の実行時に使用する Utility クラス.
  *
  * @author K.Koike
  */
-public class ScriptHelper {
+public class ScriptUtil {
 
   private final String osName = System.getProperty("os.name").toLowerCase();
   public final Platform platform = this.new Platform();
-  public static final ScriptHelper INSTANCE = new ScriptHelper();
 
-  private ScriptHelper() {}
+  public ScriptUtil() {}
 
   /**
    * {@link BhNodeInstanceId} オブジェクトを作成して返す.
@@ -72,6 +72,11 @@ public class ScriptHelper {
         .collect(Collectors.toCollection(ArrayList::new));
 
     return new BhProgramException(funcCallStack, msg, scriptEngineMsg);
+  }
+
+  /** {@link SynchronizingTimer} を新規作成する. */
+  public SynchronizingTimer newSyncTimer(int count, boolean autoReset) {
+    return new SynchronizingTimer(count, autoReset);
   }
 
   /** 実行ファイルがあるディレクトリのパスを取得する. */

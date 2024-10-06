@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv;
+package net.seapanda.bunnyhop.bhprogram.common.message;
+
+import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * バージョン情報を格納するクラス.
+ * BunnyHop と BhProgram の実行環境間で送受信されるメッセージ.
  *
  * @author K.Koike
  */
-public class VersionInfo {
-  public static final int MAJOR = 1;
-  public static final int MINOR = 4;
-  public static final int PATCH = 2;
-  public static final String APP_VERSION = MAJOR + "." + MINOR + "." + PATCH;
-  public static final long SERIAL_VERSION_UID = 142L;
+public interface BhProgramMessage extends Serializable {
+
+  public static final AtomicInteger nextId = new AtomicInteger(1);
+  
+  public default int genId() {
+    return nextId.getAndIncrement();
+  }
+
+  public int getId();
 }

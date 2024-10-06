@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.tools;
+package net.seapanda.bunnyhop.runtime.tools;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,8 @@ import java.nio.file.Paths;
  */
 public class Util {
 
-  public static final Util INSTANCE = new Util(); //!< シングルトンインスタンス
+  /** シングルトンインスタンス. */
+  public static final Util INSTANCE = new Util();
   public final String execPath;
 
   private Util() {
@@ -86,5 +87,14 @@ public class Util {
       return false;
     }
     return true;
+  }
+
+  /** このメソッドを呼び出したメソッド名を (クラス名.メソッド名) として返す. */
+  public String getCurrentMethodName() {
+    StackTraceElement[] elems = Thread.currentThread().getStackTrace();
+    if (elems.length >= 3) {
+      return elems[2].getClassName() + "." + elems[2].getMethodName();
+    }
+    return "";
   }
 }

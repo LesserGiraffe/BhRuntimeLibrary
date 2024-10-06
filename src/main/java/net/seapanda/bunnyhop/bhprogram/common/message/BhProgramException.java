@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common;
+package net.seapanda.bunnyhop.bhprogram.common.message;
 
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
+import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 
 /**
  * BhProgam 実行時に発生した例外情報を保持するクラス.
  *
  * @author K.Koike
  */
-public class BhProgramException extends RuntimeException {
+public class BhProgramException extends RuntimeException implements BhProgramMessage {
 
   private final Deque<BhNodeInstanceId> callStack;
   private final String scriptEngineMsg;
+  private final int id;
 
   /**
    * コンストラクタ.
@@ -40,6 +42,7 @@ public class BhProgramException extends RuntimeException {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     scriptEngineMsg = "";
+    id = genId();
   }
 
   /**
@@ -54,6 +57,7 @@ public class BhProgramException extends RuntimeException {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     this.scriptEngineMsg = scriptEngineMsg;
+    id = genId();
   }
 
   /** BhProgram の実行エンジンから返されたエラーメッセージを取得する. */
@@ -64,5 +68,10 @@ public class BhProgramException extends RuntimeException {
   /** 例外が発生した時のコールスタックを取得する. */
   public Deque<BhNodeInstanceId> getCallStack() {
     return new LinkedList<>(callStack);
+  }
+
+  @Override
+  public int getId() {
+    return id;
   }
 }

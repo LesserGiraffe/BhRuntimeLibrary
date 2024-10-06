@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv;
+package net.seapanda.bunnyhop.runtime;
 
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
@@ -22,28 +22,28 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import net.seapanda.bunnyhop.bhprogram.common.BhProgramData;
 import net.seapanda.bunnyhop.bhprogram.common.BhProgramHandler;
 import net.seapanda.bunnyhop.bhprogram.common.LocalClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.RemoteClientSocketFactory;
-import net.seapanda.bunnyhop.programexecenv.script.ScriptParams;
-import net.seapanda.bunnyhop.programexecenv.socket.LocalServerSocketFactory;
-import net.seapanda.bunnyhop.programexecenv.socket.RemoteServerSocketFactory;
-import net.seapanda.bunnyhop.programexecenv.tools.LogManager;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
+import net.seapanda.bunnyhop.runtime.script.ScriptParams;
+import net.seapanda.bunnyhop.runtime.socket.LocalServerSocketFactory;
+import net.seapanda.bunnyhop.runtime.socket.RemoteServerSocketFactory;
+import net.seapanda.bunnyhop.runtime.tools.LogManager;
 
 /**
  * メインクラス.
  *
  * @author K.Koike
  */
-public class BhProgramExecEnvironment {
+public class AppMain {
 
   /** メインメソッド. */
   public static void main(String[] args) {
     if (args.length >= 1) {
       if (args[0].equals("--version")) {
         System.out.println(
-            BhProgramExecEnvironment.class.getSimpleName()
+            AppMain.class.getSimpleName()
             + " version " + VersionInfo.APP_VERSION);
         return;
 
@@ -95,10 +95,9 @@ public class BhProgramExecEnvironment {
    * @param fileName スクリプトファイル名
    */
   private static void executeScript(String fileName) {
-    LocalBhProgramHandler programHandler = new LocalBhProgramHandler();
-    BhProgramData data = new BhProgramData(
-        BhProgramData.Event.PROGRAM_START,
-        ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES);
-    programHandler.runScript(fileName, data);
+    BhProgramShell programHandler = new BhProgramShell();
+    var event = new BhProgramEvent(
+        BhProgramEvent.Name.PROGRAM_START, ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES);
+    programHandler.runScript(fileName, event);
   }
 }

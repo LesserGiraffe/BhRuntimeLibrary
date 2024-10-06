@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.script;
+package net.seapanda.bunnyhop.runtime.script;
 
 /**
  * BhProgram 内で使用するキーワード.

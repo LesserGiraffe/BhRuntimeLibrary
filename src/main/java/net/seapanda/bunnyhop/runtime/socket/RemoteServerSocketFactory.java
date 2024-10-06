@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.socket;
+package net.seapanda.bunnyhop.runtime.socket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 
 /**
- * ローカルのアクセスのみ許すソケットを作成するファクトリ.
+ * リモート通信用のソケットを作成するファクトリ.
  *
  * @author K.Koike
  */

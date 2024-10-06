@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.lib;
+package net.seapanda.bunnyhop.runtime.lib;
 
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
@@ -43,9 +43,9 @@ public final class SynchronizingTimer {
    * コンストラクタ.
    *
    * @param count タイマーの初期値. (0以上, 65535以下を指定すること)
+   * @param autoReset カウンタが 0 になったとき, 自動的にカウンタを {@code count} にする場合 true.
    */
   public SynchronizingTimer(int count, boolean autoReset) {
-
     if (count < 0 || count > 65535) {
       throw new IllegalArgumentException("The 'count' must be 0 - 65535.  (" + count + ")");
     }
@@ -89,7 +89,6 @@ public final class SynchronizingTimer {
    *     </pre>
    */
   private synchronized Pair<Integer, Integer> deregister() {
-
     int phase = phaser.getPhase();
     int registeredParties = phaser.getRegisteredParties();
     if (registeredParties == 0) {
@@ -131,7 +130,6 @@ public final class SynchronizingTimer {
    * @param unit 待ち時間の単位
    */
   public void countdownAndAwait(long timeout, TimeUnit unit) {
-
     try {
       Pair<Integer, Integer> phaseAndParties = deregister();
       int registeredParties = phaseAndParties.v2;
@@ -148,17 +146,8 @@ public final class SynchronizingTimer {
    * スレッドが中断された場合は即座に制御を返す.
    */
   public void await() {
-
     try {
-      Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
-      int registeredParties = phaseAndParties.v2;
-      if (registeredParties == 0) {
-        return;
-      }
-      // ここで reset(0) によって登録済みパーティ数が 0 になっても, フェーズが変わるので,
-      // 登録済みパーティ数 0 のフェーズで待ち続けることはない.
-      int phase = phaseAndParties.v1;
-      phaser.awaitAdvanceInterruptibly(phase);
+      awaitInterruptibly();
     } catch (InterruptedException e) { /* do nothing */ }
   }
 
@@ -171,14 +160,39 @@ public final class SynchronizingTimer {
    */
   public void await(long timeout, TimeUnit unit) {
     try {
-      Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
-      int registeredParties = phaseAndParties.v2;
-      if (registeredParties == 0) {
-        return;
-      }
-      int phase = phaseAndParties.v1;
-      phaser.awaitAdvanceInterruptibly(phase, timeout, unit);
+      awaitInterruptibly(timeout, unit);
     } catch (InterruptedException | TimeoutException e) { /* do nothing */ }
+  }
+
+  /** タイマーのカウントが 0 になるまで待つ. */
+  public void awaitInterruptibly() throws InterruptedException {
+    Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
+    int registeredParties = phaseAndParties.v2;
+    if (registeredParties == 0) {
+      return;
+    }
+    // ここで reset(0) によって登録済みパーティ数が 0 になっても, フェーズが変わるので,
+    // 登録済みパーティ数 0 のフェーズで待ち続けることはない.
+    int phase = phaseAndParties.v1;
+    phaser.awaitAdvanceInterruptibly(phase);
+  }
+
+  /**
+   * タイマーのカウントが 0 になるまで {@code timeout} で指定した時間待つ.
+   *
+   * @param timeout 最大待ち時間
+   * @param unit 待ち時間の単位
+   */
+  public void awaitInterruptibly(long timeout, TimeUnit unit)
+      throws InterruptedException, TimeoutException {
+
+    Pair<Integer, Integer> phaseAndParties = getPhaseAndRegisteredParties();
+    int registeredParties = phaseAndParties.v2;
+    if (registeredParties == 0) {
+      return;
+    }
+    int phase = phaseAndParties.v1;
+    phaser.awaitAdvanceInterruptibly(phase, timeout, unit);
   }
 
   /**

@@ -18,6 +18,9 @@ package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
 /**
  * BhProgram の実行環境との通信を行うクラス.
@@ -30,10 +33,10 @@ public interface BhProgramHandler extends Remote {
    * 引数で指定した BhProgram を実行する.
    *
    * @param fileName 実行ファイル名
-   * @param data プログラム開始時に送信するデータ
+   * @param event BhProgram 開始時に BhProgram に渡されるイベント
    * @return 実行に成功した場合true
    */
-  public boolean runScript(String fileName, BhProgramData data) throws RemoteException;
+  public boolean runScript(String fileName, BhProgramEvent event) throws RemoteException;
 
   /** BunnyHopとの通信を切断する. */
   public void disconnect() throws RemoteException;
@@ -42,17 +45,32 @@ public interface BhProgramHandler extends Remote {
   public void connect() throws RemoteException;
 
   /**
-   * BhProgram の実行環境にデータを送信する.
+   * BhProgram の実行環境にメッセージを送信する.
    *
-   * @param data 送信するデータ. null不可.
+   * @param msg 送信するメッセージ. null不可.
    * @return 送信に成功した場合 true
    */
-  public boolean sendDataToScript(BhProgramData data) throws RemoteException;
+  public boolean sendMsgToScript(BhProgramMessage msg) throws RemoteException;
 
   /**
-   * BhProgram の実行環境からデータを受信する.
+   * BhProgram の実行環境からレスポンスを受信する.
    *
-   * @return 受信データ. 受信に失敗した場合もしくは受信データがなかった場合null
+   * @return 受信したレスポンス. 受信に失敗した場合もしくは受信可能なレスポンスがなかった場合 null.
    */
-  public BhProgramData recvDataFromScript() throws RemoteException;
+  public BhProgramResponse recvRespFromScript() throws RemoteException;
+
+  /**
+   * BhProgram の実行環境からメッセージを受信する.
+   *
+   * @return 受信したメッセージ. 受信に失敗した場合もしくは受信可能なメッセージがなかった場合 null.
+   */
+  public BhProgramMessage recvMsgFromScript() throws RemoteException;
+
+  /**
+   * BhProgram の実行環境にレスポンスを送信する.
+   *
+   * @param resp 送信するレスポンス. null不可.
+   * @return 送信に成功した場合 true
+   */
+  public boolean sendRespToScript(BhProgramResponse resp) throws RemoteException;
 }

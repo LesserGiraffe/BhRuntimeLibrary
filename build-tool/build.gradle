@@ -28,18 +28,17 @@ java {
   }
 }
 
-ext.jarName = 'BhProgramExecEnvironment.jar'
+ext.jarName = 'bhruntimelib.jar'
 ext.USR_HOME = System.getProperty('user.home')
 ext.JDK_VER = 21
 ext.appDirName = 'App';
 ext.ps = File.pathSeparator
 ext.fs = File.separator
-ext.projName = 'BhProgramExecEnvironment'
 ext.jarLibName = 'Jlib'
 
 application {
   // Define the main class for the application.
-  mainClass = 'net.seapanda.bunnyhop.programexecenv.BhProgramExecEnvironment'
+  mainClass = 'net.seapanda.bunnyhop.runtime.AppMain'
 }
 
 // ライブラリの準備
@@ -63,9 +62,10 @@ sourceSets {
 
 
 compileJava {
+  classpath += fileTree("$projectDir/../$appDirName/$jarLibName") { include "*.jar" }
   options.incremental = true
   options.fork = true
-  options.failOnError = false
+  options.failOnError = true
   options.forkOptions.executable = USR_HOME + '/java/' + JDK_VER + '/jdk/bin/javac.exe'
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.programexecenv.lib;
+package net.seapanda.bunnyhop.runtime.lib;
 
 import java.util.Objects;
 
