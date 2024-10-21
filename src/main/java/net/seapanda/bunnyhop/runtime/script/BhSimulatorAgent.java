@@ -46,9 +46,6 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnLeftRa
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnRightRaspiCarResp;
 import net.seapanda.bunnyhop.runtime.tools.Util;
 
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
-
 /**
  * BhSimulator の機能を実行するコマンドを発行するクラス.
  *

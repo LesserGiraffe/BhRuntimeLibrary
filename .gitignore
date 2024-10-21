@@ -1,13 +1,9 @@
-# Ignore Gradle project-specific cache directory
 .gradle
 .classpath
 .project
-
-# Ignore Gradle build output directory
+.settings
 build
 mlib
-8
-11
 bin
-.settings
 google-java-format_windows-x86-64.exe
+/App

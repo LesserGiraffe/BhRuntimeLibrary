@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'org.mozilla:rhino:1.7.11'
+  implementation 'org.mozilla:rhino:1.7.15'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
