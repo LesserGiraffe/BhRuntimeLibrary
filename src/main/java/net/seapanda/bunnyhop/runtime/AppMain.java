@@ -77,14 +77,14 @@ public class AppMain {
       if (socketFactory instanceof LocalServerSocketFactory localSocketFactory) {
         System.out.println("\n"
             + localSocketFactory.getLocalPort() 
-            + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+            + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
       } else {
         System.out.println("\n"
             + ((RemoteServerSocketFactory) socketFactory).getLocalPort() 
-            + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+            + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
       }
     } catch (Exception e) {
-      System.out.println("\n" + "null" + BhParams.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      System.out.println("\n" + "null" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
       LogManager.INSTANCE.msgForDebug("main " + e.toString());
     }
   }

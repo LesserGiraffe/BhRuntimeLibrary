@@ -46,16 +46,16 @@ public class BhProgramShell {
   private final ExecutorService inoutputExecutor = Executors.newSingleThreadExecutor();
   /** BunnyHop へ送信するメッセージを格納する FIFO. */
   private final BlockingQueue<BhProgramMessage> sendMsgList =
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   /** BunnyHop へ送信するレスポンスを格納する FIFO. */
   private final BlockingQueue<BhProgramResponse> sendRespList =
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   private final ScriptHelper scriptHelper = new ScriptHelper(sendMsgList, sendRespList, true);
   private final BhProgramExecutor executor = new BhProgramExecutor(scriptHelper, sendMsgList);
   private final BlockingQueue<Integer> scanCmdIdList =
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   private final BlockingQueue<String> stdInBuf =
-      new ArrayBlockingQueue<>(BhParams.MAX_INPUT_TEXT_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
 
   BhProgramShell() {
     outputExecutor.submit(() -> outputSendData());
@@ -111,10 +111,10 @@ public class BhProgramShell {
     try (Scanner scan = new Scanner(System.in)) {
       while (true) {
         String line = scan.nextLine();
-        if (line.startsWith(BhParams.BhProgram.STDIN_PREFIX)) {
+        if (line.startsWith(BhConstants.BhProgram.STDIN_PREFIX)) {
           pushToStdinBuf(line);
           inputToScript();
-        } else if (line.startsWith(BhParams.BhProgram.EVENT_INPUT_PREFIX)) {
+        } else if (line.startsWith(BhConstants.BhProgram.EVENT_INPUT_PREFIX)) {
           fireEvent(line);
         } else {
           printCmdFormat();

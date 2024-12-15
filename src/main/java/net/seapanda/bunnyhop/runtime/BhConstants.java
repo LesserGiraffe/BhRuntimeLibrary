@@ -21,7 +21,7 @@ package net.seapanda.bunnyhop.runtime;
  *
  * @author K.Koike
  */
-public class BhParams {
+public class BhConstants {
   /** BhProgram に入力されたテキストデータを格納する FIFO のサイズ. */
   public static final int MAX_INPUT_TEXT_QUEUE_SIZE = 1024;
   /** BunnyHop との通信データを格納する FIFO のサイズ. */

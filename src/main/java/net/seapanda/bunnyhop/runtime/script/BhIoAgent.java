@@ -32,7 +32,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.OutputTextCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.InputTextResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
-import net.seapanda.bunnyhop.runtime.BhParams;
+import net.seapanda.bunnyhop.runtime.BhConstants;
 import net.seapanda.bunnyhop.runtime.tools.LogManager;
 import net.seapanda.bunnyhop.runtime.tools.Util;
 
@@ -55,7 +55,7 @@ public class BhIoAgent {
   private final ReentrantLock lock = new ReentrantLock();
   /** BhProgram に入力された文字列のバッファ. */
   private final BlockingQueue<String> inputTextList =
-      new ArrayBlockingQueue<>(BhParams.MAX_INPUT_TEXT_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
 
   /**
    * コンストラクタ.

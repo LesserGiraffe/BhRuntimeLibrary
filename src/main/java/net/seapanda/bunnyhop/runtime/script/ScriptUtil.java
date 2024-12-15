@@ -18,6 +18,8 @@ package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
@@ -33,6 +35,7 @@ public class ScriptUtil {
 
   private final String osName = System.getProperty("os.name").toLowerCase();
   public final Platform platform = this.new Platform();
+  private final Map<Long, Object> threadIdToUserData = new ConcurrentHashMap<>();
 
   public ScriptUtil() {}
 
@@ -87,6 +90,22 @@ public class ScriptUtil {
   public byte toByte(int num) {
     return (byte) num;
   }
+
+  /** {@code data} をこのメソッドを呼び出したスレッド固有のデータとして保持する. */
+  public void setThreadData(Object userData) {
+    threadIdToUserData.put(Thread.currentThread().threadId(), userData);
+  }
+
+  /** {@link #storeThreadData} で保存したデータを取得する. */
+  public Object getThreadData() {
+    return threadIdToUserData.get(Thread.currentThread().threadId());
+  }
+
+  /** {@link #storeThreadData} で保存したデータを削除する. */
+  public Object removeThreadData() {
+    return threadIdToUserData.remove(Thread.currentThread().threadId());
+  }
+
 
   /** OS を識別するためのクラス. */
   public class Platform {

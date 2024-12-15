@@ -39,16 +39,16 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
 
   /** BunnyHop に送信するメッセージを格納する FIFO. */
   private final BlockingQueue<BhProgramMessage> sendMsgList = 
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   /** BunnyHop から受信したメッセージを格納する FIFO. */
   private final BlockingQueue<BhProgramMessage> recvMsgList =
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   /** BunnyHop に送信するレスポンスを格納する FIFO. */
   private final BlockingQueue<BhProgramResponse> sendRespList = 
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   /** BunnyHop から受信したレスポンスを格納する FIFO. */
   private final BlockingQueue<BhProgramResponse> recvRespList =
-      new ArrayBlockingQueue<>(BhParams.MAX_MSG_QUEUE_SIZE);
+      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
 
   /** BunnyHop との通信が有効な場合 true. */
   private boolean connected = false;
@@ -74,7 +74,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
   public boolean sendMsgToScript(BhProgramMessage data) {
     boolean success = false;
     try {
-      success = recvMsgList.offer(data, BhParams.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
+      success = recvMsgList.offer(data, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return success;
   }
@@ -83,7 +83,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
   public BhProgramResponse recvRespFromScript() {
     BhProgramResponse resp = null;
     try {
-      resp = sendRespList.poll(BhParams.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
+      resp = sendRespList.poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return resp;
   }
@@ -92,7 +92,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
   public BhProgramMessage recvMsgFromScript() {
     BhProgramMessage msg = null;
     try {
-      msg = sendMsgList.poll(BhParams.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
+      msg = sendMsgList.poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return msg;
   }
@@ -101,7 +101,7 @@ public class BhProgramHandlerImpl implements BhProgramHandler {
   public boolean sendRespToScript(BhProgramResponse resp) {
     boolean success = false;
     try {
-      success = recvRespList.offer(resp, BhParams.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
+      success = recvRespList.offer(resp, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return success; 
   }

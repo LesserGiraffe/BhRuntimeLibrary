@@ -21,7 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,9 +35,7 @@ import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.script.ScriptParams;
 import net.seapanda.bunnyhop.runtime.tools.LogManager;
 import net.seapanda.bunnyhop.runtime.tools.Util;
-
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
@@ -70,7 +70,7 @@ public class BhProgramExecutor {
         ScriptHelper scriptHelper, BlockingQueue<BhProgramMessage> sendMsgList) {
     this.scriptHelper = scriptHelper;
     this.sendMsgList = sendMsgList;
-    Context cx = ContextFactory.getGlobal().enterContext();
+    Context cx = Context.enter();
     bhAppScope = cx.initStandardObjects();
     Context.exit();
   }
@@ -82,9 +82,9 @@ public class BhProgramExecutor {
    * @param event 実行時にスクリプトに渡すイベントデータ
    */
   public boolean runScript(String fileName, BhProgramEvent event) {
-    Path scriptPath = Paths.get(Util.INSTANCE.execPath, BhParams.Path.SCRIPT_DIR, fileName);
+    Path scriptPath = Paths.get(Util.INSTANCE.execPath, BhConstants.Path.SCRIPT_DIR, fileName);
     try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
-      Context context = ContextFactory.getGlobal().enterContext();
+      Context context = Context.enter();
       context.setLanguageVersion(Context.VERSION_ES6);
       context.setOptimizationLevel(9);
       bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
@@ -103,9 +103,11 @@ public class BhProgramExecutor {
   private void startBhApp(String fileName, BhProgramEvent event) {
     try {
       // 初期化
-      Context cx = ContextFactory.getGlobal().enterContext();
-      ScriptableObject.putProperty(
-          bhAppScope, ScriptParams.Properties.BH_SCRIPT_HELPER, scriptHelper);
+      Context cx = Context.enter();
+      bhAppScope.put(
+          ScriptParams.Properties.BH_SCRIPT_HELPER,
+          bhAppScope,
+          Context.javaToJS(scriptHelper, bhAppScope));
       bhAppScript.exec(cx, bhAppScope);
       isBhAppInitialized.set(true);
       // 自動実行する関数を実行
@@ -127,13 +129,13 @@ public class BhProgramExecutor {
       return;
     }
     try {
-      Context cx = ContextFactory.getGlobal().enterContext();
+      Context cx = Context.enter();
       Function getEventHandlers = (Function) bhAppScope.get(event.eventHandlerResolver);
       NativeArray funcNameList = (NativeArray) getEventHandlers.call(
           cx, bhAppScope, bhAppScope, new String[] {event.name.toString()});
 
       for (Object funcName : funcNameList) {
-        callAsync((String) funcName, bhAppScope);
+        bhProgramExec.submit(() -> callFunc(funcName.toString()));
       }
     } catch (Exception e) {
       LogManager.INSTANCE.errMsgForDebug(
@@ -143,23 +145,22 @@ public class BhProgramExecutor {
     }
   }
 
-  /** 非同期的に Javascript の関数を呼ぶ. */
-  private void callAsync(String funcName, ScriptableObject scope) {
-    bhProgramExec.submit(() -> {
-      ScriptableObject thisObj = null;
-      try {
-        Context cx = ContextFactory.getGlobal().enterContext();
-        thisObj = cx.initStandardObjects();  // funcName.call(thisObj, args...);
-        Function func = (Function) bhAppScope.get(funcName);
-        func.call(cx, bhAppScope, thisObj, new Object[0]);
-      } catch (Throwable e) {
-        sendException(e, thisObj);
-        LogManager.INSTANCE.errMsgForDebug(
-            BhProgramHandlerImpl.class.getSimpleName() + "::callAsync(" + funcName + ")\n" + e);
-      } finally {
-        Context.exit();
-      }
-    });
+  /** {@code funcName} で指定した JavaScript の関数を呼ぶ. */
+  private Object callFunc(String funcName) {
+    ScriptableObject thisObj = null;
+    try {
+      Context cx = Context.enter();
+      thisObj = cx.initStandardObjects();  // funcName.call(thisObj, args...);
+      Function func = (Function) bhAppScope.get(funcName);
+      return func.call(cx, bhAppScope, thisObj, new Object[0]);
+    } catch (Throwable e) {
+      sendException(e, thisObj);
+      LogManager.INSTANCE.errMsgForDebug(
+          BhProgramHandlerImpl.class.getSimpleName() + "::callAsync(" + funcName + ")\n" + e);
+    } finally {
+      Context.exit();
+    }
+    return null;
   }
 
   /**
@@ -204,10 +205,9 @@ public class BhProgramExecutor {
   /* BhProgram の呼び出しコンテキストからエラーメッセージを抽出する.  */
   private String getErrMsgs(ScriptableObject context) {
     NativeArray msgList = new NativeArray(0);
-    if (context != null
-        && ScriptableObject.hasProperty(context, ScriptParams.Properties.ADDITIONAL_ERROR_MSGS)) {
-      Object tmp = context.get(ScriptParams.Properties.ADDITIONAL_ERROR_MSGS);
-      msgList = (tmp instanceof NativeArray) ? (NativeArray) tmp : msgList;
+    if (context != null) {
+      Object msgs = context.get(ScriptParams.Properties.ERROR_MSGS);
+      msgList = (msgs instanceof NativeArray) ? (NativeArray) msgs : msgList;
     }
 
     return ((Collection<?>) msgList).stream()
@@ -216,12 +216,19 @@ public class BhProgramExecutor {
   }
 
   /* BhProgram の呼び出しコンテキストからコールスタックを抽出する.  */
-  private NativeArray getCallStack(ScriptableObject context) {
-    NativeArray callStack = new NativeArray(0);
-    if (context != null
-        && ScriptableObject.hasProperty(context, ScriptParams.Properties.CALL_STACK)) {
-      Object tmp = context.get(ScriptParams.Properties.CALL_STACK);
-      callStack = (tmp instanceof NativeArray) ? (NativeArray) tmp : callStack;
+  private List<?> getCallStack(ScriptableObject context) {
+    List<Object> callStack = new ArrayList<>();
+    if (context != null) {
+      if (context.get(ScriptParams.Properties.CALL_STACK) instanceof NativeArray cs) {
+        for (Object nodeInstId : cs) {
+          callStack.add(nodeInstId);
+        }
+      }
+      Object currentNodeInstId = ScriptableObject.hasProperty(
+          context, ScriptParams.Properties.CURRENT_NODE_INST_ID);
+      if (currentNodeInstId != null) {
+        callStack.add(currentNodeInstId);
+      }
     }
     return callStack;
   }

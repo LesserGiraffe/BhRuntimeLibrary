@@ -26,8 +26,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import net.seapanda.bunnyhop.runtime.BhParams;
+import net.seapanda.bunnyhop.runtime.BhConstants;
 
 /**
  * ログ出力クラス.
@@ -53,7 +52,7 @@ public class LogManager {
   private boolean initLogSystem() {
     Path logFilePath = genLogFilePath(0);
     if (!Util.INSTANCE.createDirectoryIfNotExists(
-        Paths.get(Util.INSTANCE.execPath, BhParams.Path.LOG_DIR))) {
+        Paths.get(Util.INSTANCE.execPath, BhConstants.Path.LOG_DIR))) {
       return false;
     }
     if (!Util.INSTANCE.createFileIfNotExists(logFilePath)) {
@@ -61,7 +60,7 @@ public class LogManager {
     }
     try {
       //ログローテーション
-      if (Files.size(logFilePath) > BhParams.LOG_FILE_SIZE_LIMIT && !renameLogFiles()) {
+      if (Files.size(logFilePath) > BhConstants.LOG_FILE_SIZE_LIMIT && !renameLogFiles()) {
         return false;
       }
     } catch (IOException | SecurityException e) {
@@ -116,11 +115,11 @@ public class LogManager {
    */
   private boolean renameLogFiles() {
     try {
-      Path oldestLogFilePath = genLogFilePath(BhParams.MAX_LOG_FILE_NUM - 1);
+      Path oldestLogFilePath = genLogFilePath(BhConstants.MAX_LOG_FILE_NUM - 1);
       if (Files.exists(oldestLogFilePath)) {
         Files.delete(oldestLogFilePath);
       }
-      for (int fileNo = BhParams.MAX_LOG_FILE_NUM - 2; fileNo >= 0; --fileNo) {
+      for (int fileNo = BhConstants.MAX_LOG_FILE_NUM - 2; fileNo >= 0; --fileNo) {
         Path oldLogFilePath = genLogFilePath(fileNo);
         Path newLogFilePath = genLogFilePath(fileNo + 1);
         if (Files.exists(oldLogFilePath)) {
@@ -137,7 +136,7 @@ public class LogManager {
 
     String numStr = ("0000" + fileNo);
     numStr = numStr.substring(numStr.length() - 4, numStr.length());
-    String logFileName = BhParams.Path.LOG_FILE_NAME + numStr + ".log";
-    return Paths.get(Util.INSTANCE.execPath, BhParams.Path.LOG_DIR, logFileName);
+    String logFileName = BhConstants.Path.LOG_FILE_NAME + numStr + ".log";
+    return Paths.get(Util.INSTANCE.execPath, BhConstants.Path.LOG_DIR, logFileName);
   }
 }

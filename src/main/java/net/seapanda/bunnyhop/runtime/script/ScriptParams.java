@@ -28,7 +28,8 @@ public class ScriptParams {
     public static final String BH_INOUT = "bhInout";
     public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
     public static final String CALL_STACK = "_callStack";
-    public static final String ADDITIONAL_ERROR_MSGS = "_additionalErrorMsgs";
+    public static final String CURRENT_NODE_INST_ID = "_currentNodeInstId";
+    public static final String ERROR_MSGS = "_errorMsgs";
   }
 
   /** BhProgram に定義された関数名. */
