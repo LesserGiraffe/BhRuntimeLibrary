@@ -23,14 +23,14 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
  */
 public abstract class BhTextIoCmd implements BhProgramMessage {
 
-  private final int id;
+  private final long id;
 
   private BhTextIoCmd() {
     id = genId();
   }
 
   @Override
-  public int getId() {
+  public long getId() {
     return id;
   }
 

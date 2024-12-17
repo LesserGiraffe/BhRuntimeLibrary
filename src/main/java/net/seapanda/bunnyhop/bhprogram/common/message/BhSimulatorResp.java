@@ -32,7 +32,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   }
 
   @Override
-  public int getId() {
+  public long getId() {
     return id;
   }
 

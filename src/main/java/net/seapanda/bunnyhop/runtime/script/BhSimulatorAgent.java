@@ -55,9 +55,9 @@ public class BhSimulatorAgent {
   /** コマンドを格納する FIFO. */
   private final BlockingQueue<BhProgramMessage> sendMsgList;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
-  private final Map<Integer, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
+  private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */
-  private final Map<Integer, BhSimulatorResp> cmdIdToResp = new ConcurrentHashMap<>();
+  private final Map<Long, BhSimulatorResp> cmdIdToResp = new ConcurrentHashMap<>();
 
   /**
    * コンストラクタ.

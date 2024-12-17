@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public interface BhProgramResponse extends Serializable {
 
-  public int getId();
+  public long getId();
 
   /** この応答の元となったメッセージの処理に成功した場合 true を返す. */
   public boolean isSuccessful();

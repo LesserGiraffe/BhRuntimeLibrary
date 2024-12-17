@@ -49,9 +49,9 @@ public class BhIoAgent {
   /** BunnyHop との接続状態フラグ. */
   private boolean isTextOutputEnabled = false;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
-  private final Map<Integer, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
+  private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */
-  private final Map<Integer, BhTextIoResp> cmdIdToResp = new ConcurrentHashMap<>();
+  private final Map<Long, BhTextIoResp> cmdIdToResp = new ConcurrentHashMap<>();
   private final ReentrantLock lock = new ReentrantLock();
   /** BhProgram に入力された文字列のバッファ. */
   private final BlockingQueue<String> inputTextList =

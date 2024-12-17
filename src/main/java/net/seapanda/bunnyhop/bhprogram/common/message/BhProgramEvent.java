@@ -23,7 +23,7 @@ public class BhProgramEvent implements BhProgramMessage {
   public final Name name;
   /** イベントに対応する BhProgram の関数を解決する関数の名前. */
   public final String eventHandlerResolver;
-  private final int id;
+  private final long id;
 
   /**
    * コンストラクタ.
@@ -38,7 +38,7 @@ public class BhProgramEvent implements BhProgramMessage {
   }
 
   @Override
-  public int getId() {
+  public long getId() {
     return id;
   }
 

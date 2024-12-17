@@ -23,16 +23,16 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
  */
 public abstract class BhTextIoResp implements BhProgramResponse {
 
-  private final int id;
+  private final long id;
   public final boolean success;
 
-  private BhTextIoResp(int id, boolean success) {
+  private BhTextIoResp(long id, boolean success) {
     this.id = id;
     this.success = success;
   }
 
   @Override
-  public int getId() {
+  public long getId() {
     return id;
   }
 
@@ -46,7 +46,7 @@ public abstract class BhTextIoResp implements BhProgramResponse {
 
     public final String text;
 
-    public OutputTextResp(int id, boolean success, String text) {
+    public OutputTextResp(long id, boolean success, String text) {
       super(id, success);
       this.text = text;
     }
@@ -57,7 +57,7 @@ public abstract class BhTextIoResp implements BhProgramResponse {
     
     public final String text;
     
-    public InputTextResp(int id, boolean success, String text) {
+    public InputTextResp(long id, boolean success, String text) {
       super(id, success);
       this.text = text;
     }

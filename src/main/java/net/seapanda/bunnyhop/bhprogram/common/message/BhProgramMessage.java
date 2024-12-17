@@ -17,7 +17,7 @@
 package net.seapanda.bunnyhop.bhprogram.common.message;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * BunnyHop と BhProgram の実行環境間で送受信されるメッセージ.
@@ -26,11 +26,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public interface BhProgramMessage extends Serializable {
 
-  public static final AtomicInteger nextId = new AtomicInteger(1);
+  public static final AtomicLong nextId = new AtomicLong(1);
   
-  public default int genId() {
+  public default long genId() {
     return nextId.getAndIncrement();
   }
 
-  public int getId();
+  public long getId();
 }

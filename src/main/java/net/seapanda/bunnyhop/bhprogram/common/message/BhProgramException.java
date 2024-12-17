@@ -30,7 +30,8 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
 
   private final Deque<BhNodeInstanceId> callStack;
   private final String scriptEngineMsg;
-  private final int id;
+  private final long threadId;
+  private final long msgId;
 
   /**
    * コンストラクタ.
@@ -39,10 +40,7 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
    * @param msg 例外メッセージ
    */
   public BhProgramException(Collection<BhNodeInstanceId> callStack, String msg) {
-    super(msg);
-    this.callStack = new LinkedList<>(callStack);
-    scriptEngineMsg = "";
-    id = genId();
+    this(callStack, msg, "", -1);
   }
 
   /**
@@ -54,10 +52,24 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
    */
   public BhProgramException(
       Collection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg) {
+    this(callStack, msg, scriptEngineMsg, -1);
+  }
+
+  /**
+   * コンストラクタ.
+   *
+   * @param callStack 例外が発生した時のコールスタック
+   * @param msg 例外メッセージ
+   * @param scriptEngineMsg BhProgram の実行エンジンから返されたエラーメッセージ
+   * @param threadId 例外を出したスレッドの ID
+   */
+  public BhProgramException(
+      Collection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg, long threadId) {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     this.scriptEngineMsg = scriptEngineMsg;
-    id = genId();
+    this.threadId = threadId;
+    msgId = genId();
   }
 
   /** BhProgram の実行エンジンから返されたエラーメッセージを取得する. */
@@ -70,8 +82,16 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
     return new LinkedList<>(callStack);
   }
 
+  /**
+   * 例外を発生させたスレッドの ID を取得する.
+   * この情報が無い場合, 負の値を返す.
+   */
+  public long getThreadId() {
+    return threadId;
+  }
+
   @Override
-  public int getId() {
-    return id;
+  public long getId() {
+    return msgId;
   }
 }

@@ -23,14 +23,14 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
  */
 public abstract class BhSimulatorCmd implements BhProgramMessage {
 
-  private final int id;
+  private final long id;
 
   private BhSimulatorCmd() {
     id = genId();
   }
 
   @Override
-  public int getId() {
+  public long getId() {
     return id;
   }
 

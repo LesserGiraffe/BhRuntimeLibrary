@@ -52,7 +52,7 @@ public class BhProgramShell {
       new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   private final ScriptHelper scriptHelper = new ScriptHelper(sendMsgList, sendRespList, true);
   private final BhProgramExecutor executor = new BhProgramExecutor(scriptHelper, sendMsgList);
-  private final BlockingQueue<Integer> scanCmdIdList =
+  private final BlockingQueue<Long> scanCmdIdList =
       new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
   private final BlockingQueue<String> stdInBuf =
       new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
@@ -140,7 +140,7 @@ public class BhProgramShell {
     if (!stdInBuf.isEmpty() && !scanCmdIdList.isEmpty()) {
       try {
         String inputText = stdInBuf.take();
-        int cmdId = scanCmdIdList.take();
+        long cmdId = scanCmdIdList.take();
         scriptHelper.io.notify(new InputTextResp(cmdId, true, inputText));
       } catch (InterruptedException e) { /* do nothing */ }
     }
