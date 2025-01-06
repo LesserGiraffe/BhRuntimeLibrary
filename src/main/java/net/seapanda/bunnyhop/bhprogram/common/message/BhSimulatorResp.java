@@ -23,10 +23,10 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
  */
 public abstract class BhSimulatorResp implements BhProgramResponse {
 
-  private final int id;
+  private final long id;
   public final boolean success;
 
-  private BhSimulatorResp(int id, boolean success) {
+  private BhSimulatorResp(long id, boolean success) {
     this.id = id;
     this.success = success;
   }
@@ -44,7 +44,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar を前進させるコマンドのレスポンス. */
   public static class MoveForwardRaspiCarResp extends BhSimulatorResp {
 
-    public MoveForwardRaspiCarResp(int id, boolean success) {
+    public MoveForwardRaspiCarResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -52,7 +52,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar を後退させるコマンドのレスポンス. */
   public static class MoveBackwardRaspiCarResp extends BhSimulatorResp {
 
-    public MoveBackwardRaspiCarResp(int id, boolean success) {
+    public MoveBackwardRaspiCarResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -60,7 +60,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar を右回転させるコマンドのレスポンス. */
   public static class TurnRightRaspiCarResp extends BhSimulatorResp {
 
-    public TurnRightRaspiCarResp(int id, boolean success) {
+    public TurnRightRaspiCarResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -68,7 +68,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar を左回転させるコマンドのレスポンス. */
   public static class TurnLeftRaspiCarResp extends BhSimulatorResp {
     
-    public TurnLeftRaspiCarResp(int id, boolean success) {
+    public TurnLeftRaspiCarResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -76,7 +76,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar を停止させるコマンドのレスポンス. */
   public static class StopRaspiCarResp extends BhSimulatorResp {
     
-    public StopRaspiCarResp(int id, boolean success) {
+    public StopRaspiCarResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -86,7 +86,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
     
     public final double distance;
 
-    public MeasureDistanceResp(int id, boolean success, double distance) {
+    public MeasureDistanceResp(long id, boolean success, double distance) {
       super(id, success);
       this.distance = distance;
     }
@@ -99,8 +99,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
     public final int blue;
 
     /** コンストラクタ. */
-    public DetectColorResp(
-        int id, boolean success, float red, float green, float blue) {
+    public DetectColorResp(long id, boolean success, float red, float green, float blue) {
       super(id, success);
       this.red = Math.clamp((int) (red * 255), 0, 255);
       this.green = Math.clamp((int) (green * 255), 0, 255);
@@ -111,7 +110,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar の左目の色を設定するコマンドのレスポンス. */
   public static class SetLeftEyeColorResp extends  BhSimulatorResp {
     
-    public SetLeftEyeColorResp(int id, boolean success) {
+    public SetLeftEyeColorResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -119,7 +118,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar の右目の色を設定するコマンドのレスポンス. */
   public static class SetRightEyeColorResp extends  BhSimulatorResp {
     
-    public SetRightEyeColorResp(int id, boolean success) {
+    public SetRightEyeColorResp(long id, boolean success) {
       super(id, success);
     }
   }
@@ -127,7 +126,7 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   /** RaspiCar の両目の色を設定するコマンド. */
   public static class SetBothEyesColorResp extends  BhSimulatorResp {
   
-    public SetBothEyesColorResp(int id, boolean success) {
+    public SetBothEyesColorResp(long id, boolean success) {
       super(id, success);
     }
   }

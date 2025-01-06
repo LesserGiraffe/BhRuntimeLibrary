@@ -16,7 +16,6 @@
 
 package net.seapanda.bunnyhop.runtime;
 
-import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -33,7 +32,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.InputTextResp
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.script.ScriptParams;
-import net.seapanda.bunnyhop.runtime.tools.LogManager;
+import net.seapanda.bunnyhop.runtime.service.BhService;
 
 /**
  * ローカル環境で BhProgram を実行するクラス.
@@ -82,9 +81,8 @@ public class BhProgramShell {
           case BhProgramException exception -> {
             System.out.println(exception.getMessage() + "\n");
             System.out.println(exception.getScriptEngineMsg() + "\n");
-            Iterator<BhNodeInstanceId> iter = exception.getCallStack().descendingIterator();
-            while (iter.hasNext()) {
-              System.out.println("  " + iter.next().toString() + "\n");
+            for (BhNodeInstanceId instId : exception.getCallStack().reversed()) {
+              System.out.println("  " + instId.toString() + "\n");
             }
           }
 
@@ -121,7 +119,8 @@ public class BhProgramShell {
         }
       }
     } catch (Exception e) {
-      LogManager.INSTANCE.errMsgForDebug(getClass().getSimpleName() + "  input  " + e.toString());
+      BhService.msgPrinter().errForDebug(
+          "Failed to input string to BhProgram.\n%s".formatted(e));
       e.printStackTrace();
     }
   }

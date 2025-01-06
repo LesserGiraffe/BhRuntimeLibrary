@@ -33,8 +33,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.InputTextResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
 import net.seapanda.bunnyhop.runtime.BhConstants;
-import net.seapanda.bunnyhop.runtime.tools.LogManager;
-import net.seapanda.bunnyhop.runtime.tools.Util;
+import net.seapanda.bunnyhop.runtime.service.BhService;
+import net.seapanda.bunnyhop.utility.Utility;
 
 /**
  * BhProgram と BunnyHop 間のテキストの入出力に伴うコマンドとレスポンスを発行するクラス.
@@ -91,7 +91,7 @@ public class BhIoAgent {
     if (resp instanceof OutputTextResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -105,7 +105,7 @@ public class BhIoAgent {
       String text = inputTextList.take();
       return text;
     } catch (InterruptedException e) {
-      throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+      throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
     }
   }
 
@@ -153,7 +153,7 @@ public class BhIoAgent {
         sendRespList.put(new InputTextResp(cmd.getId(), success, inputTextCmd.text));
       }
     } catch (InterruptedException e) {
-      LogManager.INSTANCE.errMsgForDebug(Util.INSTANCE.getCurrentMethodName() + " failed");
+      BhService.msgPrinter().errForDebug(e.toString());
     }
   }
 

@@ -23,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
-import net.seapanda.bunnyhop.runtime.lib.SynchronizingTimer;
-import net.seapanda.bunnyhop.runtime.tools.Util;
+import net.seapanda.bunnyhop.utility.SynchronizingTimer;
+import net.seapanda.bunnyhop.utility.Utility;
 
 /**
  * BhProgram の実行時に使用する Utility クラス.
@@ -84,7 +84,7 @@ public class ScriptUtil {
 
   /** 実行ファイルがあるディレクトリのパスを取得する. */
   public String getExecPath() {
-    return Util.INSTANCE.execPath;
+    return Utility.execPath;
   }
 
   public byte toByte(int num) {

@@ -36,6 +36,8 @@ ext.ps = File.pathSeparator
 ext.fs = File.separator
 ext.jarLibName = 'Jlib'
 
+ext.bhUtilityJarName = 'bhutility.jar'
+
 application {
   // Define the main class for the application.
   mainClass = 'net.seapanda.bunnyhop.runtime.AppMain'
@@ -48,6 +50,12 @@ task prepareLibs(type: Copy) {
 
   doFirst {
     delete "$projectDir/../$appDirName/$jarLibName"
+  }
+
+  doLast {
+    ant.copy(todir: "$projectDir/../$appDirName/$jarLibName") {
+      fileset(dir: "$projectDir/../lib", includes: "$bhUtilityJarName")
+    }
   }
 }
 

@@ -33,8 +33,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.script.ScriptParams;
-import net.seapanda.bunnyhop.runtime.tools.LogManager;
-import net.seapanda.bunnyhop.runtime.tools.Util;
+import net.seapanda.bunnyhop.runtime.service.BhService;
+import net.seapanda.bunnyhop.utility.Utility;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.JavaScriptException;
@@ -82,7 +82,7 @@ public class BhProgramExecutor {
    * @param event 実行時にスクリプトに渡すイベントデータ
    */
   public boolean runScript(String fileName, BhProgramEvent event) {
-    Path scriptPath = Paths.get(Util.INSTANCE.execPath, BhConstants.Path.SCRIPT_DIR, fileName);
+    Path scriptPath = Paths.get(Utility.execPath, BhConstants.Path.SCRIPT_DIR, fileName);
     try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
       Context context = Context.enter();
       context.setLanguageVersion(Context.VERSION_ES6);
@@ -90,7 +90,8 @@ public class BhProgramExecutor {
       bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
       Executors.newSingleThreadExecutor().submit(() -> startBhApp(fileName, event));
     } catch (Exception e) {
-      LogManager.INSTANCE.errMsgForDebug("runScript 2 " +  e.toString() + " " + fileName);
+      BhService.msgPrinter().errForDebug(
+          "Failed to run a script.  (%s)\n%s".formatted(fileName, e));
       return false;
     } finally {
       Context.exit();
@@ -113,7 +114,8 @@ public class BhProgramExecutor {
       // 自動実行する関数を実行
       fireEvent(event);
     } catch (Exception e) {
-      LogManager.INSTANCE.errMsgForDebug("runScript 1 " +  e.toString() + " " + fileName);
+      BhService.msgPrinter().errForDebug(
+          "Failed to start a script.  (%s)\n%s".formatted(fileName, e));
     } finally {
       Context.exit();
     }
@@ -138,8 +140,8 @@ public class BhProgramExecutor {
         bhProgramExec.submit(() -> callFunc(funcName.toString()));
       }
     } catch (Exception e) {
-      LogManager.INSTANCE.errMsgForDebug(
-          BhProgramHandlerImpl.class.getSimpleName() + "::fireEvent\n" + e);
+      BhService.msgPrinter().errForDebug(
+          "Failed to fire an event.  (%s)\n%s".formatted(event, e));
     } finally {
       Context.exit();
     }
@@ -155,8 +157,8 @@ public class BhProgramExecutor {
       return func.call(cx, bhAppScope, thisObj, new Object[0]);
     } catch (Throwable e) {
       sendException(e, thisObj);
-      LogManager.INSTANCE.errMsgForDebug(
-          BhProgramHandlerImpl.class.getSimpleName() + "::callAsync(" + funcName + ")\n" + e);
+      BhService.msgPrinter().errForDebug(
+          "Failed to call a function.  (%s)\n%s".formatted(funcName, e));
     } finally {
       Context.exit();
     }

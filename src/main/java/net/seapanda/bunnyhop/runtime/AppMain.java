@@ -27,9 +27,9 @@ import net.seapanda.bunnyhop.bhprogram.common.LocalClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.RemoteClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.runtime.script.ScriptParams;
+import net.seapanda.bunnyhop.runtime.service.BhService;
 import net.seapanda.bunnyhop.runtime.socket.LocalServerSocketFactory;
 import net.seapanda.bunnyhop.runtime.socket.RemoteServerSocketFactory;
-import net.seapanda.bunnyhop.runtime.tools.LogManager;
 
 /**
  * メインクラス.
@@ -46,14 +46,17 @@ public class AppMain {
             AppMain.class.getSimpleName()
             + " version " + VersionInfo.APP_VERSION);
         return;
-
-      } else if (args[0].equals("-run") && args.length >= 2) {
-        LogManager.INSTANCE.init(true);
+      }
+      
+      if (!BhService.initialize()) {
+        System.exit(-1);
+      }
+      if (args[0].equals("-run") && args.length >= 2) {
         executeScript(args[1]);
       } else {
-        LogManager.INSTANCE.init(false);
         exportRmiObject(Boolean.valueOf(args[0]));
       }
+      BhService.msgPrinter().close();
     }
   }
 
@@ -85,7 +88,7 @@ public class AppMain {
       }
     } catch (Exception e) {
       System.out.println("\n" + "null" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
-      LogManager.INSTANCE.msgForDebug("main " + e.toString());
+      BhService.msgPrinter().errForDebug("Failed to export an rmi object.\n" + e);
     }
   }
 

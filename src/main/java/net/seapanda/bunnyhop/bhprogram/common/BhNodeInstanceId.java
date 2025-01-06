@@ -49,10 +49,7 @@ public class BhNodeInstanceId implements Serializable {
 
   @Override
   public int hashCode() {
-
-    int hash = 29;
-    hash = 173 * hash + Objects.hashCode(this.id);
-    return hash;
+    return Objects.hashCode(this.id);
   }
 }
 

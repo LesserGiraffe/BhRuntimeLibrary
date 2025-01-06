@@ -44,7 +44,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.SetRightEy
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.StopRaspiCarResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnLeftRaspiCarResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnRightRaspiCarResp;
-import net.seapanda.bunnyhop.runtime.tools.Util;
+import net.seapanda.bunnyhop.utility.Utility;
 
 /**
  * BhSimulator の機能を実行するコマンドを発行するクラス.
@@ -82,7 +82,7 @@ public class BhSimulatorAgent {
     if (resp instanceof MoveForwardRaspiCarResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -99,7 +99,7 @@ public class BhSimulatorAgent {
     if (resp instanceof MoveBackwardRaspiCarResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -116,7 +116,7 @@ public class BhSimulatorAgent {
     if (resp instanceof TurnRightRaspiCarResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -133,7 +133,7 @@ public class BhSimulatorAgent {
     if (resp instanceof TurnLeftRaspiCarResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -148,7 +148,7 @@ public class BhSimulatorAgent {
     if (resp instanceof StopRaspiCarResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -163,7 +163,7 @@ public class BhSimulatorAgent {
     if (resp instanceof MeasureDistanceResp measureDistanceResp && resp.success) {
       return measureDistanceResp.distance;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -179,7 +179,7 @@ public class BhSimulatorAgent {
     if (resp instanceof DetectColorResp detectColorResp && resp.success) {
       return new int[] { detectColorResp.red, detectColorResp.green, detectColorResp.blue };
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**detectColor
@@ -197,7 +197,7 @@ public class BhSimulatorAgent {
     if (resp instanceof SetLeftEyeColorResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -215,7 +215,7 @@ public class BhSimulatorAgent {
     if (resp instanceof SetRightEyeColorResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /**
@@ -233,7 +233,7 @@ public class BhSimulatorAgent {
     if (resp instanceof SetBothEyesColorResp && resp.success) {
       return;
     }
-    throw new AgencyFailedException(Util.INSTANCE.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
   /** コマンドを送って応答を待つ. */

@@ -16,9 +16,9 @@
 
 package net.seapanda.bunnyhop.bhprogram.common.message;
 
-import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.SequencedCollection;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 
 /**
@@ -39,7 +39,7 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
    * @param callStack 例外が発生した時のコールスタック
    * @param msg 例外メッセージ
    */
-  public BhProgramException(Collection<BhNodeInstanceId> callStack, String msg) {
+  public BhProgramException(SequencedCollection<BhNodeInstanceId> callStack, String msg) {
     this(callStack, msg, "", -1);
   }
 
@@ -51,7 +51,7 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
    * @param scriptEngineMsg BhProgram の実行エンジンから返されたエラーメッセージ
    */
   public BhProgramException(
-      Collection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg) {
+        SequencedCollection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg) {
     this(callStack, msg, scriptEngineMsg, -1);
   }
 
@@ -64,7 +64,10 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
    * @param threadId 例外を出したスレッドの ID
    */
   public BhProgramException(
-      Collection<BhNodeInstanceId> callStack, String msg, String scriptEngineMsg, long threadId) {
+        SequencedCollection<BhNodeInstanceId> callStack,
+        String msg,
+        String scriptEngineMsg,
+        long threadId) {
     super(msg);
     this.callStack = new LinkedList<>(callStack);
     this.scriptEngineMsg = scriptEngineMsg;
@@ -78,7 +81,7 @@ public class BhProgramException extends RuntimeException implements BhProgramMes
   }
 
   /** 例外が発生した時のコールスタックを取得する. */
-  public Deque<BhNodeInstanceId> getCallStack() {
+  public SequencedCollection<BhNodeInstanceId> getCallStack() {
     return new LinkedList<>(callStack);
   }
 
