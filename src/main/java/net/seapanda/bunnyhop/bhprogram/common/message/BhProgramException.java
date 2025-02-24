@@ -26,7 +26,7 @@ import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
  *
  * @author K.Koike
  */
-public class BhProgramException extends RuntimeException implements BhProgramMessage {
+public class BhProgramException extends RuntimeException implements BhProgramNotification {
 
   private final Deque<BhNodeInstanceId> callStack;
   private final String scriptEngineMsg;

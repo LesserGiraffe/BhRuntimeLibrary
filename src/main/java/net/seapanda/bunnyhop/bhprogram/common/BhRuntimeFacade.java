@@ -19,15 +19,15 @@ package net.seapanda.bunnyhop.bhprogram.common;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
 /**
- * BhProgram の実行環境との通信を行うクラス.
+ * BhProgram の実行環境 (BhRuntime) に対する操作を規定したインタフェース.
  *
  * @author K.Koike
  */
-public interface BhProgramHandler extends Remote {
+public interface BhRuntimeFacade extends Remote {
 
   /**
    * 引数で指定した BhProgram を実行する.
@@ -38,39 +38,42 @@ public interface BhProgramHandler extends Remote {
    */
   public boolean runScript(String fileName, BhProgramEvent event) throws RemoteException;
 
-  /** BunnyHopとの通信を切断する. */
+  /** BhRuntime との通信を無効化する. */
   public void disconnect() throws RemoteException;
 
-  /** BunnyHopとの通信を始める. */
+  /** BhRuntime との通信を有効化する. */
   public void connect() throws RemoteException;
 
-  /**
-   * BhProgram の実行環境にメッセージを送信する.
-   *
-   * @param msg 送信するメッセージ. null不可.
-   * @return 送信に成功した場合 true
-   */
-  public boolean sendMsgToScript(BhProgramMessage msg) throws RemoteException;
+  /** BunnyHopとの通信状態を取得する. */
+  public boolean isConnected() throws RemoteException;
 
   /**
-   * BhProgram の実行環境からレスポンスを受信する.
+   * BhRuntime にメッセージを送信する.
+   *
+   * @param notif 送信する通知. null不可.
+   * @return 送信に成功した場合 true
+   */
+  public boolean sendNotifToRuntime(BhProgramNotification notif) throws RemoteException;
+
+  /**
+   * BhRuntime からレスポンスを受信する.
    *
    * @return 受信したレスポンス. 受信に失敗した場合もしくは受信可能なレスポンスがなかった場合 null.
    */
-  public BhProgramResponse recvRespFromScript() throws RemoteException;
+  public BhProgramResponse recvRespFromRuntime() throws RemoteException;
 
   /**
-   * BhProgram の実行環境からメッセージを受信する.
+   * BhRuntime からメッセージを受信する.
    *
    * @return 受信したメッセージ. 受信に失敗した場合もしくは受信可能なメッセージがなかった場合 null.
    */
-  public BhProgramMessage recvMsgFromScript() throws RemoteException;
+  public BhProgramNotification recvNotifFromRuntime() throws RemoteException;
 
   /**
-   * BhProgram の実行環境にレスポンスを送信する.
+   * BhRuntime にレスポンスを送信する.
    *
    * @param resp 送信するレスポンス. null不可.
    * @return 送信に成功した場合 true
    */
-  public boolean sendRespToScript(BhProgramResponse resp) throws RemoteException;
+  public boolean sendRespToRuntime(BhProgramResponse resp) throws RemoteException;
 }

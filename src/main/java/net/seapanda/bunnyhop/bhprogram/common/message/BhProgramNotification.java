@@ -14,31 +14,20 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.runtime.service;
+package net.seapanda.bunnyhop.bhprogram.common.message;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * アプリケーション全体で使用するクラスのオブジェクトをまとめて保持する.
+ * BunnyHop と BhProgram の実行環境間で送受信される通知.
  *
  * @author K.Koike
  */
-public class BhService {
+public interface BhProgramNotification extends BhProgramMessage {
 
-  private static volatile MsgPrinter msgPrinter;
-
-  /** 保持している全てのオブジェクトの初期化処理を行う. */
-  public static boolean initialize() {
-    try {
-      msgPrinter = new MsgPrinter();
-    } catch (Exception e) {
-      if (msgPrinter != null) {
-        msgPrinter.errForDebug(e.toString());
-      }
-      return false;
-    }
-    return true;
-  }
-
-  public static MsgPrinter msgPrinter() {
-    return msgPrinter;
+  public static final AtomicLong nextId = new AtomicLong(1);
+  
+  default long genId() {
+    return nextId.getAndIncrement();
   }
 }

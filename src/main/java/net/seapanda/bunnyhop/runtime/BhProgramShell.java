@@ -17,25 +17,25 @@
 package net.seapanda.bunnyhop.runtime;
 
 import java.util.Scanner;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.InputTextCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.OutputTextCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.InputTextResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
-import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
-import net.seapanda.bunnyhop.runtime.script.ScriptParams;
-import net.seapanda.bunnyhop.runtime.service.BhService;
+import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
+import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.Keywords;
+import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
+import net.seapanda.bunnyhop.runtime.service.LogManager;
 
 /**
- * ローカル環境で BhProgram を実行するクラス.
+ * 外部プログラムとの通信をせずに BhProgram を実行するクラス.
  *
  * @author K.Koike
  */
@@ -43,21 +43,22 @@ public class BhProgramShell {
 
   private final ExecutorService outputExecutor = Executors.newSingleThreadExecutor();
   private final ExecutorService inoutputExecutor = Executors.newSingleThreadExecutor();
-  /** BunnyHop へ送信するメッセージを格納する FIFO. */
-  private final BlockingQueue<BhProgramMessage> sendMsgList =
-      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
-  /** BunnyHop へ送信するレスポンスを格納する FIFO. */
-  private final BlockingQueue<BhProgramResponse> sendRespList =
-      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
-  private final ScriptHelper scriptHelper = new ScriptHelper(sendMsgList, sendRespList, true);
-  private final BhProgramExecutor executor = new BhProgramExecutor(scriptHelper, sendMsgList);
-  private final BlockingQueue<Long> scanCmdIdList =
-      new ArrayBlockingQueue<>(BhConstants.MAX_MSG_QUEUE_SIZE);
-  private final BlockingQueue<String> stdInBuf =
-      new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
+  private final MessageQueueSet queueSet;
+  private final BhProgramExecutor executor;
+  private final BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
+  private final BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor;
 
-  BhProgramShell() {
-    outputExecutor.submit(() -> outputSendData());
+  /** コンストラクタ. */
+  BhProgramShell(
+      MessageQueueSet queueSet,
+      BhProgramExecutor executor,
+      BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
+      BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor) {
+    this.queueSet = queueSet;
+    this.executor = executor;
+    this.textIoCmdProcessor = textIoCmdProcessor;
+    this.textIoRespProcessor = textIoRespProcessor;
+    outputExecutor.submit(() -> output());
     inoutputExecutor.submit(() -> input());
   }
 
@@ -72,28 +73,22 @@ public class BhProgramShell {
     return executor.runScript(fileName, event);
   }
 
-
-  private void outputSendData() {
+  private void output() {
     while (true) {
       try {
-        BhProgramMessage msg = sendMsgList.take();
-        switch (msg) {
+        BhProgramNotification notif = queueSet.sendNotifList().take();
+        switch (notif) {
           case BhProgramException exception -> {
             System.out.println(exception.getMessage() + "\n");
             System.out.println(exception.getScriptEngineMsg() + "\n");
             for (BhNodeInstanceId instId : exception.getCallStack().reversed()) {
-              System.out.println("  " + instId.toString() + "\n");
+              System.out.println("  %s\n".formatted(instId.toString()));
             }
           }
 
           case OutputTextCmd cmd -> {
             System.out.println(cmd.text);
-            scriptHelper.io.notify(new OutputTextResp(cmd.getId(), true, cmd.text));
-          }
-
-          case InputTextCmd cmd -> {
-            scanCmdIdList.offer(cmd.getId());
-            inputToScript();
+            textIoRespProcessor.process(new OutputTextResp(cmd.getId(), true, cmd.text));
           }
 
           default -> { }
@@ -111,7 +106,6 @@ public class BhProgramShell {
         String line = scan.nextLine();
         if (line.startsWith(BhConstants.BhProgram.STDIN_PREFIX)) {
           pushToStdinBuf(line);
-          inputToScript();
         } else if (line.startsWith(BhConstants.BhProgram.EVENT_INPUT_PREFIX)) {
           fireEvent(line);
         } else {
@@ -119,8 +113,7 @@ public class BhProgramShell {
         }
       }
     } catch (Exception e) {
-      BhService.msgPrinter().errForDebug(
-          "Failed to input string to BhProgram.\n%s".formatted(e));
+      LogManager.logger().error("Failed to input string to BhProgram.\n%s".formatted(e));
       e.printStackTrace();
     }
   }
@@ -128,22 +121,12 @@ public class BhProgramShell {
   private void pushToStdinBuf(String line) {
     String[] splited = line.split("\\:");
     if (splited.length >= 2) {
-      stdInBuf.offer(splited[1]);
+      textIoCmdProcessor.process(new InputTextCmd(splited[1]));
     } else {
-      stdInBuf.offer("");
+      textIoCmdProcessor.process(new InputTextCmd(""));
     }
   }
 
-  /** バッファリングしたテキストをスクリプトに入力する. */
-  private void inputToScript() {
-    if (!stdInBuf.isEmpty() && !scanCmdIdList.isEmpty()) {
-      try {
-        String inputText = stdInBuf.take();
-        long cmdId = scanCmdIdList.take();
-        scriptHelper.io.notify(new InputTextResp(cmdId, true, inputText));
-      } catch (InterruptedException e) { /* do nothing */ }
-    }
-  }
 
   private void fireEvent(String line) {
     String[] splited = line.split("\\:");
@@ -151,7 +134,7 @@ public class BhProgramShell {
       String eventName = splited[1];
       try {
         var event = BhProgramEvent.Name.valueOf(eventName);
-        executor.fireEvent(new BhProgramEvent(event, ScriptParams.Funcs.GET_EVENT_HANDLER_NAMES));
+        executor.fireEvent(new BhProgramEvent(event, Keywords.Funcs.GET_EVENT_HANDLER_NAMES));
       } catch (Exception e) {
         System.err.println("invalid event name  " + eventName);
       }
@@ -162,8 +145,8 @@ public class BhProgramShell {
 
   private void printCmdFormat() {
     System.out.println("Input command format");
-    System.out.println("  i:input string to stdin");
-    System.out.println("  e:EVENT_NAME");
+    System.out.println("  %s input string to stdin".formatted(BhConstants.BhProgram.STDIN_PREFIX));
+    System.out.println("  %s EVENT_NAME".formatted(BhConstants.BhProgram.EVENT_INPUT_PREFIX));
     System.out.println();
   }
 }

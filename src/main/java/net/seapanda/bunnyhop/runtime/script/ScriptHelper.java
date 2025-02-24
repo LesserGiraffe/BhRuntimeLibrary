@@ -16,9 +16,11 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
-import java.util.concurrent.BlockingQueue;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
+import net.seapanda.bunnyhop.runtime.script.io.BhTextInput;
+import net.seapanda.bunnyhop.runtime.script.io.BhTextIo;
+import net.seapanda.bunnyhop.runtime.script.io.BhTextOutput;
+import net.seapanda.bunnyhop.runtime.script.simulator.BhSimulatorCtrl;
 
 /**
  * BhProgram に公開するヘルパークラス.
@@ -27,23 +29,34 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
  */
 public class ScriptHelper {
 
-  public final BhIoAgent io;
-  public final BhSimulatorAgent simulator;
+  public final BhTextIo io;
+  public final BhSimulatorCtrl simulator;
   public final ScriptUtil util;
+  public final HwCmdDispatcher hw;
+  public final ThreadUtil thread;
+  public final Factory factory;
 
-  /**
-   * コンストラクタ.
-   *
-   * @param sendMsgList BunnyHop へ送信するメッセージを格納する FIFO
-   * @param sendRespList BunnyHop へ送信するレスポンスを格納する FIFO
-   * @param enableTextOutput 初期状態で, BunnyHop へのテキストデータの送信を有効化する場合 true
-   */
+  /** コンストラクタ. */
   public ScriptHelper(
-      BlockingQueue<BhProgramMessage> sendMsgList,
-      BlockingQueue<BhProgramResponse> sendRespList,
-      boolean enableTextOutput) {
-    io = new BhIoAgent(sendMsgList, sendRespList, enableTextOutput);
-    simulator = new BhSimulatorAgent(sendMsgList);
-    util = new ScriptUtil();
+      BhTextInput textInput,
+      BhTextOutput textOutput,
+      BhSimulatorCtrl simulator,
+      HwCmdDispatcher hw) {
+    this.io = new BhTextIo() {
+      @Override
+      public String scanln() throws Exception {
+        return textInput.scanln();
+      }
+
+      @Override
+      public void println(String text) throws Exception {
+        textOutput.println(text);
+      }
+    };
+    this.simulator = simulator;
+    this.hw = hw;
+    this.util = new ScriptUtil();
+    this.thread = new ThreadUtil();
+    this.factory = new Factory();
   }
 }

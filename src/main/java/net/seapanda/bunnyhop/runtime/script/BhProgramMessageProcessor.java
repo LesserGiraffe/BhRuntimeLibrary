@@ -16,24 +16,16 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
+
 /**
- * BhProgram 内で使用するキーワード.
+ * {@link BhProgramMessage} オブジェクトを処理する機能を規定したインタフェース.
  *
  * @author K.Koike
  */
-public class ScriptParams {
+@FunctionalInterface
+public interface BhProgramMessageProcessor<T extends BhProgramMessage> {
 
-  /** Javascript オブジェクトのプロパティ名. */
-  public static class Properties {
-    public static final String BH_INOUT = "bhInout";
-    public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
-    public static final String CALL_STACK = "_callStack";
-    public static final String CURRENT_NODE_INST_ID = "_currentNodeInstId";
-    public static final String ERROR_MSGS = "_errorMsgs";
-  }
-
-  /** BhProgram に定義された関数名. */
-  public static class Funcs {
-    public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
-  }
+  /** {@code resp} を処理する. */
+  void process(T resp);
 }

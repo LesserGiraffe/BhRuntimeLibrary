@@ -14,15 +14,31 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.runtime.service;
 
-import java.io.Serializable;
+import net.seapanda.bunnyhop.utility.log.Logger;
 
 /**
- * BunnyHop と BhProgram の実行環境間で送受信されるメッセージ.
+ * アプリケーション全体で使用する {@link Logger} オブジェクトを保持するクラス.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class LogManager {
+
+  private static volatile Logger logger = new Logger() {
+    @Override
+    public void info(String msg) {}
+
+    @Override
+    public void error(String msg) {}
+  };
+
+  /** 初期化処理を行う. */
+  public static void initialize(Logger logger) {
+    LogManager.logger = logger;
+  }
+
+  public static Logger logger() {
+    return logger;
+  }
 }

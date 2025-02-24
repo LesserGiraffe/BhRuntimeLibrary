@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.runtime;
+package net.seapanda.bunnyhop.runtime.executor;
 
 import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
@@ -30,10 +30,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
-import net.seapanda.bunnyhop.runtime.script.ScriptParams;
-import net.seapanda.bunnyhop.runtime.service.BhService;
+import net.seapanda.bunnyhop.runtime.service.LogManager;
 import net.seapanda.bunnyhop.utility.Utility;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -44,11 +44,11 @@ import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
- * BhProgram を実行するクラス.
+ * JavaScript で書かれた BhProgram を実行する機能を提供するクラス.
  *
  *@author K.Koike
  */
-public class BhProgramExecutor {
+public class JsBhProgramExecutor implements BhProgramExecutor {
 
   private final AtomicBoolean isBhAppInitialized = new AtomicBoolean(false);
   private Script bhAppScript;
@@ -58,31 +58,27 @@ public class BhProgramExecutor {
   /** BhProgram に公開するヘルパークラス. */
   private final ScriptHelper scriptHelper;
   /** BunnyHop への送信データを格納するキュー. */
-  private final BlockingQueue<BhProgramMessage> sendMsgList;
+  private final BlockingQueue<BhProgramNotification> sendNotifList;
 
   /**
    * コンストラクタ.
    *
    * @param scriptHelper BhProgram に公開するヘルパークラス.
-   * @param sendMsgList BunnyHopへの送信データキュー
+   * @param sendNotifList 発行した通知を格納する FIFO
    */
-  public BhProgramExecutor(
-        ScriptHelper scriptHelper, BlockingQueue<BhProgramMessage> sendMsgList) {
+  public JsBhProgramExecutor(
+        ScriptHelper scriptHelper, BlockingQueue<BhProgramNotification> sendNotifList) {
     this.scriptHelper = scriptHelper;
-    this.sendMsgList = sendMsgList;
+    this.sendNotifList = sendNotifList;
     Context cx = Context.enter();
     bhAppScope = cx.initStandardObjects();
     Context.exit();
   }
 
-  /**
-   * {@code fileName} で指定したスクリプトを実行する.
-   *
-   * @param fileName 実行するスクリプトファイル名
-   * @param event 実行時にスクリプトに渡すイベントデータ
-   */
-  public boolean runScript(String fileName, BhProgramEvent event) {
-    Path scriptPath = Paths.get(Utility.execPath, BhConstants.Path.SCRIPT_DIR, fileName);
+  @Override
+  public synchronized boolean runScript(String fileName, BhProgramEvent event) {
+    Path scriptPath = Paths.get(fileName).isAbsolute()
+        ? Paths.get(fileName) : Paths.get(Utility.execPath, fileName);
     try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
       Context context = Context.enter();
       context.setLanguageVersion(Context.VERSION_ES6);
@@ -90,7 +86,7 @@ public class BhProgramExecutor {
       bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
       Executors.newSingleThreadExecutor().submit(() -> startBhApp(fileName, event));
     } catch (Exception e) {
-      BhService.msgPrinter().errForDebug(
+      LogManager.logger().error(
           "Failed to run a script.  (%s)\n%s".formatted(fileName, e));
       return false;
     } finally {
@@ -106,7 +102,7 @@ public class BhProgramExecutor {
       // 初期化
       Context cx = Context.enter();
       bhAppScope.put(
-          ScriptParams.Properties.BH_SCRIPT_HELPER,
+          Keywords.Properties.BH_SCRIPT_HELPER,
           bhAppScope,
           Context.javaToJS(scriptHelper, bhAppScope));
       bhAppScript.exec(cx, bhAppScope);
@@ -114,18 +110,14 @@ public class BhProgramExecutor {
       // 自動実行する関数を実行
       fireEvent(event);
     } catch (Exception e) {
-      BhService.msgPrinter().errForDebug(
+      LogManager.logger().error(
           "Failed to start a script.  (%s)\n%s".formatted(fileName, e));
     } finally {
       Context.exit();
     }
   }
 
-  /**
-   * BhProgram のイベントハンドラを呼び出す.
-   *
-   * @param event このイベントに関連するイベントハンドラを呼び出す.
-   */
+  @Override
   public synchronized void fireEvent(BhProgramEvent event) {
     if (!isBhAppInitialized.get()) {
       return;
@@ -140,7 +132,7 @@ public class BhProgramExecutor {
         bhProgramExec.submit(() -> callFunc(funcName.toString()));
       }
     } catch (Exception e) {
-      BhService.msgPrinter().errForDebug(
+      LogManager.logger().error(
           "Failed to fire an event.  (%s)\n%s".formatted(event, e));
     } finally {
       Context.exit();
@@ -157,7 +149,7 @@ public class BhProgramExecutor {
       return func.call(cx, bhAppScope, thisObj, new Object[0]);
     } catch (Throwable e) {
       sendException(e, thisObj);
-      BhService.msgPrinter().errForDebug(
+      LogManager.logger().error(
           "Failed to call a function.  (%s)\n%s".formatted(funcName, e));
     } finally {
       Context.exit();
@@ -176,15 +168,15 @@ public class BhProgramExecutor {
     if (throwed != null) {
       BhProgramException exception = new BhProgramException(
           throwed.getCallStack(), throwed.getMessage(), src.toString());
-      sendMsgList.add(exception);
+      sendNotifList.add(exception);
       return;
     }
 
-    BhProgramException exception = scriptHelper.util.newBhProgramException(
+    BhProgramException exception = scriptHelper.factory.newBhProgramException(
         getCallStack(thisObj),
         src.toString() + getErrMsgs(thisObj),
         src.toString());
-    sendMsgList.add(exception);
+    sendNotifList.add(exception);
   }
 
   /**
@@ -208,7 +200,7 @@ public class BhProgramExecutor {
   private String getErrMsgs(ScriptableObject context) {
     NativeArray msgList = new NativeArray(0);
     if (context != null) {
-      Object msgs = context.get(ScriptParams.Properties.ERROR_MSGS);
+      Object msgs = context.get(Keywords.Properties.ERROR_MSGS);
       msgList = (msgs instanceof NativeArray) ? (NativeArray) msgs : msgList;
     }
 
@@ -221,13 +213,13 @@ public class BhProgramExecutor {
   private List<?> getCallStack(ScriptableObject context) {
     List<Object> callStack = new ArrayList<>();
     if (context != null) {
-      if (context.get(ScriptParams.Properties.CALL_STACK) instanceof NativeArray cs) {
+      if (context.get(Keywords.Properties.CALL_STACK) instanceof NativeArray cs) {
         for (Object nodeInstId : cs) {
           callStack.add(nodeInstId);
         }
       }
       Object currentNodeInstId = ScriptableObject.hasProperty(
-          context, ScriptParams.Properties.CURRENT_NODE_INST_ID);
+          context, Keywords.Properties.CURRENT_NODE_INST_ID);
       if (currentNodeInstId != null) {
         callStack.add(currentNodeInstId);
       }

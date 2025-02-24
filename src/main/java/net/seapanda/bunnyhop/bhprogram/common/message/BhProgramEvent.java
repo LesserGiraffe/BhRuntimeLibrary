@@ -17,7 +17,7 @@
 package net.seapanda.bunnyhop.bhprogram.common.message;
 
 /** BunnyHop と BhProgram の間で送受信されるイベント. */
-public class BhProgramEvent implements BhProgramMessage {
+public class BhProgramEvent implements BhProgramNotification {
 
   /** イベント名. */
   public final Name name;

@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.runtime;
+package net.seapanda.bunnyhop.runtime.script.io;
+
 
 /**
- * バージョン情報を格納するクラス.
+ * BunnyHop のテキスト IO を操作する処理を定義したインタフェース.
+ * <p>
+ * BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
+ * </p>
  *
  * @author K.Koike
  */
-public class VersionInfo {
-  public static final int MAJOR = 1;
-  public static final int MINOR = 4;
-  public static final int PATCH = 2;
-  public static final String APP_VERSION = MAJOR + "." + MINOR + "." + PATCH;
-  public static final long SERIAL_VERSION_UID = 142L;
+public interface BhTextOutput {
+
+  /**
+   * BunnyHop のテキスト I/O に文字列を書き込む.
+   *
+   * @param text 書き込む文字列
+   * @throws Excetion 文字列の書き込みに失敗した
+   */
+  public void println(String text) throws Exception;
 }

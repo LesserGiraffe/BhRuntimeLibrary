@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
   implementation 'org.mozilla:rhino:1.7.15'
+  implementation 'commons-cli:commons-cli:1.9.0'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

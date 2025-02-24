@@ -14,71 +14,55 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.runtime.script;
+package net.seapanda.bunnyhop.runtime.script.io;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.InputTextCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.OutputTextCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.InputTextResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
-import net.seapanda.bunnyhop.runtime.BhConstants;
-import net.seapanda.bunnyhop.runtime.service.BhService;
+import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
+import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.utility.Utility;
 
 /**
- * BhProgram と BunnyHop 間のテキストの入出力に伴うコマンドとレスポンスを発行するクラス.
+ * BhProgram によるテキストの出力機能を提供するクラス.
  *
  * @author K.Koike
  */
-public class BhIoAgent {
-  /** 送信するメッセージを格納する FIFO. */
-  private final BlockingQueue<BhProgramMessage> sendMsgList;
-  /** 送信するレスポンスを格納する FIFO. */
-  private final BlockingQueue<BhProgramResponse> sendRespList;
-  /** BunnyHop との接続状態フラグ. */
+public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcessor<BhTextIoResp> {
+
+  /** 発行した通知を格納する FIFO. */
+  private final BlockingQueue<BhProgramNotification> sendNotifList;
+  /** BunnyHop へのテキストデータの送信が有効な場合 true. */
   private boolean isTextOutputEnabled = false;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
   private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */
   private final Map<Long, BhTextIoResp> cmdIdToResp = new ConcurrentHashMap<>();
   private final ReentrantLock lock = new ReentrantLock();
-  /** BhProgram に入力された文字列のバッファ. */
-  private final BlockingQueue<String> inputTextList =
-      new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
 
   /**
    * コンストラクタ.
    *
-   * @param sendMsgList 発行したコマンドを格納する FIFO
-   * @param sendRespList 発行したレスポンスを格納する FIFO
+   * @param sendNotifList 発行した通知を格納する FIFO
    * @param enableTextOutput 初期状態で, BunnyHop へのテキストデータの送信を有効化する場合 true
    */
-  public BhIoAgent(
-        BlockingQueue<BhProgramMessage> sendMsgList,
-        BlockingQueue<BhProgramResponse> sendRespList,
-        boolean enableTextOutput) {
-    this.sendMsgList = sendMsgList;
-    this.sendRespList = sendRespList;
+  public BhTextOutputAgent(
+      BlockingQueue<BhProgramNotification> sendNotifList,
+      boolean enableTextOutput) {
+    this.sendNotifList = sendNotifList;
     this.isTextOutputEnabled = enableTextOutput;
   }
-
-  /**
-   * BunnyHop に文字列データを送信するコマンドを発行する.
-   *
-   * @param text 送信する文字列
-   * @throws AgencyFailedException コマンドの実行が失敗した
-   */
+  
+  @Override
   public void println(String text) throws AgencyFailedException {
     lock.lock();
     if (!isTextOutputEnabled) {
@@ -94,20 +78,6 @@ public class BhIoAgent {
     throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
-  /**
-   * BunnyHop からテキストデータを受信する.
-   *
-   * @return 受信したテキストデータ
-   * @throws AgencyFailedException コマンドの実行が失敗した
-   */
-  public String scanln() throws AgencyFailedException {
-    try {
-      String text = inputTextList.take();
-      return text;
-    } catch (InterruptedException e) {
-      throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-    }
-  }
 
   /** コマンドを送って応答を待つ. */
   private void sendCmdAndWait(BhTextIoCmd cmd, boolean unlock) {
@@ -115,7 +85,7 @@ public class BhIoAgent {
     var latch = new CountDownLatch(1);
     cmdIdToBarrier.put(cmd.getId(), latch);
     try {
-      isAdded = sendMsgList.offer(cmd, Long.MAX_VALUE, TimeUnit.DAYS);
+      isAdded = sendNotifList.offer(cmd, Long.MAX_VALUE, TimeUnit.DAYS);
       if (unlock) {
         lock.unlock();
       }
@@ -123,37 +93,16 @@ public class BhIoAgent {
         latch.await();
       }
     } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
       cmdIdToBarrier.remove(cmd.getId());
     }
   }
 
-  /**
-   * このオブジェクトにコマンドのレスポンスを渡す.
-   *
-   * @param resp コマンドのレスポンス.
-   */
-  public void notify(BhTextIoResp resp) {
+  @Override
+  public void process(BhTextIoResp resp) {
     CountDownLatch latch = cmdIdToBarrier.remove(resp.getId());
     if (latch != null) {
       cmdIdToResp.put(resp.getId(), resp);
       latch.countDown();
-    }
-  }
-
-  /**
-   * このオブジェクトにコマンドを渡す.
-   *
-   * @param cmd このオブジェクトが処理するコマンド.
-   */
-  public void notify(BhTextIoCmd cmd) {
-    try {
-      if (cmd instanceof InputTextCmd inputTextCmd) {
-        boolean success = inputTextList.offer(inputTextCmd.text);
-        sendRespList.put(new InputTextResp(cmd.getId(), success, inputTextCmd.text));
-      }
-    } catch (InterruptedException e) {
-      BhService.msgPrinter().errForDebug(e.toString());
     }
   }
 
@@ -177,11 +126,11 @@ public class BhIoAgent {
 
   /** BunnyHop にテキストデータを送信するコマンドをキャンセルする. */
   private void cancelTextOutput() {
-    List<BhProgramMessage> outputTextCmdList = sendMsgList.stream()
+    List<BhProgramNotification> outputTextCmdList = sendNotifList.stream()
         .filter(msg -> msg instanceof OutputTextCmd)
         .toList();
-    sendMsgList.removeAll(outputTextCmdList);
-    outputTextCmdList.forEach(cmd -> notify(
+    sendNotifList.removeAll(outputTextCmdList);
+    outputTextCmdList.forEach(cmd -> process(
         new OutputTextResp(cmd.getId(), true, ((OutputTextCmd) cmd).text)));
   }
 }

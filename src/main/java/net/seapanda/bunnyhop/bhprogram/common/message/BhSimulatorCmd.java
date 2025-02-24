@@ -21,7 +21,7 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
  *
  * @author K.Koike
  */
-public abstract class BhSimulatorCmd implements BhProgramMessage {
+public abstract class BhSimulatorCmd implements BhProgramNotification {
 
   private final long id;
 

@@ -16,12 +16,18 @@
 
 package net.seapanda.bunnyhop.runtime;
 
+import net.seapanda.bunnyhop.utility.AppVersion;
+
 /**
  * BhProgramExecutor のパラメータ一式をまとめたクラス.
  *
  * @author K.Koike
  */
 public class BhConstants {
+  /** アプリケーションの名前. */
+  public static final String APP_NAME = "BhRuntimeLibrary";
+  /** アプリケーションのバージョン. */
+  public static final AppVersion APP_VERSION = AppVersion.of("bhr-2.0.0");
   /** BhProgram に入力されたテキストデータを格納する FIFO のサイズ. */
   public static final int MAX_INPUT_TEXT_QUEUE_SIZE = 1024;
   /** BunnyHop との通信データを格納する FIFO のサイズ. */
@@ -36,6 +42,8 @@ public class BhConstants {
   public static final int LOG_FILE_SIZE_LIMIT = 1024 * 1024;
   /** ログファイルの最大個数. */
   public static final int MAX_LOG_FILE_NUM = 4;
+  /** プロセスの終了完了待ちタイムアウト時間 (sec). */
+  public static final int PROC_END_TIMEOUT = 4;
 
   /** BhProgram に関するパラメータ. */
   public static class BhProgram {
@@ -47,8 +55,11 @@ public class BhConstants {
 
   /** ファイルパスに関するパラメータ. */
   public static class Path {
-    public static final String SCRIPT_DIR = "Compiled";
-    public static final String LOG_DIR = "BhExecEnvLog";
+    public static final String LOG_DIR = "Log";
     public static final String LOG_FILE_NAME = "msg";
+    /** HW 制御プログラムがあるディレクトリの名前. */
+    public static final String HW_CTRL_DIR = "HwCtrl";
+    /** HW 制御プログラムの名前. */
+    public static final String HW_CTRL = "hwctrl";
   }
 }
