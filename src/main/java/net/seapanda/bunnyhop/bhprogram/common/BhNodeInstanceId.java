@@ -28,10 +28,20 @@ public class BhNodeInstanceId implements Serializable {
 
   private final String id;
   /** ID が無いことを表す null オブジェクト. */
-  public static final BhNodeInstanceId NONE = new BhNodeInstanceId("NONE");
+  public static final BhNodeInstanceId NONE = new BhNodeInstanceId("");
 
-  public BhNodeInstanceId(String id) {
+  private BhNodeInstanceId(String id) {
     this.id = id;
+  }
+
+  /**
+   * {@link BhNodeInstanceId} を作成する.
+   *
+   * @param id 識別子名
+   * @return {@link BhNodeInstanceId} オブジェクト.
+   */
+  public static BhNodeInstanceId of(String id) {
+    return new BhNodeInstanceId(id == null ? "" : id);
   }
 
   @Override

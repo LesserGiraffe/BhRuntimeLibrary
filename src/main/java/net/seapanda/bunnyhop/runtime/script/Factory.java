@@ -18,8 +18,8 @@ package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
 import net.seapanda.bunnyhop.utility.SynchronizingTimer;
 
@@ -37,7 +37,7 @@ public class Factory {
    * @return {@link BhNodeInstanceId} オブジェクト
    */
   public BhNodeInstanceId newBhNodeInstanceId(String id) {
-    return new BhNodeInstanceId(id);
+    return BhNodeInstanceId.of(id);
   }
 
   /**
@@ -48,7 +48,7 @@ public class Factory {
    * @return 例外オブジェクト
    */
   public BhProgramException newBhProgramException(List<?> callStack, String msg) {
-    return newBhProgramException(callStack, msg, "");
+    return newBhProgramException(callStack, msg, null);
   }
 
   /**
@@ -56,16 +56,18 @@ public class Factory {
    *
    * @param callStack 例外発生時のコールスタック
    * @param msg 例外メッセージ
-   * @param scriptEngineMsg BhProgram の実行エンジンから返されたエラーメッセージ
+   * @param cause 例外の原因
    * @return 例外オブジェクト
    */
   public BhProgramException newBhProgramException(
-      List<?> callStack, String msg, String scriptEngineMsg) {
-    ArrayList<BhNodeInstanceId> funcCallStack = callStack.stream()
-        .map(nodeInstanceID -> newBhNodeInstanceId(nodeInstanceID.toString()))
-        .collect(Collectors.toCollection(ArrayList::new));
-
-    return new BhProgramException(funcCallStack, msg, scriptEngineMsg);
+      List<?> callStack, String msg, Throwable cause) {
+    var funcCallStack = new ArrayList<BhCallStackItem>();
+    long id = 0;
+    for (var elem : callStack) {
+      var item = new BhCallStackItem(id++, newBhNodeInstanceId(elem.toString()));
+      funcCallStack.add(item);  
+    }
+    return new BhProgramException(funcCallStack, msg, Thread.currentThread().threadId(), cause);
   }
 
   /** {@link SynchronizingTimer} を新規作成する. */

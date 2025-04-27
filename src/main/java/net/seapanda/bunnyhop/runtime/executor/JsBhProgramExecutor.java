@@ -17,6 +17,8 @@
 package net.seapanda.bunnyhop.runtime.executor;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,10 +39,9 @@ import net.seapanda.bunnyhop.runtime.service.LogManager;
 import net.seapanda.bunnyhop.utility.Utility;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
-import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 /**
@@ -82,7 +83,6 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
     try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
       Context context = Context.enter();
       context.setLanguageVersion(Context.VERSION_ES6);
-      context.setOptimizationLevel(9);
       bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
       Executors.newSingleThreadExecutor().submit(() -> startBhApp(fileName, event));
     } catch (Exception e) {
@@ -105,7 +105,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
           Keywords.Properties.BH_SCRIPT_HELPER,
           bhAppScope,
           Context.javaToJS(scriptHelper, bhAppScope));
-      bhAppScript.exec(cx, bhAppScope);
+      executeScript(bhAppScript, cx, bhAppScope);
       isBhAppInitialized.set(true);
       // 自動実行する関数を実行
       fireEvent(event);
@@ -114,6 +114,15 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
           "Failed to start a script.  (%s)\n%s".formatted(fileName, e));
     } finally {
       Context.exit();
+    }
+  }
+
+  /** {@code cx} と {@code scope} を使って, {@code script} を実行する. */
+  private void executeScript(Script script, Context cx, ScriptableObject scope) {
+    try {
+      script.exec(cx, scope);
+    } catch (Throwable e) {
+      sendException(e, scope);
     }
   }
 
@@ -165,17 +174,18 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
    */
   private void sendException(Throwable src, ScriptableObject thisObj) {
     BhProgramException throwed = getBhProgramExceptionFrom(src);
+    BhProgramException exception = null;
     if (throwed != null) {
-      BhProgramException exception = new BhProgramException(
-          throwed.getCallStack(), throwed.getMessage(), src.toString());
-      sendNotifList.add(exception);
-      return;
+      exception = new BhProgramException(
+          throwed.getCallStack(),
+          throwed.getMessage(),
+          throwed.getThreadId());
+    } else {
+      exception = scriptHelper.factory.newBhProgramException(
+          getCallStack(thisObj),
+          getErrMsgs(thisObj),
+          toSerializable(src));
     }
-
-    BhProgramException exception = scriptHelper.factory.newBhProgramException(
-        getCallStack(thisObj),
-        src.toString() + getErrMsgs(thisObj),
-        src.toString());
     sendNotifList.add(exception);
   }
 
@@ -186,12 +196,8 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
    * @return BhProgramException オブジェクト. src の中に存在しない場合は null.
    */
   private BhProgramException getBhProgramExceptionFrom(Throwable src) {
-    if (src instanceof JavaScriptException jsException) {
-      if (jsException.getValue() instanceof NativeJavaObject nativeObj) {
-        if (nativeObj.unwrap() instanceof BhProgramException exception) {
-          return exception;
-        }
-      }
+    if (src.getCause() instanceof BhProgramException exception) {
+      return exception;
     }
     return null;
   }
@@ -206,24 +212,53 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
 
     return ((Collection<?>) msgList).stream()
         .map(obj -> obj.toString())
-        .reduce("\n", (lhs, rhs) -> lhs + "\n" + rhs);
+        .reduce((lhs, rhs) -> lhs + "\n" + rhs)
+        .orElse("");
   }
 
   /* BhProgram の呼び出しコンテキストからコールスタックを抽出する.  */
   private List<?> getCallStack(ScriptableObject context) {
+    if (context == null) {
+      return new ArrayList<>();
+    }
     List<Object> callStack = new ArrayList<>();
-    if (context != null) {
-      if (context.get(Keywords.Properties.CALL_STACK) instanceof NativeArray cs) {
-        for (Object nodeInstId : cs) {
-          callStack.add(nodeInstId);
-        }
+    if (context.get(Keywords.Properties.CALL_STACK) instanceof NativeArray cs) {
+      for (Object nodeInstId : cs) {
+        callStack.add(nodeInstId);
       }
-      Object currentNodeInstId = ScriptableObject.hasProperty(
-          context, Keywords.Properties.CURRENT_NODE_INST_ID);
-      if (currentNodeInstId != null) {
-        callStack.add(currentNodeInstId);
-      }
+    }
+    Object currentNodeInstId =
+        ScriptableObject.getProperty(context, Keywords.Properties.CURRENT_NODE_INST_ID);
+    // BhProgram 内部でスタックオーバーフローが発生した場合, コールスタックのトップは無効な BhNodeInstanceId の可能性がある.
+    if (currentNodeInstId != null && currentNodeInstId != Scriptable.NOT_FOUND) {
+      callStack.add(currentNodeInstId);
     }
     return callStack;
   }
+
+  /**
+   * {@code obj} がシリアライズ不可能な場合, {@code obj} のメッセージを格納した
+   * {@link Throwable} オブジェクトを返す.
+   */
+  private static Throwable toSerializable(Throwable obj) {
+    if (!isSerializable(obj)) {
+      return new Throwable(obj.getMessage());
+    }
+    return obj;
+  }
+
+  /** {@code obj} がシリアライズ可能か調べる. */
+  private static boolean isSerializable(Object obj) {
+    try (
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+    ) {
+      oos.writeObject(obj);
+      oos.flush();
+      bos.toByteArray();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }  
 }

@@ -114,16 +114,24 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
 
   /** HW を制御するプログラムにコマンドを送信する. */
   private void sendCmd(long cmdId, String... cmd) throws AgencyFailedException {
+    boolean unlocked = false;
     try {
       lock.lock();
       if (process == null) {
         throw new AgencyFailedException("HW Ctrl Program has ended.");
       }
       process.getOutputStream().write(createCmd(cmdId, cmd));
+      lock.unlock();
+      unlocked = true;
     } catch (IOException e) {
       throw new AgencyFailedException("Failed to send a HW ctrl cmd.\n" + e);
     } finally {
-      lock.unlock();
+      // unlock 前に StackOverflow していた場合, ここでスタックに空きがある状態で unlock 可能.
+      // finally 節でのみ unlock すると, ここで StackOverflow した場合 unlock できない可能性がある.
+      // try 節と finally 節の両方で StackOverflow することは想定しない.
+      if (!unlocked) {
+        lock.unlock();
+      }
     }
   }
 
@@ -152,8 +160,8 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
     if (process == null) {
       return;
     }
-    lock.lock();
     try {
+      lock.lock();
       process.getOutputStream().write("terminate\n".getBytes("UTF-8"));
       process.waitFor(BhConstants.PROC_END_TIMEOUT, TimeUnit.SECONDS);
       closeStreams();

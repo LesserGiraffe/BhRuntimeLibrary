@@ -16,6 +16,8 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import net.seapanda.bunnyhop.utility.Utility;
 
 /**
@@ -25,8 +27,8 @@ import net.seapanda.bunnyhop.utility.Utility;
  */
 public class ScriptUtil {
 
-  private final String osName = System.getProperty("os.name").toLowerCase();
-  public final Platform platform = this.new Platform();
+  public final Platform platform = new Platform();
+  public final Timer timer = new Timer();
 
   public ScriptUtil() {}
 
@@ -39,14 +41,53 @@ public class ScriptUtil {
     return (byte) num;
   }
 
+  /**
+   * 文字列を指定したバイト数以下の文字列に切り詰める.
+   *
+   * @param text 切り詰める文字列
+   * @param numBytes このバイト数以下になるように {@code input} を切り詰める
+   * @param charset バイト数を計算する際の文字コード
+   * @return 切り詰められt文字列
+   */
+  public String substringByBytes(String text, int numBytes, String charset) {
+    Charset cs = Charset.forName(charset);
+    if (text == null) {
+      return null;
+    }
+    if (numBytes <= 0) {
+      return "";
+    }
+    String substring = new String(Arrays.copyOf(text.getBytes(cs), numBytes), cs);
+    if (text.startsWith(substring)) {
+      return substring;
+    }
+    return substringByBytes(text, numBytes - 1, charset);
+  }
+
   /** OS を識別するためのクラス. */
-  public class Platform {
+  public static class Platform {
+
+    private final String osName = System.getProperty("os.name").toLowerCase();
+
     public boolean isWindows() {
       return osName.startsWith("windows");
     }
 
     public boolean isLinux() {
       return osName.startsWith("linux");
+    }
+  }
+
+  /** 時間を取得するためのクラス. */
+  public static class Timer {
+    private long startTime = 0L;
+
+    public void start() {
+      startTime = System.currentTimeMillis();
+    }
+  
+    public long getMillis() {
+      return System.currentTimeMillis() - startTime;
     }
   }
 }

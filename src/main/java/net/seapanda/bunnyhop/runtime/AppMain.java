@@ -202,7 +202,7 @@ public class AppMain {
       var helper =
           new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher);
       var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
-      BhProgramShell shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
+      var shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
       var event = new BhProgramEvent(
           BhProgramEvent.Name.PROGRAM_START, Keywords.Funcs.GET_EVENT_HANDLER_NAMES);
       shell.runScript(fileName, event);

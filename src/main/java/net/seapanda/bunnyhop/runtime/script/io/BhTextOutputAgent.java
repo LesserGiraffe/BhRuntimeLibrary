@@ -64,37 +64,47 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
   
   @Override
   public void println(String text) throws AgencyFailedException {
-    lock.lock();
-    if (!isTextOutputEnabled) {
-      lock.unlock();
-      return;
-    }
-    var cmd = new OutputTextCmd(text + "\n");
-    sendCmdAndWait(cmd, true);
-    BhTextIoResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof OutputTextResp && resp.success) {
-      return;
+    boolean unlocked = false;
+    try {
+      lock.lock();
+      if (!isTextOutputEnabled) {
+        return;
+      }
+      var cmd = new OutputTextCmd(text + "\n");
+      unlocked = sendCmdAndWait(cmd);
+      BhTextIoResp resp = cmdIdToResp.remove(cmd.getId());
+      if (resp instanceof OutputTextResp && resp.success) {
+        return;
+      }
+    } finally {
+      // unlock 前に StackOverflow していた場合, ここでスタックに空きがある状態で unlock 可能.
+      // finally 節でのみ unlock すると, ここで StackOverflow した場合 unlock できない可能性がある.
+      // try 節と finally 節の両方で StackOverflow することは想定しない.
+      if (!unlocked) {
+        lock.unlock();
+      }
     }
     throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
 
   /** コマンドを送って応答を待つ. */
-  private void sendCmdAndWait(BhTextIoCmd cmd, boolean unlock) {
+  private boolean sendCmdAndWait(BhTextIoCmd cmd) {
     var isAdded = false;
     var latch = new CountDownLatch(1);
+    var unlocked = false;
     cmdIdToBarrier.put(cmd.getId(), latch);
     try {
       isAdded = sendNotifList.offer(cmd, Long.MAX_VALUE, TimeUnit.DAYS);
-      if (unlock) {
-        lock.unlock();
-      }
+      lock.unlock();
+      unlocked = true;
       if (isAdded) {
         latch.await();
       }
     } catch (InterruptedException e) {
       cmdIdToBarrier.remove(cmd.getId());
     }
+    return unlocked;
   }
 
   @Override
@@ -111,17 +121,23 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
    * 既にキューイングされているテキスト出力コマンドはキャンセルされる. 
    */
   public void disableTextOutput() {
-    lock.lock();
-    isTextOutputEnabled = false;
-    cancelTextOutput();
-    lock.unlock();
+    try {
+      lock.lock();
+      isTextOutputEnabled = false;
+      cancelTextOutput();
+    } finally {
+      lock.unlock();
+    }
   }
 
   /** BunnyHop へのテキストデータの送信を有効化する. */
   public void enableTextOutput() {
-    lock.lock();
-    isTextOutputEnabled = true;
-    lock.unlock();
+    try {
+      lock.lock();
+      isTextOutputEnabled = true;
+    } finally {
+      lock.unlock();
+    }
   }
 
   /** BunnyHop にテキストデータを送信するコマンドをキャンセルする. */

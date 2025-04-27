@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'org.mozilla:rhino:1.7.15'
+  implementation "org.mozilla:rhino-all:1.8.0"
   implementation 'commons-cli:commons-cli:1.9.0'
 }
 

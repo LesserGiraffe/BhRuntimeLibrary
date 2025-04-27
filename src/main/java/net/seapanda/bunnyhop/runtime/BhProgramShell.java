@@ -19,7 +19,7 @@ package net.seapanda.bunnyhop.runtime;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
@@ -79,15 +79,18 @@ public class BhProgramShell {
         BhProgramNotification notif = queueSet.sendNotifList().take();
         switch (notif) {
           case BhProgramException exception -> {
-            System.out.println(exception.getMessage() + "\n");
-            System.out.println(exception.getScriptEngineMsg() + "\n");
-            for (BhNodeInstanceId instId : exception.getCallStack().reversed()) {
-              System.out.println("  %s\n".formatted(instId.toString()));
+            System.out.println("error message: " + exception.toString() + "\n");
+            if (exception.getCause() != null) {
+              System.out.println("cause: " + exception.getCause().toString() + "\n");
+            }
+            System.out.println("call stack");
+            for (BhCallStackItem item : exception.getCallStack().reversed()) {
+              System.out.println("  %s".formatted(item.nodeId().toString()));
             }
           }
 
           case OutputTextCmd cmd -> {
-            System.out.println(cmd.text);
+            System.out.print(cmd.text);
             textIoRespProcessor.process(new OutputTextResp(cmd.getId(), true, cmd.text));
           }
 
