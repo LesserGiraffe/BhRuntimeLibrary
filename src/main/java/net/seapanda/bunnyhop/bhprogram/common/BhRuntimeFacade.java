@@ -36,16 +36,16 @@ public interface BhRuntimeFacade extends Remote {
    * @param event BhProgram 開始時に BhProgram に渡されるイベント
    * @return 実行に成功した場合true
    */
-  public boolean runScript(String fileName, BhProgramEvent event) throws RemoteException;
+  boolean runScript(String fileName, BhProgramEvent event) throws RemoteException;
 
   /** BhRuntime との通信を無効化する. */
-  public void disconnect() throws RemoteException;
+  void disconnect() throws RemoteException;
 
   /** BhRuntime との通信を有効化する. */
-  public void connect() throws RemoteException;
+  void connect() throws RemoteException;
 
   /** BunnyHopとの通信状態を取得する. */
-  public boolean isConnected() throws RemoteException;
+  boolean isConnected() throws RemoteException;
 
   /**
    * BhRuntime にメッセージを送信する.
@@ -53,21 +53,21 @@ public interface BhRuntimeFacade extends Remote {
    * @param notif 送信する通知. null不可.
    * @return 送信に成功した場合 true
    */
-  public boolean sendNotifToRuntime(BhProgramNotification notif) throws RemoteException;
+  boolean sendNotifToRuntime(BhProgramNotification notif) throws RemoteException;
 
   /**
    * BhRuntime からレスポンスを受信する.
    *
    * @return 受信したレスポンス. 受信に失敗した場合もしくは受信可能なレスポンスがなかった場合 null.
    */
-  public BhProgramResponse recvRespFromRuntime() throws RemoteException;
+  BhProgramResponse recvRespFromRuntime() throws RemoteException;
 
   /**
    * BhRuntime からメッセージを受信する.
    *
    * @return 受信したメッセージ. 受信に失敗した場合もしくは受信可能なメッセージがなかった場合 null.
    */
-  public BhProgramNotification recvNotifFromRuntime() throws RemoteException;
+  BhProgramNotification recvNotifFromRuntime() throws RemoteException;
 
   /**
    * BhRuntime にレスポンスを送信する.
@@ -75,5 +75,5 @@ public interface BhRuntimeFacade extends Remote {
    * @param resp 送信するレスポンス. null不可.
    * @return 送信に成功した場合 true
    */
-  public boolean sendRespToRuntime(BhProgramResponse resp) throws RemoteException;
+  boolean sendRespToRuntime(BhProgramResponse resp) throws RemoteException;
 }

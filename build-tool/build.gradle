@@ -35,6 +35,7 @@ ext.JDK_VER = 21
 ext.appDirName = 'App';
 ext.ps = File.pathSeparator
 ext.fs = File.separator
+ext.projName = 'BhRuntime'
 ext.jarLibName = 'Jlib'
 
 ext.bhUtilityJarName = 'bhutility.jar'
@@ -101,5 +102,31 @@ task runApp(type: Exec) {
       (USR_HOME + '/java/' + JDK_VER +'/jdk/bin/java'),
       '-cp', ("$projectDir/../$appDirName/$jarLibName/*"),
       application.mainClass.get())
+  }
+}
+
+task jlink(type: Exec) {
+  // dependsOn 'createJar'
+
+  doFirst {
+    // カスタムJRE作成
+    delete "$projectDir/../$projName"
+    commandLine (
+      (USR_HOME + '/java/' + JDK_VER + '/jdk/bin/jlink'),
+      '--add-modules', 'ALL-MODULE-PATH',
+      '--module-path', (USR_HOME + '/java/arm/' + JDK_VER + '/jdk/jmods'),
+      // '--compress=2',
+      '--output', "$projectDir/../$projName")
+  }
+
+  doLast {
+    ant.mkdir(dir:"$projectDir/../$projName/$appDirName")
+    ant.mkdir(dir:"$projectDir/../$projName/$appDirName/Compiled")
+    ant.mkdir(dir:"$projectDir/../$projName/$appDirName/Log")
+    ant.copy(todir: "$projectDir/../$projName/$appDirName") {
+      fileset(dir: "$projectDir/../$appDirName")
+    }
+    delete fileTree("$projectDir/../$projName/$appDirName/Compiled"){}
+    delete fileTree("$projectDir/../$projName/$appDirName/Log"){}
   }
 }

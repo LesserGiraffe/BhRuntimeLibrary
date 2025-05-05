@@ -27,7 +27,7 @@ public class BhConstants {
   /** アプリケーションの名前. */
   public static final String APP_NAME = "BhRuntimeLibrary";
   /** アプリケーションのバージョン. */
-  public static final AppVersion APP_VERSION = AppVersion.of("bhr-2.0.0");
+  public static final AppVersion APP_VERSION = AppVersion.of("bhrun-2.0.0");
   /** BhProgram に入力されたテキストデータを格納する FIFO のサイズ. */
   public static final int MAX_INPUT_TEXT_QUEUE_SIZE = 1024;
   /** BunnyHop との通信データを格納する FIFO のサイズ. */
@@ -58,7 +58,7 @@ public class BhConstants {
     public static final String LOG_DIR = "Log";
     public static final String LOG_FILE_NAME = "msg";
     /** HW 制御プログラムがあるディレクトリの名前. */
-    public static final String HW_CTRL_DIR = "HwCtrl";
+    public static final String ACTIONS = "Actions";
     /** HW 制御プログラムの名前. */
     public static final String HW_CTRL = "hwctrl";
   }

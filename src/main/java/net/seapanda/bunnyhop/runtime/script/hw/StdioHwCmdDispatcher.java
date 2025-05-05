@@ -18,8 +18,8 @@ package net.seapanda.bunnyhop.runtime.script.hw;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +47,6 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
 
   /** HW を制御するプログラムの {@link Process} オブジェクト. */
   private Process process;
-  /** HW を制御するプログラムの標準出力を {@link BufferedReader} でラップしたオブジェクト. */
-  private final BufferedReader stdout;
   /** HW を制御するプログラムからコマンドの応答を取得する Executor. */
   private final ExecutorService respReader = Executors.newSingleThreadExecutor();
   /** HW を制御するプログラムに送信するコマンドの ID. */
@@ -69,7 +67,6 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
     ProcessBuilder procBuilder = new ProcessBuilder(command);
     try {
       process = procBuilder.start();
-      stdout = new BufferedReader(new InputStreamReader(process.getInputStream(), "UTF-8"));
       respReader.submit(this::readResponse);
     } catch (IOException e) {
       throw new AgencyFailedException(e.toString());
@@ -80,20 +77,25 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
   private void readResponse() {
     while (true) {
       String respStr = "";
+      BufferedReader ir = process.inputReader();
       try {
-        respStr = stdout.readLine();
-        List<String> resp = Arrays.asList(respStr.split(delimiter));
-        long respId = Long.valueOf(resp.removeFirst());
-        CountDownLatch latch = cmdIdToBarrier.remove(respId);
-        if (latch != null) {
-          cmdIdToResp.put(respId, resp);
-          latch.countDown();
+        if ((respStr = ir.readLine()) != null) {
+          List<String> resp = new ArrayList<>(Arrays.asList(respStr.split(delimiter)));
+          long respId = Long.valueOf(resp.removeFirst());
+          CountDownLatch latch = cmdIdToBarrier.remove(respId);
+          if (latch != null) {
+            cmdIdToResp.put(respId, resp);
+            latch.countDown();
+          }  
+        } else {
+          Thread.sleep(1);
         }
-      } catch (IOException e) {
+      } catch (IOException | InterruptedException e) {
         break;
       } catch (Exception e) {
         LogManager.logger().error(
             "Received an invalid HW ctrl response.  (%s)\n%s".formatted(respStr, e));
+      } catch (Throwable e) {
       }
     }
   }
@@ -120,7 +122,9 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
       if (process == null) {
         throw new AgencyFailedException("HW Ctrl Program has ended.");
       }
-      process.getOutputStream().write(createCmd(cmdId, cmd));
+      process.outputWriter().write(createCmd(cmdId, cmd));
+      process.outputWriter().newLine();
+      process.outputWriter().flush();
       lock.unlock();
       unlocked = true;
     } catch (IOException e) {
@@ -145,14 +149,14 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
     return cmdIdToResp.remove(cmdId);
   }
 
-  /** HW を制御するプログラムに送信するコマンドのバイト列を作成する. */
-  private byte[] createCmd(long cmdId, String... cmd) throws UnsupportedEncodingException {
+  /** HW を制御するプログラムに送信するコマンドの文字列を作成する. */
+  private String createCmd(long cmdId, String... cmd) throws UnsupportedEncodingException {
     StringJoiner joiner = new StringJoiner(delimiter);
     joiner.add(Long.toString(cmdId));
     for (String field : cmd) {
       joiner.add(field);
     }
-    return (joiner.toString() + "\n").getBytes("UTF-8");
+    return joiner.toString();
   }
 
   /** 現在実行中の HW を制御するプログラムを停止し, このオブジェクトに関連するリソースを全て開放する. */
@@ -177,7 +181,6 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
   /** HW を制御するプログラムの標準入力と標準/エラー出力を閉じる. */
   private void closeStreams() throws IOException {
     process.getErrorStream().close();
-    stdout.close();
     process.getOutputStream().close();
   }
 }

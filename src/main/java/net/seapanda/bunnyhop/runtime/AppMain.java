@@ -71,11 +71,16 @@ public class AppMain {
       System.out.println(e);
       System.exit(-1);
     }
-
-    CommandLine cmd = parseCmd(args, logger);
+    var options = new Options();
+    CommandLine cmd = parseCmd(args, options, logger);
     boolean isLocal = !cmd.hasOption("remote");
     boolean enableHwCtrl = cmd.hasOption("hwctrl");
 
+    if (cmd.hasOption("help")) {
+      HelpFormatter hf = new HelpFormatter();
+      hf.printHelp("[opts]", options);
+      return;
+    }
     if (cmd.hasOption("version")) {
       System.out.println(BhConstants.APP_VERSION.toString());
       return;
@@ -85,19 +90,14 @@ public class AppMain {
     } else {
       exportRmiObject(isLocal, enableHwCtrl);
     }
-    logger.close();
   }
 
   /** コマンドライン引数をパースする. */
-  private static CommandLine parseCmd(String[] args, FileLogger logger) {
-    Options options = new Options();
-    options.addOption("remote", "If set, BhRuntime can communicates with a remote machine.")
-        .addOption("hwctrl", "If set, BhRuntime uses hwctrl.");
-    
+  private static CommandLine parseCmd(String[] args, Options options, FileLogger logger) {
     options.addOption(Option.builder()
         .longOpt("remote")
         .hasArg(false)
-        .desc("If set, BhRuntime can communicates with a remote machine.")
+        .desc("If set, BhRuntime can communicate with a remote machine.")
         .build());
 
     options.addOption(Option.builder()
@@ -109,7 +109,7 @@ public class AppMain {
     options.addOption(Option.builder()
         .longOpt("version")
         .hasArg(false)
-        .desc("Output the version of BhRuntime.")
+        .desc("Output the version of BhRuntime and exit.")
         .build());
 
     options.addOption(Option.builder()
@@ -122,8 +122,11 @@ public class AppMain {
         """)
         .build());
 
-    HelpFormatter hf = new HelpFormatter();
-    hf.printHelp("[opts]", options);        
+    options.addOption(Option.builder()
+        .longOpt("help")
+        .hasArg(false)
+        .desc("Print help about BhRuntime environment variables and exit.")
+        .build());
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = null;
@@ -159,7 +162,7 @@ public class AppMain {
       registry.rebind(BhRuntimeFacade.class.getSimpleName(), remote);
       outputLocalTcpPort(socketFactory);
     } catch (Exception e) {
-      System.out.println("\n" + "null" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      System.out.println("\n-1" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
       LogManager.logger().error("Failed to export an rmi object.\n" + e);
     }
   }
@@ -193,7 +196,7 @@ public class AppMain {
   private static void executeScript(String fileName, boolean enableHwCtrl) {
     try {
       String cmd = Paths.get(
-          Utility.execPath, BhConstants.Path.HW_CTRL_DIR, BhConstants.Path.HW_CTRL).toString();
+          Utility.execPath, BhConstants.Path.ACTIONS, BhConstants.Path.HW_CTRL).toString();
       var dispatcher = enableHwCtrl ? new StdioHwCmdDispatcher(cmd) : new HwCmdDispatcher() {};
       var queueSet = new MessageQueueSet();
       var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
@@ -222,7 +225,7 @@ public class AppMain {
    */
   private static BhRuntimeFacade createRuntimeFacade(boolean enableHwCtrl) throws Exception {
     String cmd = Paths.get(
-        Utility.execPath, BhConstants.Path.HW_CTRL_DIR, BhConstants.Path.HW_CTRL).toString();
+        Utility.execPath, BhConstants.Path.ACTIONS, BhConstants.Path.HW_CTRL).toString();
     var dispatcher = enableHwCtrl ? new StdioHwCmdDispatcher(cmd) : new HwCmdDispatcher() {};
     var queueSet = new MessageQueueSet();
     var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
