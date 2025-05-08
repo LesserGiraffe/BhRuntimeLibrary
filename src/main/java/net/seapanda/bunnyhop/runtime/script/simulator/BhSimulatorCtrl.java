@@ -24,91 +24,11 @@ package net.seapanda.bunnyhop.runtime.script.simulator;
  */
 public interface BhSimulatorCtrl {
 
-  /**
-   * RaspiCar を前進させる.
+  /** BhSimulator にコマンドを送る.
    *
-   * @param speedLevel 速度レベル
-   * @param time 前進する時間 (sec)
+   * @param cmd BhSimulator に送るコマンド
+   * @return {@code cmd} に対するレスポンス
    * @throws Exception シミュレータの制御に失敗した
    */
-  public void moveForwardRaspiCar(double speedLevel, double time) throws Exception;
-
-  /**
-   * RaspiCar を後退させる.
-   *
-   * @param speedLevel 速度レベル
-   * @param time 後退する時間 (sec)
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void moveBackwardRaspiCar(double speedLevel, double time) throws Exception;
-
-  /**
-   * RaspiCar を右回転させる.
-   *
-   * @param speedLevel 速度レベル
-   * @param time 右回転する時間 (sec)
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void turnRightRaspiCar(double speedLevel, double time) throws Exception;
-
-  /**
-   * RaspiCar を左回転させる.
-   *
-   * @param speedLevel 速度レベル
-   * @param time 左回転する時間 (sec)
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void turnLeftRaspiCar(double speedLevel, double time) throws Exception;
-
-  /**
-   * RaspiCar を停止させる.
-   *
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void stopRaspiCar() throws Exception;
-
-  /**
-   * RaspiCar の距離センサの値を取得する.
-   *
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public double measureDistance() throws Exception;
-
-  /**
-   * RaspiCar の色センサの値を取得する.
-   *
-   * @return [赤の輝度値, 緑の輝度値, 青の輝度値]
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public int[] detectColor() throws Exception;
-
-  /**
-   * RaspiCar の左目の色を設定する.
-   *
-   * @param red 赤の輝度値
-   * @param green 緑の輝度値
-   * @param blue 青の輝度値
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void setLeftEyeColor(int red, int green, int blue) throws Exception;
-
-  /**
-   * RaspiCar の右目の色を設定する.
-   *
-   * @param red 赤の輝度値
-   * @param green 緑の輝度値
-   * @param blue 青の輝度値
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void setRightEyeColor(int red, int green, int blue) throws Exception;
-
-  /**
-   * RaspiCar の両目の色を設定する.
-   *
-   * @param red 赤の輝度値
-   * @param green 緑の輝度値
-   * @param blue 青の輝度値
-   * @throws Exception シミュレータの制御に失敗した
-   */
-  public void setBothEyesColor(int red, int green, int blue) throws Exception;
+  String[] sendCmd(String... cmd) throws Exception;
 }

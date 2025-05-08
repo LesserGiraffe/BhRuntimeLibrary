@@ -16,6 +16,8 @@
 
 package net.seapanda.bunnyhop.bhprogram.common.message;
 
+import java.util.Arrays;
+
 /**
  * {@link BhSimulatorCmd} のレスポンス.
  *
@@ -41,93 +43,23 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
     return success;
   }
 
-  /** RaspiCar を前進させるコマンドのレスポンス. */
-  public static class MoveForwardRaspiCarResp extends BhSimulatorResp {
+  /** 文字列の配列として返される {@link BhSimulatorCmd} のレスポンス. */
+  public static class StrBhSimulatorResp extends BhSimulatorResp {
+    private String[] resp;
 
-    public MoveForwardRaspiCarResp(long id, boolean success) {
+    public StrBhSimulatorResp(long id, boolean success, String[] resp) {
       super(id, success);
+      this.resp = Arrays.copyOf(resp, resp.length);
     }
-  }
 
-  /** RaspiCar を後退させるコマンドのレスポンス. */
-  public static class MoveBackwardRaspiCarResp extends BhSimulatorResp {
-
-    public MoveBackwardRaspiCarResp(long id, boolean success) {
-      super(id, success);
+    /** レスポンスを構成する要素を返す. */
+    public String[] getComponents() {
+      return Arrays.copyOf(resp, resp.length);
     }
-  }
 
-  /** RaspiCar を右回転させるコマンドのレスポンス. */
-  public static class TurnRightRaspiCarResp extends BhSimulatorResp {
-
-    public TurnRightRaspiCarResp(long id, boolean success) {
-      super(id, success);
-    }
-  }
-
-  /** RaspiCar を左回転させるコマンドのレスポンス. */
-  public static class TurnLeftRaspiCarResp extends BhSimulatorResp {
-    
-    public TurnLeftRaspiCarResp(long id, boolean success) {
-      super(id, success);
-    }
-  }
-
-  /** RaspiCar を停止させるコマンドのレスポンス. */
-  public static class StopRaspiCarResp extends BhSimulatorResp {
-    
-    public StopRaspiCarResp(long id, boolean success) {
-      super(id, success);
-    }
-  }
-
-  /** RaspiCar の距離センサの値を取得するコマンドのレスポンス. */
-  public static class MeasureDistanceResp extends BhSimulatorResp {
-    
-    public final double distance;
-
-    public MeasureDistanceResp(long id, boolean success, double distance) {
-      super(id, success);
-      this.distance = distance;
-    }
-  }
-
-  /** RaspiCar の色センサの値を取得するコマンドのレスポンス. */
-  public static class DetectColorResp extends BhSimulatorResp {
-    public final int red;
-    public final int green;
-    public final int blue;
-
-    /** コンストラクタ. */
-    public DetectColorResp(long id, boolean success, float red, float green, float blue) {
-      super(id, success);
-      this.red = Math.clamp((int) (red * 255), 0, 255);
-      this.green = Math.clamp((int) (green * 255), 0, 255);
-      this.blue = Math.clamp((int) (blue * 255), 0, 255);
-    }
-  }
-
-  /** RaspiCar の左目の色を設定するコマンドのレスポンス. */
-  public static class SetLeftEyeColorResp extends  BhSimulatorResp {
-    
-    public SetLeftEyeColorResp(long id, boolean success) {
-      super(id, success);
-    }
-  }
-
-  /** RaspiCar の右目の色を設定するコマンドのレスポンス. */
-  public static class SetRightEyeColorResp extends  BhSimulatorResp {
-    
-    public SetRightEyeColorResp(long id, boolean success) {
-      super(id, success);
-    }
-  }
-
-  /** RaspiCar の両目の色を設定するコマンド. */
-  public static class SetBothEyesColorResp extends  BhSimulatorResp {
-  
-    public SetBothEyesColorResp(long id, boolean success) {
-      super(id, success);
+    @Override
+    public String toString() {
+      return String.join(",", resp);
     }
   }
 }

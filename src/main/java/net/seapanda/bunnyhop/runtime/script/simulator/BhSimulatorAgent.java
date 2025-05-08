@@ -23,27 +23,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.DetectColorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.MeasureDistanceCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.MoveBackwardRaspiCarCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.MoveForwardRaspiCarCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.SetBothEyesColorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.SetLeftEyeColorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.SetRightEyeColorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.StopRaspiCarCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.TurnLeftRaspiCarCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.TurnRightRaspiCarCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.StrBhSimulatorCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.DetectColorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.MeasureDistanceResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.MoveBackwardRaspiCarResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.MoveForwardRaspiCarResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.SetBothEyesColorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.SetLeftEyeColorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.SetRightEyeColorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.StopRaspiCarResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnLeftRaspiCarResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.TurnRightRaspiCarResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.StrBhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.utility.Utility;
@@ -72,113 +54,15 @@ public class BhSimulatorAgent implements
   }
 
   @Override
-  public void moveForwardRaspiCar(double speedLevel, double time) throws AgencyFailedException {
-    var cmd = new MoveForwardRaspiCarCmd(speedLevel, time);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof MoveForwardRaspiCarResp && resp.success) {
-      return;
+  public String[] sendCmd(String... cmd) throws AgencyFailedException {
+    var command = new StrBhSimulatorCmd(cmd);
+    sendCmdAndWait(command);
+    BhSimulatorResp resp = cmdIdToResp.remove(command.getId());
+    if (resp instanceof StrBhSimulatorResp strResp && resp.success) {
+      return strResp.getComponents();
     }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void moveBackwardRaspiCar(double speedLevel, double time) throws AgencyFailedException {
-    var cmd = new MoveBackwardRaspiCarCmd(speedLevel, time);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof MoveBackwardRaspiCarResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void turnRightRaspiCar(double speedLevel, double time) throws AgencyFailedException {
-    var cmd = new TurnRightRaspiCarCmd(speedLevel, time);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof TurnRightRaspiCarResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void turnLeftRaspiCar(double speedLevel, double time) throws AgencyFailedException {
-    var cmd = new TurnLeftRaspiCarCmd(speedLevel, time);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof TurnLeftRaspiCarResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void stopRaspiCar() throws AgencyFailedException {
-    var cmd = new StopRaspiCarCmd();
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof StopRaspiCarResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public double measureDistance() throws AgencyFailedException {
-    var cmd = new MeasureDistanceCmd();
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof MeasureDistanceResp measureDistanceResp && resp.success) {
-      return measureDistanceResp.distance;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public int[] detectColor() throws AgencyFailedException {
-    var cmd = new DetectColorCmd();
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof DetectColorResp detectColorResp && resp.success) {
-      return new int[] { detectColorResp.red, detectColorResp.green, detectColorResp.blue };
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void setLeftEyeColor(int red, int green, int blue) throws AgencyFailedException {
-    var cmd = new SetLeftEyeColorCmd(red, green, blue);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof SetLeftEyeColorResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void setRightEyeColor(int red, int green, int blue) throws AgencyFailedException {
-    var cmd = new SetRightEyeColorCmd(red, green, blue);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof SetRightEyeColorResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
-  }
-
-  @Override
-  public void setBothEyesColor(int red, int green, int blue) throws AgencyFailedException {
-    var cmd = new SetBothEyesColorCmd(red, green, blue);
-    sendCmdAndWait(cmd);
-    BhSimulatorResp resp = cmdIdToResp.remove(cmd.getId());
-    if (resp instanceof SetBothEyesColorResp && resp.success) {
-      return;
-    }
-    throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
+    throw new AgencyFailedException(
+        "%s failed.\n(%s)".formatted(Utility.getCurrentMethodName(), resp));
   }
 
   /** コマンドを送って応答を待つ. */
