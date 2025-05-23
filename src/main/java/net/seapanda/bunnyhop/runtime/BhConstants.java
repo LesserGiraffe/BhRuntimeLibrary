@@ -32,12 +32,10 @@ public class BhConstants {
   public static final int MAX_INPUT_TEXT_QUEUE_SIZE = 1024;
   /** BunnyHop との通信データを格納する FIFO のサイズ. */
   public static final int MAX_MSG_QUEUE_SIZE = 2048;
-  /** BunnyHop への送信データキューの読み出しタイムアウト (sec). */
-  public static final int POP_MSG_TIMEOUT = 3;
-  /** BunnyHop への送信データキューの書き込みタイムアウト (sec). */
-  public static final int PUSH_SEND_DATA_TIMEOUT = 3;
-  /** BunnyHopからの受信データキューの書き込みタイムアウト (sec). */
-  public static final int PUSH_MSG_TIMEOUT = 3;
+  /** BunnyHop への送信データキューの読み出しタイムアウト (ms). */
+  public static final int POP_MSG_TIMEOUT = 1500;
+  /** BunnyHopからの受信データキューの書き込みタイムアウト (ms). */
+  public static final int PUSH_MSG_TIMEOUT = 1500;
   /** ログファイル1つあたりの最大バイト数. */
   public static final int LOG_FILE_SIZE_LIMIT = 1024 * 1024;
   /** ログファイルの最大個数. */

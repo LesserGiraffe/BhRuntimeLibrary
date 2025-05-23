@@ -16,6 +16,7 @@
 
 package net.seapanda.bunnyhop.runtime.script.io;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -109,10 +110,15 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
 
   @Override
   public void process(BhTextIoResp resp) {
-    CountDownLatch latch = cmdIdToBarrier.remove(resp.getId());
-    if (latch != null) {
-      cmdIdToResp.put(resp.getId(), resp);
-      latch.countDown();
+    try {
+      lock.lock();
+      CountDownLatch latch = cmdIdToBarrier.remove(resp.getId());
+      if (latch != null) {
+        cmdIdToResp.put(resp.getId(), resp);
+        latch.countDown();
+      }
+    } finally {
+      lock.unlock();
     }
   }
 
@@ -148,5 +154,9 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
     sendNotifList.removeAll(outputTextCmdList);
     outputTextCmdList.forEach(cmd -> process(
         new OutputTextResp(cmd.getId(), true, ((OutputTextCmd) cmd).text)));
+
+    for (long cmdId : new ArrayList<>(cmdIdToBarrier.keySet())) {
+      process(new OutputTextResp(cmdId, true, ""));
+    }
   }
 }

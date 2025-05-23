@@ -84,7 +84,8 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   @Override
   public boolean sendNotifToRuntime(BhProgramNotification notif) {
     try {
-      return queueSet.recvNotifList().offer(notif, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
+      return queueSet.recvNotifList().offer(
+          notif, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return false;
   }
@@ -92,7 +93,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   @Override
   public BhProgramResponse recvRespFromRuntime() {
     try {
-      return queueSet.sendRespList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
+      return queueSet.sendRespList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return null;
   }
@@ -100,7 +101,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   @Override
   public BhProgramNotification recvNotifFromRuntime() {
     try {
-      return queueSet.sendNotifList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.SECONDS);
+      return queueSet.sendNotifList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return null;
   }
@@ -108,7 +109,8 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   @Override
   public boolean sendRespToRuntime(BhProgramResponse resp) {
     try {
-      return queueSet.recvRespList().offer(resp, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.SECONDS);
+      return queueSet.recvRespList().offer(
+          resp, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
     return false;
   }
