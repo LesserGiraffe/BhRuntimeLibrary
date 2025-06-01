@@ -21,7 +21,7 @@ import java.util.List;
 import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
-import net.seapanda.bunnyhop.utility.SynchronizingTimer;
+import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
 
 /**
  * BhProgram が使用するオブジェクトを生成する機能を提供するクラス.

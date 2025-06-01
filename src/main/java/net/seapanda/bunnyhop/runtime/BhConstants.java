@@ -16,7 +16,7 @@
 
 package net.seapanda.bunnyhop.runtime;
 
-import net.seapanda.bunnyhop.utility.AppVersion;
+import net.seapanda.bunnyhop.utility.version.AppVersion;
 
 /**
  * BhProgramExecutor のパラメータ一式をまとめたクラス.
