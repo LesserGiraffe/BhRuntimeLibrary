@@ -23,7 +23,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 import net.seapanda.bunnyhop.runtime.BhConstants;
 
 /**
- * BunnyHop と BhProgram の実行環境で送受信されるメッセージを格納するキューのセット.
+ * BunnyHop と BhRuntimeで送受信されるメッセージを格納するキューのセット.
  *
  * @param sendNotifList BunnyHop に送信するメッセージを格納する FIFO.
  * @param recvNotifList BunnyHop から受信したメッセージを格納する FIFO.

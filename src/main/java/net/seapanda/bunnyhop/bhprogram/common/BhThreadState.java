@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common;
 
-import java.io.Serializable;
-
-/**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
- *
- * @author K.Koike
- */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+/** BhProgram のスレッドの状態. */
+public enum BhThreadState {
+  
+  /** 動作中. */
+  RUNNING,
+  /** デバッガによる一時停止中. */
+  SUSPENDED,
+  /** エラーが発生して終了した. */
+  ERROR,
+  /** 処理を完遂して終了した. */
+  FINISHED,
 }

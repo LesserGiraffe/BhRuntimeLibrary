@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.thread;
 
 import java.io.Serializable;
+import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * コールスタックのシンボルを格納するレコード.
+ * 
+ * <p>コールスタック : 各関数呼び出しに対応するシンボルの ID を格納するスタック
  *
- * @author K.Koike
+ * @param frameIdx {@code symbolId} のコールスタック内におけるインデックス
+ * @param symbolId コールスタックの {@code frameIdx} 番目に格納された ID
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
-}
+public record BhCallStackItem(int frameIdx, BhSymbolId symbolId) implements Serializable {}

@@ -32,6 +32,8 @@ import net.seapanda.bunnyhop.runtime.executor.JsBhProgramExecutor;
 import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
+import net.seapanda.bunnyhop.runtime.script.debug.BhProgramDebugger;
+import net.seapanda.bunnyhop.runtime.script.debug.DebugCmdProcessor;
 import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.hw.StdioHwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInputAgent;
@@ -202,8 +204,8 @@ public class AppMain {
       var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
       var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
       var textOutAgent = new BhTextOutputAgent(queueSet.sendNotifList(), true);
-      var helper =
-          new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher);
+      var debugger = new BhProgramDebugger(queueSet.sendNotifList());
+      var helper = new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher, debugger);
       var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
       var shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
       var event = new BhProgramEvent(
@@ -231,11 +233,17 @@ public class AppMain {
     var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
     var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
     var textOutAgent = new BhTextOutputAgent(queueSet.sendNotifList(), false);
-    var helper =
-        new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher);
+    var debugger = new BhProgramDebugger(queueSet.sendNotifList());
+    var debugCmdProcessor = new DebugCmdProcessor(debugger, queueSet.sendRespList());
+    var helper = new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher, debugger);
     var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
     var facade = new BhRuntimeFacadeImpl(
-        queueSet, executor, textInAgent, textOutAgent, resp -> {}, simAgent);
+        queueSet,
+        executor,
+        textInAgent,
+        textOutAgent,
+        simAgent,
+        debugCmdProcessor);
     setEventHandlers(textOutAgent, facade);
     return facade;
   }

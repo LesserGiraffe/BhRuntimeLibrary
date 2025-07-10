@@ -16,11 +16,8 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
-import java.util.ArrayList;
 import java.util.List;
-import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhCallStackItem;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
+import net.seapanda.bunnyhop.bhprogram.common.message.exception.BhProgramException;
 import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
 
 /**
@@ -29,49 +26,55 @@ import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
  * @author K.Koike
  */
 public class Factory {
-  
-  /**
-   * {@link BhNodeInstanceId} オブジェクトを作成して返す.
-   *
-   * @param id 作成するIDの文字列表現
-   * @return {@link BhNodeInstanceId} オブジェクト
-   */
-  public BhNodeInstanceId newBhNodeInstanceId(String id) {
-    return BhNodeInstanceId.of(id);
-  }
 
   /**
    * {@link BhProgramException} オブジェクトを作成して返す.
    *
-   * @param callStack 例外発生時のコールスタック
    * @param msg 例外メッセージ
    * @return 例外オブジェクト
    */
-  public BhProgramException newBhProgramException(List<?> callStack, String msg) {
-    return newBhProgramException(callStack, msg, null);
+  public BhProgramException newBhProgramException(String msg) {
+    return new BhProgramException(msg);
   }
 
   /**
    * {@link BhProgramException} オブジェクトを作成して返す.
    *
-   * @param callStack 例外発生時のコールスタック
    * @param msg 例外メッセージ
    * @param cause 例外の原因
    * @return 例外オブジェクト
    */
-  public BhProgramException newBhProgramException(
-      List<?> callStack, String msg, Throwable cause) {
-    var funcCallStack = new ArrayList<BhCallStackItem>();
-    long id = 0;
-    for (var elem : callStack) {
-      var item = new BhCallStackItem(id++, newBhNodeInstanceId(elem.toString()));
-      funcCallStack.add(item);  
-    }
-    return new BhProgramException(funcCallStack, msg, Thread.currentThread().threadId(), cause);
+  public BhProgramException newBhProgramException(String msg, Throwable cause) {
+    return new BhProgramException(msg, cause);
   }
 
   /** {@link SynchronizingTimer} を新規作成する. */
   public SynchronizingTimer newSyncTimer(int count, boolean autoReset) {
     return new SynchronizingTimer(count, autoReset);
+  }
+
+  /**
+   * {@link ScriptThreadContext} オブジェクトを作成する.
+   *
+   * @param context BhProgram が操作するスレッドコンテキストオブジェクト
+   * @param idxCallStack コールスタックが格納された {@link context} のインデックス
+   * @param idxNextNodeInstId 次に実行される処理の ID が格納された {@link context} のインデックス
+   * @param idxErrorMsgs エラーメッセージが格納された {@link context} のインデックス
+   * @param idxVarStack 変数スタックが格納された {@link context} のインデックス
+   * @return {@link ScriptThreadContext} オブジェクト
+   */
+  public ScriptThreadContext newScriptThreadContext(
+      List<?> context, 
+      int idxCallStack,
+      int idxNextNodeInstId,
+      int idxErrorMsgs,
+      int idxVarStack) {
+    return new ScriptThreadContext(
+        Thread.currentThread().threadId(),
+        context,
+        idxCallStack,
+        idxNextNodeInstId,
+        idxErrorMsgs,
+        idxVarStack);
   }
 }

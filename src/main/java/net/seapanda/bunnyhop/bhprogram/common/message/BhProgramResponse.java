@@ -18,7 +18,7 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
 
 
 /**
- * BunnyHop と BhProgram の実行環境間で送受信される応答データ.
+ * BunnyHop と BhRuntime 間で送受信される応答データ.
  * 特定の {@link BhProgramNotification} を受け取ったプログラムが, このオブジェクトを応答として返す.
  *
  * @author K.Koike

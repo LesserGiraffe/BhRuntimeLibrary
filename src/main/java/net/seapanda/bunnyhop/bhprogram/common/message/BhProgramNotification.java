@@ -19,7 +19,7 @@ package net.seapanda.bunnyhop.bhprogram.common.message;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * BunnyHop と BhProgram の実行環境間で送受信される通知.
+ * BunnyHop と BhRuntime 間で送受信される通知.
  *
  * @author K.Koike
  */

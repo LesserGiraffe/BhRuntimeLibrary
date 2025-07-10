@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * ローカル変数の情報を取得するコマンド.
+ *
+ * <p>コマンドの詳細.<br><br>
+ * {@link #threadId} で指定されたスレッドが持つ変数スタックの
+ * {@link #frameIdx} 番目のスタックフレームに存在する変数の情報を取得する.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class GetLocalVarsCmd extends BhDebugCmd {
+  
+  public final long threadId;
+  public final int frameIdx;
+    
+  /** コンストラクタ. */
+  public GetLocalVarsCmd(long threadId, int frameIdx) {
+    this.threadId = threadId;
+    this.frameIdx = frameIdx;
+  }
 }

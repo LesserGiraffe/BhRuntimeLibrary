@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.simulator;
 
-import java.util.Arrays;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 
 /**
  * BhSimulator が処理するコマンド.
@@ -27,26 +27,12 @@ public abstract class BhSimulatorCmd implements BhProgramNotification {
 
   private final long id;
 
-  private BhSimulatorCmd() {
+  protected BhSimulatorCmd() {
     id = genId();
   }
 
   @Override
   public long getId() {
     return id;
-  }
-
-  /** 文字列ベースの BhSimulator コマンド. */
-  public static class StrBhSimulatorCmd extends BhSimulatorCmd {
-    String[] cmd;
-
-    public StrBhSimulatorCmd(String[] cmd) {
-      this.cmd = Arrays.copyOf(cmd, cmd.length);
-    }
-
-    /** コマンドを構成する要素を返す. */
-    public String[] getComponents() {
-      return Arrays.copyOf(cmd, cmd.length);
-    }
   }
 }

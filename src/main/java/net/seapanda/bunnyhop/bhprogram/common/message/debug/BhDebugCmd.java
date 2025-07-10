@@ -14,43 +14,25 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.debug;
+
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 
 /**
- * BunnyHop のテキスト入力/出力処理を表すコマンド.
+ * デバッガに対する命令を表すクラスの基底クラス.
  *
  * @author K.Koike
  */
-public abstract class BhTextIoCmd implements BhProgramNotification {
-
+public abstract class BhDebugCmd implements BhProgramNotification {
+  
   private final long id;
 
-  private BhTextIoCmd() {
+  protected BhDebugCmd() {
     id = genId();
   }
 
   @Override
   public long getId() {
     return id;
-  }
-
-  /** BhProgram が出力した文字列を BunnyHop に送信するコマンド. */
-  public static class OutputTextCmd extends BhTextIoCmd {
-    
-    public final String text;
-
-    public OutputTextCmd(String text) {
-      this.text = text;
-    }
-  }
-
-  /** BhProgram に文字列を送信するコマンド. */
-  public static class InputTextCmd extends BhTextIoCmd {
-    
-    public final String text;
-
-    public InputTextCmd(String text) {
-      this.text = text;
-    }
   }
 }

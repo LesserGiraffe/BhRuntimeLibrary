@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * {@link #threadId} で指定したスレッドが一時停止中であった場合, 次に停止可能な位置まで処理を進めるコマンド.
+ *
+ * <p>次の処理が関数呼び出しであった場合, その中では止まらず, 関数呼び出し終了後の次に停止可能な位置で止まる.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class StepOverCmd extends BhDebugCmd {
+  
+  public final long threadId;
+
+  /**
+   * コンストラクタ.
+   *
+   * @param threadId 処理を進めるスレッドの ID
+   */
+  public StepOverCmd(long threadId) {
+    this.threadId = threadId;
+  }
 }

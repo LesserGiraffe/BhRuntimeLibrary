@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.simulator;
 
-import java.io.Serializable;
+import java.util.Arrays;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * 文字列ベースの BhSimulator コマンド.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class StringBhSimulatorCmd extends BhSimulatorCmd {
+
+  String[] cmd;
+
+  public StringBhSimulatorCmd(String[] cmd) {
+    this.cmd = Arrays.copyOf(cmd, cmd.length);
+  }
+
+  /** コマンドを構成する要素を返す. */
+  public String[] getComponents() {
+    return Arrays.copyOf(cmd, cmd.length);
+  }
 }

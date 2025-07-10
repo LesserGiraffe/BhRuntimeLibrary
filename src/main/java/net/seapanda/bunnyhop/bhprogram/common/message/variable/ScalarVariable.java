@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.variable;
 
-import java.io.Serializable;
+import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * スカラ変数の情報を格納するクラス.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class ScalarVariable extends Variable {
+
+  /** 変数の値. */
+  public final String val;
+
+  public ScalarVariable(BhSymbolId varId, String val) {
+    super(varId);
+    this.val = val;
+  }
 }

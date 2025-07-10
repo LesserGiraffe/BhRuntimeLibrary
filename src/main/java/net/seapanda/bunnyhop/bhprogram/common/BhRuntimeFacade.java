@@ -23,7 +23,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
 /**
- * BhProgram の実行環境 (BhRuntime) に対する操作を規定したインタフェース.
+ * BhRuntime (BhRuntime) に対する操作を規定したインタフェース.
  *
  * @author K.Koike
  */

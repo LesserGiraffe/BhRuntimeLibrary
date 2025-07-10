@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * グローバル変数の情報を取得するコマンド.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class GetGlobalVarsCmd extends BhDebugCmd {
+  
+  public GetGlobalVarsCmd() {}
 }

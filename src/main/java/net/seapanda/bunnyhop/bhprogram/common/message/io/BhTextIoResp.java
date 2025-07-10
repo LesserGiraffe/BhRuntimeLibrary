@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.io;
+
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
 /**
  * {@link BhTextIoCmd} のレスポンス.
@@ -26,7 +28,7 @@ public abstract class BhTextIoResp implements BhProgramResponse {
   private final long id;
   public final boolean success;
 
-  private BhTextIoResp(long id, boolean success) {
+  protected BhTextIoResp(long id, boolean success) {
     this.id = id;
     this.success = success;
   }
@@ -39,27 +41,5 @@ public abstract class BhTextIoResp implements BhProgramResponse {
   @Override
   public boolean isSuccessful() {
     return success;
-  }
-
-  /** BunnyHop の標準出力に文字列を出力するコマンドのレスポンス. */
-  public static class OutputTextResp extends BhTextIoResp {
-
-    public final String text;
-
-    public OutputTextResp(long id, boolean success, String text) {
-      super(id, success);
-      this.text = text;
-    }
-  }
-
-  /** BunnyHop の標準入力から文字列を受け取るコマンドのレスポンス. */
-  public static class InputTextResp extends BhTextIoResp {
-    
-    public final String text;
-    
-    public InputTextResp(long id, boolean success, String text) {
-      super(id, success);
-      this.text = text;
-    }
   }
 }

@@ -22,10 +22,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd.StrBhSimulatorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp.StrBhSimulatorResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.simulator.BhSimulatorCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.simulator.BhSimulatorResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.simulator.StringBhSimulatorCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.simulator.StringBhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.utility.Utility;
@@ -55,10 +55,10 @@ public class BhSimulatorAgent implements
 
   @Override
   public String[] sendCmd(String... cmd) throws AgencyFailedException {
-    var command = new StrBhSimulatorCmd(cmd);
+    var command = new StringBhSimulatorCmd(cmd);
     sendCmdAndWait(command);
     BhSimulatorResp resp = cmdIdToResp.remove(command.getId());
-    if (resp instanceof StrBhSimulatorResp strResp && resp.success) {
+    if (resp instanceof StringBhSimulatorResp strResp && resp.isSuccessful()) {
       return strResp.getComponents();
     }
     throw new AgencyFailedException(

@@ -26,13 +26,14 @@ public class Keywords {
   /** Javascript オブジェクトのプロパティ名. */
   public static class Properties {
     public static final String BH_SCRIPT_HELPER = "bhScriptHelper";
-    public static final String CALL_STACK = "_callStack";
-    public static final String CURRENT_NODE_INST_ID = "_currentNodeInstId";
-    public static final String ERROR_MSGS = "_errorMsgs";
+    public static final String SET = "_set";
+    public static final String GET = "_get";
+    public static final String ID = "_id";
   }
 
   /** BhProgram に定義された関数名. */
   public static class Funcs {
     public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
+    public static final String NOTIFY_THREAD_END = "_notifyThreadEnd";
   }
 }

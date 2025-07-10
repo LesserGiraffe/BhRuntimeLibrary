@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * デバッガが監視している全てのスレッドのコンテキストを取得するコマンド.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class GetThreadContextsCmd extends BhDebugCmd {
+  
+  public GetThreadContextsCmd() {}
 }

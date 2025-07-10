@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.io;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * BhProgram に文字列を送信するコマンド.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class InputTextCmd extends BhTextIoCmd {
+    
+  public final String text;
+
+  public InputTextCmd(String text) {
+    this.text = text;
+  }
 }

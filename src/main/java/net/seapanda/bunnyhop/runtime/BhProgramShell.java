@@ -19,15 +19,16 @@ package net.seapanda.bunnyhop.runtime;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramException;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.InputTextCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd.OutputTextCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp.OutputTextResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.exception.BhProgramException;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.BhTextIoCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.BhTextIoResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.InputTextCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.OutputTextCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.OutputTextResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhCallStackItem;
+import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhThreadContext;
 import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.runtime.script.Keywords;
@@ -78,16 +79,7 @@ public class BhProgramShell {
       try {
         BhProgramNotification notif = queueSet.sendNotifList().take();
         switch (notif) {
-          case BhProgramException exception -> {
-            System.out.println("error message: " + exception.toString() + "\n");
-            if (exception.getCause() != null) {
-              System.out.println("cause: " + exception.getCause().toString() + "\n");
-            }
-            System.out.println("call stack");
-            for (BhCallStackItem item : exception.getCallStack().reversed()) {
-              System.out.println("  %s".formatted(item.nodeId().toString()));
-            }
-          }
+          case BhThreadContext context -> outputThreadInfo(context);
 
           case OutputTextCmd cmd -> {
             System.out.print(cmd.text);
@@ -99,6 +91,21 @@ public class BhProgramShell {
       } catch (InterruptedException e) {
         break;
       }
+    }
+  }
+
+  /** スレッド情報を出力する. */
+  private void outputThreadInfo(BhThreadContext context) {
+    if (context.getException() != null) {
+      BhProgramException exception = context.getException();
+      System.out.println("error message: " + exception.toString() + "\n");
+      if (exception.getCause() != null) {
+        System.out.println("cause: " + exception.getCause().toString() + "\n");
+      }
+    }
+    System.out.println("call stack");
+    for (BhCallStackItem item : context.getCallStack().reversed()) {
+      System.out.println("  %s".formatted(item.symbolId().toString()));
     }
   }
 

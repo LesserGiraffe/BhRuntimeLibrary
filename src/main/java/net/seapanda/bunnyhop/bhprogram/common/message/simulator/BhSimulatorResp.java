@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
+package net.seapanda.bunnyhop.bhprogram.common.message.simulator;
 
-import java.util.Arrays;
+import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
 /**
  * {@link BhSimulatorCmd} のレスポンス.
@@ -26,9 +26,9 @@ import java.util.Arrays;
 public abstract class BhSimulatorResp implements BhProgramResponse {
 
   private final long id;
-  public final boolean success;
+  private final boolean success;
 
-  private BhSimulatorResp(long id, boolean success) {
+  protected BhSimulatorResp(long id, boolean success) {
     this.id = id;
     this.success = success;
   }
@@ -41,25 +41,5 @@ public abstract class BhSimulatorResp implements BhProgramResponse {
   @Override
   public boolean isSuccessful() {
     return success;
-  }
-
-  /** 文字列の配列として返される {@link BhSimulatorCmd} のレスポンス. */
-  public static class StrBhSimulatorResp extends BhSimulatorResp {
-    private String[] resp;
-
-    public StrBhSimulatorResp(long id, boolean success, String[] resp) {
-      super(id, success);
-      this.resp = Arrays.copyOf(resp, resp.length);
-    }
-
-    /** レスポンスを構成する要素を返す. */
-    public String[] getComponents() {
-      return Arrays.copyOf(resp, resp.length);
-    }
-
-    @Override
-    public String toString() {
-      return String.join(",", resp);
-    }
   }
 }

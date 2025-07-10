@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
-import net.seapanda.bunnyhop.bhprogram.common.BhNodeInstanceId;
+package net.seapanda.bunnyhop.bhprogram.common.message.exception;
 
 /**
- * コールスタックの要素.
+ * 指定された BhProgram のスレッドが見つからなかった場合の例外.
  *
- * @param frameId このオブジェクトに対応するスタックフレームの ID
- * @param nodeId この要素に対応する関数呼び出しを行った BhNode を特定するための識別子
+ * @author K.Koike
  */
-public record BhCallStackItem(long frameId, BhNodeInstanceId nodeId) implements Serializable {}
+public class NoSuchThreadException extends Exception {
+
+  public NoSuchThreadException() {}
+
+  public NoSuchThreadException(String msg) {
+    super(msg);
+  }
+}

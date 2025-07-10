@@ -16,6 +16,7 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
+import net.seapanda.bunnyhop.runtime.script.debug.DebugInstrumentation;
 import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInput;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextIo;
@@ -31,9 +32,9 @@ public class ScriptHelper {
 
   public final BhTextIo io;
   public final BhSimulatorCtrl simulator;
-  public final ScriptUtil util;
   public final HwCmdDispatcher hw;
-  public final ThreadUtil thread;
+  public final DebugInstrumentation debug;
+  public final ScriptUtil util;
   public final Factory factory;
 
   /** コンストラクタ. */
@@ -41,7 +42,8 @@ public class ScriptHelper {
       BhTextInput textInput,
       BhTextOutput textOutput,
       BhSimulatorCtrl simulator,
-      HwCmdDispatcher hw) {
+      HwCmdDispatcher hw,
+      DebugInstrumentation debug) {
     this.io = new BhTextIo() {
       @Override
       public String scanln() throws Exception {
@@ -55,8 +57,8 @@ public class ScriptHelper {
     };
     this.simulator = simulator;
     this.hw = hw;
+    this.debug = debug;
     this.util = new ScriptUtil();
-    this.thread = new ThreadUtil();
     this.factory = new Factory();
   }
 }

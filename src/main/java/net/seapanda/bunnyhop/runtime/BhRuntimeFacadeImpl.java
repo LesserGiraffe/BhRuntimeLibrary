@@ -25,10 +25,10 @@ import net.seapanda.bunnyhop.bhprogram.common.BhRuntimeFacade;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhSimulatorResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhTextIoResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.debug.BhDebugCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.BhTextIoCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.io.BhTextIoResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.simulator.BhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
@@ -39,17 +39,15 @@ import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
  * @author K.Koike
  */
 public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
-
   
-
   /** BunnyHop との通信が有効な場合 true. */
   private boolean connected = false;
   private final MessageQueueSet queueSet;
   private final BhProgramExecutor executor;
   private final BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
   private final BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor;
-  private final BhProgramMessageProcessor<BhSimulatorCmd> simCmdProcessor;
   private final BhProgramMessageProcessor<BhSimulatorResp> simRespProcessor;
+  private final BhProgramMessageProcessor<BhDebugCmd> debugCmdProcessor;
 
   /** BunnyHop から受信したメッセージを処理する Executor. */
   private final ExecutorService recvMsgProcessor = Executors.newSingleThreadExecutor();
@@ -64,14 +62,14 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
       BhProgramExecutor executor,
       BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
       BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor,
-      BhProgramMessageProcessor<BhSimulatorCmd> simCmdProcessor,
-      BhProgramMessageProcessor<BhSimulatorResp> simRespProcessor) {
+      BhProgramMessageProcessor<BhSimulatorResp> simRespProcessor,
+      BhProgramMessageProcessor<BhDebugCmd> debugCmdProcessor) {
     this.queueSet = queueSet;
     this.executor = executor;
     this.textIoCmdProcessor = textIoCmdProcessor;
     this.textIoRespProcessor = textIoRespProcessor;
-    this.simCmdProcessor = simCmdProcessor;
     this.simRespProcessor = simRespProcessor;
+    this.debugCmdProcessor = debugCmdProcessor;
     recvMsgProcessor.submit(() -> processRecvMsg());
     recvRespProcessor.submit(() -> processRecvResp());
   }
@@ -143,8 +141,8 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
       }
       switch (notif) {
         case BhTextIoCmd textIoCmd -> textIoCmdProcessor.process(textIoCmd);
-        case BhSimulatorCmd simCmd -> simCmdProcessor.process(simCmd);
         case BhProgramEvent event -> executor.fireEvent(event);
+        case BhDebugCmd debugCmd -> debugCmdProcessor.process(debugCmd);
         default -> { }
       }
     }

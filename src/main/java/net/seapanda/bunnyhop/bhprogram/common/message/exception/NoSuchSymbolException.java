@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package net.seapanda.bunnyhop.bhprogram.common.message;
-
-import java.io.Serializable;
+package net.seapanda.bunnyhop.bhprogram.common.message.exception;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * 指定した条件に合うシンボルが見つからなかった場合の例外.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public class NoSuchSymbolException extends Exception {
+  
+  public NoSuchSymbolException() {}
+
+  public NoSuchSymbolException(String msg) {
+    super(msg);
+  }
 }

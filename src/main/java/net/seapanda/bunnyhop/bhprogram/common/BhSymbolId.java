@@ -20,28 +20,28 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * BunnyHop と BhProgram の実行環境間でノードのインスタンスを特定するための識別子.
+ * BunnyHop で作成したプログラムの各種シンボルを特定するための ID.
  *
  * @author K.Koike
  */
-public class BhNodeInstanceId implements Serializable {
+public class BhSymbolId implements Serializable {
 
   private final String id;
   /** ID が無いことを表す null オブジェクト. */
-  public static final BhNodeInstanceId NONE = new BhNodeInstanceId("");
+  public static final BhSymbolId NONE = new BhSymbolId("");
 
-  private BhNodeInstanceId(String id) {
+  private BhSymbolId(String id) {
     this.id = id;
   }
 
   /**
-   * {@link BhNodeInstanceId} を作成する.
+   * {@link BhSymbolId} を作成する.
    *
    * @param id 識別子名
-   * @return {@link BhNodeInstanceId} オブジェクト.
+   * @return {@link BhSymbolId} オブジェクト.
    */
-  public static BhNodeInstanceId of(String id) {
-    return new BhNodeInstanceId(id == null ? "" : id);
+  public static BhSymbolId of(String id) {
+    return new BhSymbolId(id == null ? "" : id);
   }
 
   @Override
@@ -54,7 +54,7 @@ public class BhNodeInstanceId implements Serializable {
     if (obj == null) {
       return false;
     }
-    return (getClass() == obj.getClass()) && (id.equals(((BhNodeInstanceId) obj).id));
+    return (getClass() == obj.getClass()) && (id.equals(((BhSymbolId) obj).id));
   }
 
   @Override
