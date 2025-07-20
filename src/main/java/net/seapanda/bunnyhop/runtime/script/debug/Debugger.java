@@ -36,18 +36,18 @@ import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
 public interface Debugger {
 
   /**
-   * {@code threadId} で指定したスレッドの一時停止条件が必ず満たされるようになる.
+   * {@code threadId} で指定したスレッドを停止可能位置で一時停止するようにする.
    *
-   * @param threadId この ID のスレッドの一時停止条件が必ず満たされるようになる
+   * @param threadId この ID のスレッドを停止可能位置で一時停止するようにする
    * @throws NoSuchThreadException {@code threadId} で指定したスレッドが見つからなかった場合
    */
-  void enableWaitCondition(long threadId) throws NoSuchThreadException;
+  void suspend(long threadId) throws NoSuchThreadException;
 
-  /** デバッガが現在監視している全てのスレッドの一時停止条件が必ず満たされるようになる. */
-  void enableWaitConditionAll();
+  /** デバッガが監視している全ての動作中のスレッドを停止可能位置で一時停止するようにする. */
+  void suspendAll();
 
   /**
-   * {@code threadId} で指定したスレッドが一時停止中であった場合, 処理を再開させる.
+   * {@code threadId} で指定したスレッドが一時停止中であった場合, 動作を再開させる.
    *
    * @param threadId この ID のスレッドの動作を再開させる
    * @throws NoSuchThreadException {@code threadId} で指定したスレッドが見つからなかった場合

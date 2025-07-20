@@ -17,33 +17,29 @@
 package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 /**
- * スレッドの一時停止条件を有効化するコマンド.
+ * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.SuspendThreadCmd} のレスポンス.
  *
  * @author K.Koike
  */
-public class EnableThreadWaitConditionCmd extends BhDebugCmd {
-
-  /** {@link #threadId} がこの値である場合, 全てのスレッドが対象であることを表す. */
-  public static long ALL_THREADS = -1;
-
-  /** 一時停止条件を有効化するスレッドの ID. */
-  public final long threadId;
+public class SuspendThreadResp extends BhDebugResp {
 
   /**
    * コンストラクタ.
    *
-   * @param threadId 一時停止条件を有効化するスレッドの ID
+   * @param id 実行したコマンドの ID
+   * @param success コマンドの処理に成功した場合 true
    */
-  public EnableThreadWaitConditionCmd(long threadId) {
-    this.threadId = threadId;
+  public SuspendThreadResp(long id, boolean success) {
+    super(id, success);
   }
 
   /**
    * コンストラクタ.
    *
-   * <p>動作中の全てのスレッドの一時停止条件を有効化するコマンドを作成する.
+   * @param id 実行したコマンドの ID
+   * @param exception コマンドの実行中に発生した例外
    */
-  public EnableThreadWaitConditionCmd() {
-    this.threadId = ALL_THREADS;
+  public SuspendThreadResp(long id, Exception exception) {
+    super(id, false, exception);
   }
 }

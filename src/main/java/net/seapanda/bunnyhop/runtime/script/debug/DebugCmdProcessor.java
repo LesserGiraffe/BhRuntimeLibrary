@@ -23,8 +23,6 @@ import net.seapanda.bunnyhop.bhprogram.common.message.debug.AddBreakpointsCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.AddBreakpointsResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.BhDebugCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.BhDebugResp;
-import net.seapanda.bunnyhop.bhprogram.common.message.debug.EnableThreadWaitConditionCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.debug.EnableThreadWaitConditionResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalListValsCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalListValsResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalVarsCmd;
@@ -47,6 +45,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.debug.StepOutCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.StepOutResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.StepOverCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.StepOverResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.debug.SuspendThreadCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.debug.SuspendThreadResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhVarStackFrame;
 import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
 import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
@@ -74,7 +74,7 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
   public void process(BhDebugCmd debugCmd) {
     BhDebugResp resp = switch (debugCmd) {
       case AddBreakpointsCmd cmd -> process(cmd);
-      case EnableThreadWaitConditionCmd cmd -> process(cmd);
+      case SuspendThreadCmd cmd -> process(cmd);
       case GetGlobalListValsCmd cmd -> process(cmd);
       case GetGlobalVarsCmd cmd -> process(cmd);
       case GetLocalListValsCmd cmd -> process(cmd);
@@ -108,16 +108,16 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
     }
   }
 
-  private EnableThreadWaitConditionResp process(EnableThreadWaitConditionCmd cmd) {
+  private SuspendThreadResp process(SuspendThreadCmd cmd) {
     try {
-      if (cmd.threadId == EnableThreadWaitConditionCmd.ALL_THREADS) {
-        debugger.enableWaitConditionAll();
+      if (cmd.threadId == SuspendThreadCmd.ALL_THREADS) {
+        debugger.suspendAll();
       } else {
-        debugger.enableWaitCondition(cmd.threadId);
+        debugger.suspend(cmd.threadId);
       }
-      return new EnableThreadWaitConditionResp(cmd.getId(), true);
+      return new SuspendThreadResp(cmd.getId(), true);
     } catch (Exception e) {
-      return new EnableThreadWaitConditionResp(cmd.getId(), e);
+      return new SuspendThreadResp(cmd.getId(), e);
     }
   }
 

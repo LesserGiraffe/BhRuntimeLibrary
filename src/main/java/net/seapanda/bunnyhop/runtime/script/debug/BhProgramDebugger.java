@@ -138,7 +138,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public void enableWaitCondition(long threadId) throws NoSuchThreadException {
+  public void suspend(long threadId) throws NoSuchThreadException {
     ThreadInfo info = threadToInfo.get(threadId);
     if (info == null) {
       throw new NoSuchThreadException("Thread ID : %s".formatted(threadId));
@@ -147,7 +147,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public void enableWaitConditionAll() {
+  public void suspendAll() {
     threadToInfo.values().forEach(context -> context.stopThreshold.set(Integer.MAX_VALUE));
   }
 
