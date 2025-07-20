@@ -60,7 +60,7 @@ public interface DebugInstrumentation {
   /**
    * このメソッドを呼び出したスレッドが一時停止の条件を満たしている場合, 一時停止する.
    *
-   * @param stepId このメソッドを呼び出すスレッドが, 次に実行する処理の ID
+   * @param stepId このメソッドを呼び出すスレッドが, 次に実行する処理の ID (nullable)
    */
   void conditionalWait(String stepId);
 

@@ -120,7 +120,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
 
   @Override
   public void conditionalWait(String stepId) {
-    if (isThreadToBePaused(stepId)) {
+    if (stepId != null && isThreadToBePaused(stepId)) {
       pause();
     }
   }
