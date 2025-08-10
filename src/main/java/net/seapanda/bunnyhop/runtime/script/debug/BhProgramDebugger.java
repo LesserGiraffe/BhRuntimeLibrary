@@ -203,7 +203,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     if (info.state.get() != BhThreadState.SUSPENDED) {
       throw new ThreadNotSuspendedException("Thread ID : %s".formatted(threadId));
     }
-    restart(info, info.context.getCallStackSize() - 1);
+    restart(info, Math.max(info.context.getCallStackSize() - 1, 1));
   }
 
   @Override

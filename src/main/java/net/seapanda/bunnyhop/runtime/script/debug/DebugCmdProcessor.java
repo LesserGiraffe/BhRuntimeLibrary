@@ -181,7 +181,11 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
 
   private ResumeThreadResp process(ResumeThreadCmd cmd) {
     try {
-      debugger.resume(cmd.threadId);
+      if (cmd.threadId == ResumeThreadCmd.ALL_THREADS) {
+        debugger.resumeAll();
+      } else {
+        debugger.resume(cmd.threadId);
+      }
       return new ResumeThreadResp(cmd.getId(), true);
     } catch (Exception e) {
       return new ResumeThreadResp(cmd.getId(), e);
