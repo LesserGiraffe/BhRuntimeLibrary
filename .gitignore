@@ -3,9 +3,12 @@
 .project
 .settings
 .vscode
+.idea
 build
 mlib
 bin
 google-java-format_windows-x86-64.exe
 /App
 /BhRuntime
+/out
+/BhRuntimeLibrary.iml

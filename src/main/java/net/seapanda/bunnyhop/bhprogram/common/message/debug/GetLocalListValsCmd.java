@@ -34,12 +34,12 @@ public class GetLocalListValsCmd extends BhDebugCmd {
   public final long threadId;
   public final int frameIdx;
   public final BhSymbolId varId;
-  public final int startIdx;
-  public final int length;
+  public final long startIdx;
+  public final long length;
 
   /** コンストラクタ. */
   public GetLocalListValsCmd(
-      long threadId, int frameIdx, BhSymbolId varId, int startIdx, int length) {
+      long threadId, int frameIdx, BhSymbolId varId, long startIdx, long length) {
     this.threadId = threadId;
     this.frameIdx = frameIdx;
     this.varId = varId;

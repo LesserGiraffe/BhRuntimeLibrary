@@ -26,7 +26,6 @@ import java.util.SequencedCollection;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -66,7 +65,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** 発行した通知を格納する FIFO. */
   private final BlockingQueue<BhProgramNotification> sendNotifList;
   /** BhProgram のデータを文字列に変換するメソッド. */
-  private Function toStr;
+  private volatile Function toStr;
   /** グローバル変数のリスト. */
   volatile List<?> globalVars = new ArrayList<>();
 
@@ -255,7 +254,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
 
   @Override
   public ListVariable getLocalListValues(
-      long threadId, int frameIdx, BhSymbolId varId, int startIdx, int length)
+      long threadId, int frameIdx, BhSymbolId varId, long startIdx, long length)
       throws
         NoSuchThreadException,
         ThreadNotSuspendedException,
@@ -302,8 +301,8 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public ListVariable getGlobalListValues(BhSymbolId varId, int startIdx, int length)
-      throws NoSuchSymbolException, IndexOutOfBoundsException {
+  public ListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
+      throws NoSuchSymbolException {
     // AtomicBoolean のメモリバリア効果を利用して, 現在止まっているスレッドが書き込んだ最新の値を参照できるようにする
     for (ThreadInfo info : threadToInfo.values()) {
       info.state.get();
@@ -413,9 +412,8 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
       ScriptableObject scope,
       BhSymbolId varId,
       NativeArray list,
-      int startIdx,
-      int length)
-      throws IndexOutOfBoundsException {
+      long startIdx,
+      long length) {
     if (length == 0) {
       return new ListVariable(varId, list.size());
     }
@@ -423,15 +421,15 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
       startIdx = (startIdx + length + 1);
       length = -length;
     }
-    int endIdx = (startIdx + length - 1);
-    if (startIdx < 0 || endIdx > (list.size() - 1)) {
-      throw new IndexOutOfBoundsException(
-          "List Size : %s.  %s ~ %s was specified.".formatted(list.size(), startIdx, endIdx));
-    }
+    long endIdx = (startIdx + length - 1);
     var valList = new ArrayList<String>();
-    for (int i = startIdx; i <= endIdx; ++i) {
-      valList.add(getValStr(cx, scope, list.get(i)));
-    }
+    // リストを複数のスレッドで操作している場合, list の範囲チェックは無意味なので行わない.
+    // 代わりに例外が発生するまで, 指定された範囲の値を取得する.
+    try {
+      for (long i = startIdx; i <= endIdx; ++i) {
+        valList.add(getValStr(cx, scope, list.get(i)));
+      }
+    } catch (Exception ignored) { /* Do nothing. */ }
     return new ListVariable(
         varId,
         list.size(),
@@ -504,7 +502,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /**
    * スレッドコンテキストからコールスタックを作成する.
    *
-   * @param contex このスレッドコンテキストを参照してコールスタックを作成する
+   * @param context このスレッドコンテキストを参照してコールスタックを作成する
    * @param containNextNodeId 次に実行する処理の ID をコールスタックに追加する場合 true.
    */
   private static SequencedCollection<BhCallStackItem> createCallStack(
@@ -555,8 +553,6 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
    *
    * @param context BhProgram 側で操作されるスレッド固有のデータ
    * @param state スレッドの状態
-   * @param isRunning スレッドが動作中かどうかを表すフラグ.
-   *                  スレッドがメモリに書き込んだ最新の値を別のスレッドから読むために {@link AtomicBoolean} のメモリバリア効果を利用する.
    * @param stopThreshold {@code callStack} のサイズがこの値以上の場合, スレッドの停止条件を満たしているものとする
    * @param syncTimer スレッドの停止に使うオブジェクト
    */

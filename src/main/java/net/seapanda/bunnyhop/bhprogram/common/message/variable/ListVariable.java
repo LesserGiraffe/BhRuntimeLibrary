@@ -55,9 +55,9 @@ public class ListVariable extends Variable {
    * @param startIdx リスト内における {@code vals} 範囲の先頭のインデックス
    * @param vals リストの値を格納した配列 (read-only)
    */
-  public record Slice(int startIdx, List<String> vals) implements Serializable {
+  public record Slice(long startIdx, List<String> vals) implements Serializable {
 
-    public Slice(int startIdx, List<String> vals) {
+    public Slice(long startIdx, List<String> vals) {
       this.startIdx = startIdx;
       this.vals = Collections.unmodifiableList(new ArrayList<>(vals));
     }

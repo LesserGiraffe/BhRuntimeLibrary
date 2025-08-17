@@ -20,7 +20,7 @@ import java.io.Serializable;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhVarStackFrame;
 
 /**
- * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetLovalVarCmd} のレスポンス.
+ * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetLocalVarsCmd} のレスポンス.
  *
  * @author K.Koike
  */
@@ -64,7 +64,7 @@ public class GetLocalVarsResp extends BhDebugResp {
   }
 
   /**
-   * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetLovalVarCmd} の処理結果.
+   * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetLocalVarsCmd} の処理結果.
    *
    * @param threadId コマンドの処理で参照した変数スタックを持つスレッドの ID
    * @param frame コマンドの処理で取得した変数情報を格納したオブジェクト

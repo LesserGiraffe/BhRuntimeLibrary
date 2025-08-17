@@ -30,11 +30,11 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 public class GetGlobalListValsCmd extends BhDebugCmd {
   
   public final BhSymbolId varId;
-  public final int startIdx;
-  public final int length;
+  public final long startIdx;
+  public final long length;
 
   /** コンストラクタ. */
-  public GetGlobalListValsCmd(BhSymbolId varId, int startIdx, int length) {
+  public GetGlobalListValsCmd(BhSymbolId varId, long startIdx, long length) {
     this.varId = varId;
     this.startIdx = startIdx;
     this.length = length;

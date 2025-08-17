@@ -4,7 +4,7 @@ import java.io.Serializable;
 import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 
 /**
- * スカラ変数の情報を格納するクラスの基底クラス.
+ * 変数の情報を格納するクラスの基底クラス.
  *
  * @author K.Koike
  */

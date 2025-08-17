@@ -28,8 +28,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
 /**
  * デバッガの機能を規定したインタフェース.
  *
- * <p> このインタフェースのメンバメソッドはスレッドセーフであることを保証しなくて良い. </p>
- * <p> このインタフェースのメンバメソッドは, 単一のスレッドから同期的に呼ぶこと. </p>
+ * <p>このインタフェースのメンバメソッドはスレッドセーフであることを保証しなくて良い.
+ * このインタフェースのメンバメソッドは, 単一のスレッドから同期的に呼ぶこと.
  *
  * @author K.Koike
  */
@@ -137,10 +137,10 @@ public interface Debugger {
    * @throws NoSuchThreadException {@code threadId} で指定したスレッドが見つからなかった場合
    * @throws ThreadNotSuspendedException {@code threadId} で指定したスレッドが一時停止中でなかった場合
    * @throws NoSuchSymbolException {@code varId} で指定したリストが見つからなかった場合
-   * @throws IndexOutOfBoundException {@code startIdx} と {@code length} で指定したリストの範囲が不正であった場合
+   * @throws IndexOutOfBoundsException {@code frameIdx} で指定したスタックフレームが存在しなかった場合
    */
   ListVariable getLocalListValues(
-      long threadId, int frameIdx, BhSymbolId varId, int startIdx, int length)
+      long threadId, int frameIdx, BhSymbolId varId, long startIdx, long length)
       throws
         NoSuchThreadException,
         ThreadNotSuspendedException,
@@ -158,9 +158,8 @@ public interface Debugger {
    * @param length 取得する要素数
    * @return リストの値
    * @throws NoSuchSymbolException {@code varId} で指定したリストが見つからなかった場合
-   * @throws IndexOutOfBoundsException {@code startIdx} と {@code length} で指定したリストの範囲が不正であった場合
    */
-  ListVariable getGlobalListValues(BhSymbolId varId, int startIdx, int length)
+  ListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
       throws NoSuchSymbolException, IndexOutOfBoundsException;
   
   /** デバッガが監視している全てのスレッドのコンテキストを BunnyHop に送信する. */
