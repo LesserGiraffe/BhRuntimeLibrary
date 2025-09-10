@@ -48,8 +48,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.debug.StepOverResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.SuspendThreadCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.SuspendThreadResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhVarStackFrame;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 
@@ -123,7 +123,7 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
 
   private GetGlobalListValsResp process(GetGlobalListValsCmd cmd) {
     try {
-      ListVariable listVar = debugger.getGlobalListValues(cmd.varId, cmd.startIdx, cmd.length);
+      BhListVariable listVar = debugger.getGlobalListValues(cmd.varId, cmd.startIdx, cmd.length);
       return new GetGlobalListValsResp(cmd.getId(), listVar);
     } catch (Exception e) {
       return new GetGlobalListValsResp(cmd.getId(), e);
@@ -132,7 +132,7 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
 
   private GetGlobalVarsResp process(GetGlobalVarsCmd cmd) {
     try {
-      SequencedCollection<Variable> vars = debugger.getGlobalVariables();
+      SequencedCollection<BhVariable> vars = debugger.getGlobalVariables();
       return new GetGlobalVarsResp(cmd.getId(), vars);
     } catch (Exception e) {
       return new GetGlobalVarsResp(cmd.getId(), e);
@@ -141,7 +141,7 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
 
   private GetLocalListValsResp process(GetLocalListValsCmd cmd) {
     try {
-      ListVariable listVar = debugger.getLocalListValues(
+      BhListVariable listVar = debugger.getLocalListValues(
           cmd.threadId, cmd.frameIdx, cmd.varId, cmd.startIdx, cmd.length);
       return new GetLocalListValsResp(
           cmd.getId(), new GetLocalListValsResp.Result(cmd.threadId, cmd.frameIdx, listVar));
@@ -152,7 +152,7 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
 
   private GetLocalVarsResp process(GetLocalVarsCmd cmd) {
     try {
-      SequencedCollection<Variable> vars = debugger.getLocalVariables(cmd.threadId, cmd.frameIdx);
+      SequencedCollection<BhVariable> vars = debugger.getLocalVariables(cmd.threadId, cmd.frameIdx);
       var varStackFrame = new BhVarStackFrame(cmd.frameIdx, vars);
       return new GetLocalVarsResp(
           cmd.getId(), new GetLocalVarsResp.Result(cmd.threadId, varStackFrame));

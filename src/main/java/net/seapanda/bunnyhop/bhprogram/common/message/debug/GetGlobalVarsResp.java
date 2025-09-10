@@ -19,7 +19,7 @@ package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.SequencedCollection;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 
 /**
  * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalVarsCmd} のレスポンス.
@@ -29,7 +29,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
 public class GetGlobalVarsResp extends BhDebugResp {
   
   /** コマンドの処理で取得した変数情報のリスト. (read-only) */
-  public final SequencedCollection<Variable> variables;
+  public final SequencedCollection<BhVariable> variables;
 
   /**
    * コンストラクタ.  (コマンドの実行に成功したとき)
@@ -37,7 +37,7 @@ public class GetGlobalVarsResp extends BhDebugResp {
    * @param id 実行したコマンドの ID
    * @param variables コマンドの処理で取得した変数情報のリスト
    */
-  public GetGlobalVarsResp(long id, SequencedCollection<Variable> variables) {
+  public GetGlobalVarsResp(long id, SequencedCollection<BhVariable> variables) {
     this(id, true, variables, null);
   }
 
@@ -48,7 +48,7 @@ public class GetGlobalVarsResp extends BhDebugResp {
    * @param exception コマンドの実行中に発生した例外
    */
   public GetGlobalVarsResp(long id, Exception exception) {
-    this(id, false, null, exception);
+    this(id, false, new ArrayList<>(), exception);
   }
 
   /**
@@ -57,11 +57,11 @@ public class GetGlobalVarsResp extends BhDebugResp {
    * @param id 実行したコマンドの ID
    */
   public GetGlobalVarsResp(long id) {
-    this(id, false, null, null);
+    this(id, false, new ArrayList<>(), null);
   }
 
   private GetGlobalVarsResp(
-      long id, boolean success, SequencedCollection<Variable> variables, Exception exception) {
+      long id, boolean success, SequencedCollection<BhVariable> variables, Exception exception) {
     super(id, success, exception);
     this.variables = Collections.unmodifiableSequencedCollection(new ArrayList<>(variables));
   }  

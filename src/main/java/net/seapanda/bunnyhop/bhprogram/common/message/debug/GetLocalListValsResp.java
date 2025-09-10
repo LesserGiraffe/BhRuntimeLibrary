@@ -17,7 +17,7 @@
 package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
 import java.io.Serializable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
 
 /**
  * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetLocalListValsCmd} のレスポンス.
@@ -71,5 +71,5 @@ public class GetLocalListValsResp extends BhDebugResp {
    * @param variable リストの値を格納したオブジェクト
    */
   public record Result(
-      long threadId, int frameIdx, ListVariable variable) implements Serializable {}
+      long threadId, int frameIdx, BhListVariable variable) implements Serializable {}
 }

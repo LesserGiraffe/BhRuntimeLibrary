@@ -28,7 +28,7 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
  *
  * @author K.Koike
  */
-public class ListVariable extends Variable {
+public class BhListVariable extends BhVariable {
   
   /** リストの長さ. */
   public final int length;
@@ -36,15 +36,15 @@ public class ListVariable extends Variable {
   public final Collection<Slice> slices;
 
   /** コンストラクタ. */
-  public ListVariable(BhSymbolId varId, int length) {
-    super(varId);
+  public BhListVariable(BhSymbolId id, int length) {
+    super(id);
     this.length = length;
     slices = Collections.unmodifiableCollection(new ArrayList<>());
   }
 
   /** コンストラクタ. */
-  public ListVariable(BhSymbolId varId, int length, Collection<Slice> slices) {
-    super(varId);
+  public BhListVariable(BhSymbolId id, int length, Collection<Slice> slices) {
+    super(id);
     this.length = length;
     this.slices = Collections.unmodifiableCollection(new ArrayList<>(slices));
   }

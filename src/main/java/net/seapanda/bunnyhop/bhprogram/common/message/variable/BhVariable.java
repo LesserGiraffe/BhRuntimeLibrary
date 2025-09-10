@@ -8,12 +8,12 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
  *
  * @author K.Koike
  */
-public abstract class Variable implements Serializable {
+public abstract class BhVariable implements Serializable {
   
   /** 変数のシンボル ID. */
-  public final BhSymbolId varId;
+  public final BhSymbolId id;
 
-  Variable(BhSymbolId varId) {
-    this.varId = varId;
+  BhVariable(BhSymbolId id) {
+    this.id = id;
   }
 }

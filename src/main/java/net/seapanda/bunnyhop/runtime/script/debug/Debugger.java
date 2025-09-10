@@ -22,8 +22,8 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchSymbolException;
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchThreadException;
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.ThreadNotSuspendedException;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 
 /**
  * デバッガの機能を規定したインタフェース.
@@ -120,9 +120,9 @@ public interface Debugger {
    * @param frameIdx このインデックスで指定される関数フレームに存在するローカル変数の情報を取得する.
    * @throws NoSuchThreadException {@code threadId} で指定したスレッドが見つからなかった場合
    * @throws ThreadNotSuspendedException {@code threadId} で指定したスレッドが一時停止中でなかった場合
-   * @throws IndexOutOfBoundsException {@code frameIdx} で指定したスタックフレームが存在しなかった場合
+   * @throws IndexOutOfBoundsException {@code idx} で指定したスタックフレームが存在しなかった場合
    */
-  SequencedCollection<Variable> getLocalVariables(long threadId, int frameIdx)
+  SequencedCollection<BhVariable> getLocalVariables(long threadId, int frameIdx)
       throws NoSuchThreadException, ThreadNotSuspendedException, IndexOutOfBoundsException;
 
   /**
@@ -137,9 +137,9 @@ public interface Debugger {
    * @throws NoSuchThreadException {@code threadId} で指定したスレッドが見つからなかった場合
    * @throws ThreadNotSuspendedException {@code threadId} で指定したスレッドが一時停止中でなかった場合
    * @throws NoSuchSymbolException {@code varId} で指定したリストが見つからなかった場合
-   * @throws IndexOutOfBoundsException {@code frameIdx} で指定したスタックフレームが存在しなかった場合
+   * @throws IndexOutOfBoundsException {@code idx} で指定したスタックフレームが存在しなかった場合
    */
-  ListVariable getLocalListValues(
+  BhListVariable getLocalListValues(
       long threadId, int frameIdx, BhSymbolId varId, long startIdx, long length)
       throws
         NoSuchThreadException,
@@ -148,7 +148,7 @@ public interface Debugger {
         IndexOutOfBoundsException;
 
   /** グローバル変数の情報を取得する. */
-  SequencedCollection<Variable> getGlobalVariables();
+  SequencedCollection<BhVariable> getGlobalVariables();
 
   /**
    * グローバル変数のリストの値を取得する.
@@ -159,7 +159,7 @@ public interface Debugger {
    * @return リストの値
    * @throws NoSuchSymbolException {@code varId} で指定したリストが見つからなかった場合
    */
-  ListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
+  BhListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
       throws NoSuchSymbolException, IndexOutOfBoundsException;
   
   /** デバッガが監視している全てのスレッドのコンテキストを BunnyHop に送信する. */

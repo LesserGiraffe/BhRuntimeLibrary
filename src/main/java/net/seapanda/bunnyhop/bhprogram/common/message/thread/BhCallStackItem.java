@@ -25,6 +25,6 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
  * <p>コールスタック : 各関数呼び出しに対応するシンボルの ID を格納するスタック
  *
  * @param frameIdx {@code symbolId} のコールスタック内におけるインデックス
- * @param symbolId コールスタックの {@code frameIdx} 番目に格納された ID
+ * @param symbolId コールスタックの {@code idx} 番目に格納された ID
  */
 public record BhCallStackItem(int frameIdx, BhSymbolId symbolId) implements Serializable {}

@@ -38,9 +38,9 @@ import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchThreadExce
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.ThreadNotSuspendedException;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhThreadContext;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ScalarVariable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhScalarVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.ScriptThreadContext;
 import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
@@ -225,7 +225,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public SequencedCollection<Variable> getLocalVariables(long threadId, int frameIdx)
+  public SequencedCollection<BhVariable> getLocalVariables(long threadId, int frameIdx)
       throws NoSuchThreadException, ThreadNotSuspendedException, IndexOutOfBoundsException {
     ThreadInfo info = threadToInfo.get(threadId);
     if (info == null) {
@@ -253,7 +253,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public ListVariable getLocalListValues(
+  public BhListVariable getLocalListValues(
       long threadId, int frameIdx, BhSymbolId varId, long startIdx, long length)
       throws
         NoSuchThreadException,
@@ -287,7 +287,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public SequencedCollection<Variable> getGlobalVariables() {
+  public SequencedCollection<BhVariable> getGlobalVariables() {
     try {
       Context cx = ContextFactory.getGlobal().enterContext();
       ScriptableObject scope = cx.initStandardObjects();
@@ -301,7 +301,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   @Override
-  public ListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
+  public BhListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
       throws NoSuchSymbolException {
     // AtomicBoolean のメモリバリア効果を利用して, 現在止まっているスレッドが書き込んだ最新の値を参照できるようにする
     for (ThreadInfo info : threadToInfo.values()) {
@@ -361,14 +361,14 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   }
 
   /** {@code accessor} から変数情報を取得して返す. */
-  private Variable createVarInfo(Context cx, ScriptableObject scope, NativeObject accessor) {
+  private BhVariable createVarInfo(Context cx, ScriptableObject scope, NativeObject accessor) {
     String id = accessor.get(Keywords.Properties.ID).toString();
     Function getter = (Function) accessor.get(Keywords.Properties.GET);
     Object val = getter.call(cx, scope, scope, new Object[0]);
     if (val instanceof NativeArray list) {
-      return new ListVariable(BhSymbolId.of(id), list.size());
+      return new BhListVariable(BhSymbolId.of(id), list.size());
     } else {
-      return new ScalarVariable(BhSymbolId.of(id), getValStr(cx, scope, val));
+      return new BhScalarVariable(BhSymbolId.of(id), getValStr(cx, scope, val));
     }
   }
 
@@ -405,9 +405,9 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
 
   /**
    * {@code list} の {@code startIdx} から {@code length} 個の要素の値を保持する
-   * {@link ListVariable} オブジェクトを返す.
+   * {@link BhListVariable} オブジェクトを返す.
    */
-  private ListVariable getListElems(
+  private BhListVariable getListElems(
       Context cx,
       ScriptableObject scope,
       BhSymbolId varId,
@@ -415,7 +415,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
       long startIdx,
       long length) {
     if (length == 0) {
-      return new ListVariable(varId, list.size());
+      return new BhListVariable(varId, list.size());
     }
     if (length < 0) {
       startIdx = (startIdx + length + 1);
@@ -430,10 +430,10 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
         valList.add(getValStr(cx, scope, list.get(i)));
       }
     } catch (Exception ignored) { /* Do nothing. */ }
-    return new ListVariable(
+    return new BhListVariable(
         varId,
         list.size(),
-        List.of(new ListVariable.Slice(startIdx, valList)));
+        List.of(new BhListVariable.Slice(startIdx, valList)));
   }
 
   /**

@@ -23,13 +23,13 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
  *
  * @author K.Koike
  */
-public class ScalarVariable extends Variable {
+public class BhScalarVariable extends BhVariable {
 
   /** 変数の値. */
   public final String val;
 
-  public ScalarVariable(BhSymbolId varId, String val) {
-    super(varId);
+  public BhScalarVariable(BhSymbolId id, String val) {
+    super(id);
     this.val = val;
   }
 }

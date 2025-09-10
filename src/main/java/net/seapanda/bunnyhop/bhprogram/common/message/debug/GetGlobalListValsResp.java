@@ -16,7 +16,7 @@
 
 package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
 
 /**
  * {@link net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalListValsCmd} のレスポンス.
@@ -26,7 +26,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.variable.ListVariable;
 public class GetGlobalListValsResp extends BhDebugResp {
   
   /** リストの値を格納したオブジェクト. */
-  public final ListVariable variable;
+  public final BhListVariable variable;
   
   /**
    * コンストラクタ.  (コマンドの実行に成功したとき)
@@ -34,7 +34,7 @@ public class GetGlobalListValsResp extends BhDebugResp {
    * @param id 実行したコマンドの ID
    * @param variable リストの値を格納したオブジェクト
    */
-  public GetGlobalListValsResp(long id, ListVariable variable) {
+  public GetGlobalListValsResp(long id, BhListVariable variable) {
     this(id, true, variable, null);
   }
 
@@ -58,7 +58,7 @@ public class GetGlobalListValsResp extends BhDebugResp {
   }
 
   private GetGlobalListValsResp(
-      long id, boolean success, ListVariable variable, Exception exception) {
+      long id, boolean success, BhListVariable variable, Exception exception) {
     super(id, success, exception);
     this.variable = variable;
   }

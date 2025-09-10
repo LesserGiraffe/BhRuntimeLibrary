@@ -20,21 +20,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.SequencedCollection;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.Variable;
+import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 
 /**
  * 変数スタック内の特定のスタックフレームに対応するローカル変数の情報を格納するレコード.
  *
  * <p>変数スタック : ローカス変数の情報を格納するスタック.
  *
- * @param frameIdx スタックフレームのインデックス
+ * @param idx スタックフレームのインデックス
  * @param variables 変数スタックに格納された変数の情報一覧 (read-only)
  */
-public record BhVarStackFrame(int frameIdx, SequencedCollection<Variable> variables)
+public record BhVarStackFrame(int idx, SequencedCollection<BhVariable> variables)
     implements Serializable {
 
-  public BhVarStackFrame(int frameIdx, SequencedCollection<Variable> variables) {
-    this.frameIdx = frameIdx;
+  public BhVarStackFrame(int idx, SequencedCollection<BhVariable> variables) {
+    this.idx = idx;
     this.variables = Collections.unmodifiableList(new ArrayList<>(variables));
   }
 }
