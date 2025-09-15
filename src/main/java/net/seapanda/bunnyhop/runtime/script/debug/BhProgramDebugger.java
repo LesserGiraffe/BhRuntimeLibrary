@@ -377,6 +377,11 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     if (toStr == null) {
       return val.toString();
     }
+    // val が ConsString などの場合, JavaScript 側での文字列変換が正常に動作しないので,
+    // ここで Java の String に変換しておく.
+    if (val instanceof CharSequence charSeq) {
+      val = charSeq.toString();
+    }
     return toStr.call(cx, scope, scope, new Object[] {Context.javaToJS(val, scope)}).toString();
   }
 
