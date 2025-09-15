@@ -31,19 +31,19 @@ import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 public class BhListVariable extends BhVariable {
   
   /** リストの長さ. */
-  public final int length;
+  public final long length;
   /** サブリストの値を格納したオブジェクトの配列. (read-only) */
   public final Collection<Slice> slices;
 
   /** コンストラクタ. */
-  public BhListVariable(BhSymbolId id, int length) {
+  public BhListVariable(BhSymbolId id, long length) {
     super(id);
     this.length = length;
     slices = Collections.unmodifiableCollection(new ArrayList<>());
   }
 
   /** コンストラクタ. */
-  public BhListVariable(BhSymbolId id, int length, Collection<Slice> slices) {
+  public BhListVariable(BhSymbolId id, long length, Collection<Slice> slices) {
     super(id);
     this.length = length;
     this.slices = Collections.unmodifiableCollection(new ArrayList<>(slices));

@@ -366,7 +366,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     Function getter = (Function) accessor.get(Keywords.Properties.GET);
     Object val = getter.call(cx, scope, scope, new Object[0]);
     if (val instanceof NativeArray list) {
-      return new BhListVariable(BhSymbolId.of(id), list.size());
+      return new BhListVariable(BhSymbolId.of(id), list.getLength());
     } else {
       return new BhScalarVariable(BhSymbolId.of(id), getValStr(cx, scope, val));
     }
@@ -415,7 +415,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
       long startIdx,
       long length) {
     if (length == 0) {
-      return new BhListVariable(varId, list.size());
+      return new BhListVariable(varId, list.getLength());
     }
     if (length < 0) {
       startIdx = (startIdx + length + 1);
@@ -432,7 +432,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     } catch (Exception ignored) { /* Do nothing. */ }
     return new BhListVariable(
         varId,
-        list.size(),
+        list.getLength(),
         List.of(new BhListVariable.Slice(startIdx, valList)));
   }
 
