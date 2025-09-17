@@ -68,6 +68,8 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   private volatile Function toStr;
   /** グローバル変数のリスト. */
   volatile List<?> globalVars = new ArrayList<>();
+  /** メモリ同期用のオブジェクト. */
+  private final MemorySynchronizer memSync = new MemorySynchronizer();
 
   /**
    * コンストラクタ.
@@ -82,6 +84,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   public void notifyThreadStart(ScriptThreadContext context) {
     long threadId = Thread.currentThread().threadId();
     threadToInfo.put(threadId, new ThreadInfo(context));
+    memSync.syncWrite();
   }
 
   @Override
@@ -94,6 +97,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
         sendNotification(new BhThreadContext(info.context.getThreadId(), BhThreadState.FINISHED));
       }
     }
+    memSync.syncWrite();
   }
 
   @Override
@@ -106,6 +110,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
         sendNotification(createThreadContext(info, exception));
       }
     }
+    memSync.syncWrite();
   }
 
   @Override
@@ -227,6 +232,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   @Override
   public SequencedCollection<BhVariable> getLocalVariables(long threadId, int frameIdx)
       throws NoSuchThreadException, ThreadNotSuspendedException, IndexOutOfBoundsException {
+    memSync.syncRead();
     ThreadInfo info = threadToInfo.get(threadId);
     if (info == null) {
       throw new NoSuchThreadException("Thread ID : %s".formatted(threadId));
@@ -260,6 +266,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
         ThreadNotSuspendedException,
         NoSuchSymbolException,
         IndexOutOfBoundsException {
+    memSync.syncRead();
     ThreadInfo info = threadToInfo.get(threadId);
     if (info == null) {
       throw new NoSuchThreadException("Thread ID : %s".formatted(threadId));
@@ -288,6 +295,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
 
   @Override
   public SequencedCollection<BhVariable> getGlobalVariables() {
+    memSync.syncRead();
     try {
       Context cx = ContextFactory.getGlobal().enterContext();
       ScriptableObject scope = cx.initStandardObjects();
@@ -303,10 +311,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   @Override
   public BhListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
       throws NoSuchSymbolException {
-    // AtomicBoolean のメモリバリア効果を利用して, 現在止まっているスレッドが書き込んだ最新の値を参照できるようにする
-    for (ThreadInfo info : threadToInfo.values()) {
-      info.state.get();
-    }
+    memSync.syncRead();
     try {
       Context cx = ContextFactory.getGlobal().enterContext();
       ScriptableObject scope = cx.initStandardObjects();
@@ -353,11 +358,14 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     if (info == null) {
       return;
     }
+    memSync.syncWrite();
     synchronized (info) {
       info.state.set(BhThreadState.SUSPENDED);
       sendNotification(createThreadContext(info));
     }
     info.syncTimer.countdownAndAwait();
+    // 停止中に他のスレッドによって書き込まれた値を読み出せるようにする.
+    memSync.syncRead();
   }
 
   /** {@code accessor} から変数情報を取得して返す. */
@@ -460,7 +468,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** {@code info} に対応するスレッドを再開する. */
   private void restart(ThreadInfo info, int stopThreshold) {
     info.stopThreshold.set(stopThreshold);
-    // BhProgram を実行するスレッド動き出す前に, 状態を RUNNING にしなければならない.
+    // BhProgram を実行するスレッドが動き出す前に, 状態を RUNNING にしなければならない.
     // さもないと, 動き出したスレッドの変数を読んで送信してしまう可能性がある.
     synchronized (info) {
       info.state.set(BhThreadState.RUNNING);
