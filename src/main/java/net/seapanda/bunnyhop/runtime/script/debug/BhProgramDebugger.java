@@ -43,6 +43,7 @@ import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhScalarVariable;
 import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.ScriptThreadContext;
+import net.seapanda.bunnyhop.utility.concurrent.MemorySynchronizer;
 import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
