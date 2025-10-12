@@ -29,9 +29,8 @@ public interface BhProgramExecutor {
    * {@code fileName} で指定したスクリプトを実行する.
    *
    * @param fileName 実行するスクリプトファイル名. 絶対パスか BhRuntime の実行時パスからの相対パスで指定すること.
-   * @param event 実行時にスクリプトに渡すイベントデータ
    */
-  boolean runScript(String fileName, BhProgramEvent event);
+  boolean runScript(String fileName);
 
   /**
    * BhProgram のイベントハンドラを呼び出す.

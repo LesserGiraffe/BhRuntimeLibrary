@@ -18,7 +18,6 @@ package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 
@@ -33,10 +32,9 @@ public interface BhRuntimeFacade extends Remote {
    * 引数で指定した BhProgram を実行する.
    *
    * @param fileName 実行ファイル名
-   * @param event BhProgram 開始時に BhProgram に渡されるイベント
-   * @return 実行に成功した場合true
+   * @return 実行に成功した場合 true
    */
-  boolean runScript(String fileName, BhProgramEvent event) throws RemoteException;
+  boolean runScript(String fileName) throws RemoteException;
 
   /** BhRuntime との通信を無効化する. */
   void disconnect() throws RemoteException;

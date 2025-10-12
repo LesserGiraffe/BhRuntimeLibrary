@@ -71,7 +71,11 @@ public class BhProgramShell {
    * @return 実行に成功した場合 true
    */
   public boolean runScript(String fileName, BhProgramEvent event) {
-    return executor.runScript(fileName, event);
+    boolean success = executor.runScript(fileName);
+    if (success) {
+      executor.fireEvent(event);
+    }
+    return success;
   }
 
   private void output() {

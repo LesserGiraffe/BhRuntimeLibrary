@@ -70,51 +70,49 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
   }
 
   @Override
-  public synchronized boolean runScript(String fileName, BhProgramEvent event) {
-    Path scriptPath = Paths.get(fileName).isAbsolute()
-        ? Paths.get(fileName) : Paths.get(Utility.execPath, fileName);
-    try (BufferedReader reader = Files.newBufferedReader(scriptPath, StandardCharsets.UTF_8)) {
+  public synchronized boolean runScript(String fileName) {
+    Path filePath = Paths.get(fileName);
+    filePath = filePath.isAbsolute() ? filePath : Paths.get(Utility.execPath, fileName);
+    try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
       Context context = Context.enter();
       context.setLanguageVersion(Context.VERSION_ES6);
-      bhAppScript = context.compileReader(reader, scriptPath.getFileName().toString(), 1, null);
-      Executors.newSingleThreadExecutor().submit(() -> startBhApp(fileName, event));
+      bhAppScript = context.compileReader(reader, filePath.getFileName().toString(), 1, null);
+      return startBhApp(context, fileName);
     } catch (Exception e) {
       LogManager.logger().error("Failed to run a script.  (%s)\n%s".formatted(fileName, e));
-      return false;
     } finally {
       Context.exit();
     }
-    return true;
+    return false;
   }
 
 
   /** BhProgram を実行する. */
-  private void startBhApp(String fileName, BhProgramEvent event) {
+  private boolean startBhApp(Context cx, String fileName) {
     try {
       // 初期化
-      Context cx = Context.enter();
       bhAppScope.put(
           Keywords.Properties.BH_SCRIPT_HELPER,
           bhAppScope,
           Context.javaToJS(scriptHelper, bhAppScope));
-      executeScript(bhAppScript, cx, bhAppScope);
+      boolean success = executeScript(bhAppScript, cx, bhAppScope);
       isBhAppInitialized.set(true);
-      // 自動実行する関数を実行
-      fireEvent(event);
+      return success;
     } catch (Exception e) {
       LogManager.logger().error("Failed to start a script.  (%s)\n%s".formatted(fileName, e));
-    } finally {
-      Context.exit();
     }
+    return false;
   }
 
   /** {@code cx} と {@code scope} を使って, {@code script} を実行する. */
-  private void executeScript(Script script, Context cx, ScriptableObject scope) {
+  private boolean executeScript(Script script, Context cx, ScriptableObject scope) {
     try {
       script.exec(cx, scope);
+      return true;
     } catch (Throwable e) {
       notifyThreadEnd(cx, scope, e);
     }
+    return false;
   }
 
   @Override

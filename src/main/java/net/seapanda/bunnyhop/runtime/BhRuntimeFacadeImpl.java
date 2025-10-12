@@ -75,8 +75,8 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   @Override
-  public boolean runScript(String fileName, BhProgramEvent event) {
-    return executor.runScript(fileName, event);
+  public boolean runScript(String fileName) {
+    return executor.runScript(fileName);
   }
 
   @Override
