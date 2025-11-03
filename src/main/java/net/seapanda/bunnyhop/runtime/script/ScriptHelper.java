@@ -21,6 +21,9 @@ import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInput;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextIo;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextOutput;
+import net.seapanda.bunnyhop.runtime.script.platform.AudioController;
+import net.seapanda.bunnyhop.runtime.script.platform.FileManager;
+import net.seapanda.bunnyhop.runtime.script.platform.FileManager.TextFileManager;
 import net.seapanda.bunnyhop.runtime.script.simulator.BhSimulatorCtrl;
 
 /**
@@ -33,18 +36,34 @@ public class ScriptHelper {
   public final BhTextIo io;
   public final BhSimulatorCtrl simulator;
   public final HwCmdDispatcher hw;
+  public final AudioController audio;
   public final DebugInstrumentation debug;
   public final ScriptUtil util;
+  public final FileManager file;
   public final Factory factory;
 
   /** コンストラクタ. */
   public ScriptHelper(
       BhTextInput textInput,
       BhTextOutput textOutput,
+      TextFileManager textFileManager,
       BhSimulatorCtrl simulator,
       HwCmdDispatcher hw,
+      AudioController audio,
       DebugInstrumentation debug) {
-    this.io = new BhTextIo() {
+
+    this.io = createTextIo(textInput, textOutput);
+    this.file = new FileManager(textFileManager);
+    this.simulator = simulator;
+    this.hw = hw;
+    this.audio = audio;
+    this.debug = debug;
+    this.util = new ScriptUtil();
+    this.factory = new Factory();
+  }
+
+  private static BhTextIo createTextIo(BhTextInput textInput, BhTextOutput textOutput) {
+    return new BhTextIo() {
       @Override
       public String scanln() throws Exception {
         return textInput.scanln();
@@ -55,10 +74,5 @@ public class ScriptHelper {
         textOutput.println(text);
       }
     };
-    this.simulator = simulator;
-    this.hw = hw;
-    this.debug = debug;
-    this.util = new ScriptUtil();
-    this.factory = new Factory();
   }
 }

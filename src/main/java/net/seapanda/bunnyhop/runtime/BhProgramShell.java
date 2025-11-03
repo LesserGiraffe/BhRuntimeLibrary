@@ -59,8 +59,8 @@ public class BhProgramShell {
     this.executor = executor;
     this.textIoCmdProcessor = textIoCmdProcessor;
     this.textIoRespProcessor = textIoRespProcessor;
-    outputExecutor.submit(() -> output());
-    inoutputExecutor.submit(() -> input());
+    outputExecutor.submit(this::output);
+    inoutputExecutor.submit(this::input);
   }
 
   /**
@@ -109,7 +109,7 @@ public class BhProgramShell {
     }
     System.out.println("call stack");
     for (BhCallStackItem item : context.getCallStack().reversed()) {
-      System.out.println("  %s".formatted(item.symbolId().toString()));
+      System.out.printf("  %s%n", item.symbolId().toString());
     }
   }
 
@@ -133,9 +133,9 @@ public class BhProgramShell {
   }
 
   private void pushToStdinBuf(String line) {
-    String[] splited = line.split("\\:");
-    if (splited.length >= 2) {
-      textIoCmdProcessor.process(new InputTextCmd(splited[1]));
+    String[] splitted = line.split(":");
+    if (splitted.length >= 2) {
+      textIoCmdProcessor.process(new InputTextCmd(splitted[1]));
     } else {
       textIoCmdProcessor.process(new InputTextCmd(""));
     }
@@ -143,9 +143,9 @@ public class BhProgramShell {
 
 
   private void fireEvent(String line) {
-    String[] splited = line.split("\\:");
-    if (splited.length >= 2) {
-      String eventName = splited[1];
+    String[] splitted = line.split(":");
+    if (splitted.length >= 2) {
+      String eventName = splitted[1];
       try {
         var event = BhProgramEvent.Name.valueOf(eventName);
         executor.fireEvent(new BhProgramEvent(event, Keywords.Funcs.GET_EVENT_HANDLER_NAMES));
@@ -159,8 +159,8 @@ public class BhProgramShell {
 
   private void printCmdFormat() {
     System.out.println("Input command format");
-    System.out.println("  %s input string to stdin".formatted(BhConstants.BhProgram.STDIN_PREFIX));
-    System.out.println("  %s EVENT_NAME".formatted(BhConstants.BhProgram.EVENT_INPUT_PREFIX));
+    System.out.printf("  %s input string to stdin%n", BhConstants.BhProgram.STDIN_PREFIX);
+    System.out.printf("  %s EVENT_NAME%n", BhConstants.BhProgram.EVENT_INPUT_PREFIX);
     System.out.println();
   }
 }

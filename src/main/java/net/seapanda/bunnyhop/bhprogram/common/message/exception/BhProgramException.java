@@ -24,6 +24,9 @@ package net.seapanda.bunnyhop.bhprogram.common.message.exception;
  */
 public class BhProgramException extends RuntimeException {
 
+  /** BhScript の中で例外を識別するために使用する.  */
+  public final boolean isBhProgramException = true;
+
   /**
    * コンストラクタ.
    */
@@ -67,6 +70,4 @@ public class BhProgramException extends RuntimeException {
   public BhProgramException(String msg, Throwable cause) {
     super(msg, cause);
   }
-
-
 }

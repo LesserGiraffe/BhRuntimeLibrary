@@ -59,5 +59,11 @@ public class BhConstants {
     public static final String ACTIONS = "Actions";
     /** HW 制御プログラムの名前. */
     public static final String HW_CTRL = "hwctrl";
+    /** BhProgram によって作成されたデータを格納する場所のルートディレクトリの名前. */
+    public static final String USER_DATA = "UserData";
+    /** BhProgram によってテキストデータを格納するディレクトリの名前. */
+    public static final String TEXT = "Text";
+    /** BhProgram によって音声データを格納するディレクトリの名前. */
+    public static final String AUDIO = "Audio";
   }
 }

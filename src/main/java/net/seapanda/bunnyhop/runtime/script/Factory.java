@@ -41,11 +41,14 @@ public class Factory {
    * {@link BhProgramException} オブジェクトを作成して返す.
    *
    * @param msg 例外メッセージ
-   * @param cause 例外の原因
+   * @param cause 例外の原因.  BhScript から引数を渡すために {@link Object} 型にしておく.
    * @return 例外オブジェクト
    */
-  public BhProgramException newBhProgramException(String msg, Throwable cause) {
-    return new BhProgramException(msg, cause);
+  public BhProgramException newBhProgramException(String msg, Object cause) {
+    if (cause instanceof Throwable e) {
+      return new BhProgramException(msg, e);
+    }
+    return new BhProgramException(msg, new Exception(cause.toString()));
   }
 
   /** {@link SynchronizingTimer} を新規作成する. */
@@ -57,10 +60,10 @@ public class Factory {
    * {@link ScriptThreadContext} オブジェクトを作成する.
    *
    * @param context BhProgram が操作するスレッドコンテキストオブジェクト
-   * @param idxCallStack コールスタックが格納された {@link context} のインデックス
-   * @param idxNextNodeInstId 次に実行される処理の ID が格納された {@link context} のインデックス
-   * @param idxErrorMsgs エラーメッセージが格納された {@link context} のインデックス
-   * @param idxVarStack 変数スタックが格納された {@link context} のインデックス
+   * @param idxCallStack コールスタックが格納された {@code context} のインデックス
+   * @param idxNextNodeInstId 次に実行される処理の ID が格納された {@code context} のインデックス
+   * @param idxErrorMsgs エラーメッセージが格納された {@code context} のインデックス
+   * @param idxVarStack 変数スタックが格納された {@code context} のインデックス
    * @return {@link ScriptThreadContext} オブジェクト
    */
   public ScriptThreadContext newScriptThreadContext(

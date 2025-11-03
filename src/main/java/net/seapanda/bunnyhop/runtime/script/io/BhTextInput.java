@@ -19,9 +19,8 @@ package net.seapanda.bunnyhop.runtime.script.io;
 
 /**
  * BunnyHop のテキスト IO を操作する処理を定義したインタフェース.
- * <p>
- * BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
- * </p>
+ *
+ * <p>BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
  *
  * @author K.Koike
  */
@@ -31,7 +30,7 @@ public interface BhTextInput {
    * BunnyHop のテキスト I/O から文字列を読みだす.
    *
    * @return 読み出された文字列
-   * @throws Excetion 文字列の読み出しに失敗した
+   * @throws Exception 文字列の読み出しに失敗した
    */
   public String scanln() throws Exception;
 }

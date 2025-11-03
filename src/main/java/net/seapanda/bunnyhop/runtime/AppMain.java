@@ -38,6 +38,8 @@ import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.hw.StdioHwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInputAgent;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextOutputAgent;
+import net.seapanda.bunnyhop.runtime.script.platform.AudioControllerImpl;
+import net.seapanda.bunnyhop.runtime.script.platform.TextFileManagerImpl;
 import net.seapanda.bunnyhop.runtime.script.simulator.BhSimulatorAgent;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 import net.seapanda.bunnyhop.runtime.socket.LocalServerSocketFactory;
@@ -204,8 +206,21 @@ public class AppMain {
       var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
       var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
       var textOutAgent = new BhTextOutputAgent(queueSet.sendNotifList(), true);
+      String userTextDataPath = Paths.get(
+          Utility.execPath, BhConstants.Path.USER_DATA, BhConstants.Path.TEXT).toString();
+      var textFileManager = new TextFileManagerImpl(userTextDataPath);
+      String userAudioDataPath = Paths.get(
+          Utility.execPath, BhConstants.Path.USER_DATA, BhConstants.Path.AUDIO).toString();
+      var audioCtrl = new AudioControllerImpl(userAudioDataPath);
       var debugger = new BhProgramDebugger(queueSet.sendNotifList());
-      var helper = new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher, debugger);
+      var helper = new ScriptHelper(
+          textInAgent,
+          textOutAgent,
+          textFileManager,
+          simAgent,
+          dispatcher,
+          audioCtrl,
+          debugger);
       var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
       var shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
       var event = new BhProgramEvent(
@@ -233,9 +248,22 @@ public class AppMain {
     var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
     var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
     var textOutAgent = new BhTextOutputAgent(queueSet.sendNotifList(), false);
+    String userTextDataPath = Paths.get(
+        Utility.execPath, BhConstants.Path.USER_DATA, BhConstants.Path.TEXT).toString();
+    var textFileManager = new TextFileManagerImpl(userTextDataPath);
+    String userAudioDataPath = Paths.get(
+        Utility.execPath, BhConstants.Path.USER_DATA, BhConstants.Path.AUDIO).toString();
+    var audioCtrl = new AudioControllerImpl(userAudioDataPath);
     var debugger = new BhProgramDebugger(queueSet.sendNotifList());
     var debugCmdProcessor = new DebugCmdProcessor(debugger, queueSet.sendRespList());
-    var helper = new ScriptHelper(textInAgent, textOutAgent, simAgent, dispatcher, debugger);
+    var helper = new ScriptHelper(
+        textInAgent,
+        textOutAgent,
+        textFileManager,
+        simAgent,
+        dispatcher,
+        audioCtrl,
+        debugger);
     var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
     var facade = new BhRuntimeFacadeImpl(
         queueSet,
@@ -249,8 +277,8 @@ public class AppMain {
   }
 
   private static void setEventHandlers(BhTextOutputAgent agent, BhRuntimeFacadeImpl facade) {
-    facade.getEventManager().addOnConnected(() -> agent.enableTextOutput());
-    facade.getEventManager().addOnDisconnected(() -> agent.disableTextOutput());
+    facade.getEventManager().addOnConnected(agent::enableTextOutput);
+    facade.getEventManager().addOnDisconnected(agent::disableTextOutput);
     facade.disconnect();
   }
 }

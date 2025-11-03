@@ -19,11 +19,9 @@ package net.seapanda.bunnyhop.runtime.script.io;
 
 /**
  * BunnyHop のテキスト IO を操作する処理を定義したインタフェース.
- * <p>
- * BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
- * </p>
+ *
+ * <p>BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
  *
  * @author K.Koike
  */
 public interface BhTextIo extends BhTextInput, BhTextOutput {}
- 
