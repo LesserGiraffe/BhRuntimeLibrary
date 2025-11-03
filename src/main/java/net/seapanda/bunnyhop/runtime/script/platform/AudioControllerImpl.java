@@ -70,6 +70,7 @@ public class AudioControllerImpl implements AudioController {
     this.root = Paths.get(rootPath).toAbsolutePath().normalize();
   }
 
+  /** マイクは異なるスレッドから同時に使えないので synchronized メソッドにする. */
   @Override
   public synchronized void record(String path, double time) throws Exception {
     checkRecordingTime(time);
@@ -182,8 +183,9 @@ public class AudioControllerImpl implements AudioController {
     }
   }
 
+  /** マイクは異なるスレッドから同時に使えないので synchronized メソッドにする. */
   @Override
-  public double findSoundPressureAverage(double time) throws LineUnavailableException {
+  public synchronized double findSoundPressureAverage(double time) throws LineUnavailableException {
     MutableLong sum = new MutableLong(0);
     MutableInt numSamples = new MutableInt(0);
     TriConsumer<byte[], Integer, Boolean> calcSum =
@@ -198,8 +200,9 @@ public class AudioControllerImpl implements AudioController {
     return ((double) sum.getValue()) / numSamples.getValue();
   }
 
+  /** マイクは異なるスレッドから同時に使えないので synchronized メソッドにする. */
   @Override
-  public double findSoundPressurePeak(double time) throws LineUnavailableException {
+  public synchronized double findSoundPressurePeak(double time) throws LineUnavailableException {
     MutableInt peak = new MutableInt(0);
     TriConsumer<byte[], Integer, Boolean> calcPeak =
         (sampleBytes, length, littleEndian) -> {
