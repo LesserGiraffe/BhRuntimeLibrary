@@ -120,6 +120,8 @@ task jlink(type: Exec) {
     ant.mkdir(dir:"$projectDir/../$projName/$appDirName")
     ant.mkdir(dir:"$projectDir/../$projName/$appDirName/Compiled")
     ant.mkdir(dir:"$projectDir/../$projName/$appDirName/Log")
+    ant.mkdir(dir:"$projectDir/../$projName/$appDirName/UserData/Text")
+    ant.mkdir(dir:"$projectDir/../$projName/$appDirName/UserData/Audio")
     ant.copy(todir: "$projectDir/../$projName/$appDirName") {
       fileset(dir: "$projectDir/../$appDirName")
     }
