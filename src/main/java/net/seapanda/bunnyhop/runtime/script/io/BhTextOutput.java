@@ -19,9 +19,8 @@ package net.seapanda.bunnyhop.runtime.script.io;
 
 /**
  * BunnyHop のテキスト IO を操作する処理を定義したインタフェース.
- * <p>
- * BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
- * </p>
+ *
+ * <p>BunnyHop のテキスト IO : BunnyHop と BhRuntimeLibrary 間で文字列データをやり取りするためのインタフェース.
  *
  * @author K.Koike
  */
@@ -31,7 +30,15 @@ public interface BhTextOutput {
    * BunnyHop のテキスト I/O に文字列を書き込む.
    *
    * @param text 書き込む文字列
-   * @throws Excetion 文字列の書き込みに失敗した
+   * @throws Exception 文字列の書き込みに失敗した
+   */
+  public void print(String text) throws Exception;
+
+  /**
+   * BunnyHop のテキスト I/O に改行付きで文字列を書き込む.
+   *
+   * @param text 書き込む文字列
+   * @throws Exception 文字列の書き込みに失敗した
    */
   public void println(String text) throws Exception;
 }

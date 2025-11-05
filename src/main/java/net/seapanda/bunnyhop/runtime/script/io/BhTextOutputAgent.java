@@ -64,14 +64,14 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
   }
   
   @Override
-  public void println(String text) throws AgencyFailedException {
+  public void print(String text) throws AgencyFailedException {
     boolean unlocked = false;
     try {
       lock.lock();
       if (!isTextOutputEnabled) {
         return;
       }
-      var cmd = new OutputTextCmd(text + "\n");
+      var cmd = new OutputTextCmd(text);
       unlocked = sendCmdAndWait(cmd);
       BhTextIoResp resp = cmdIdToResp.remove(cmd.getId());
       if (resp instanceof OutputTextResp && resp.success) {
@@ -88,6 +88,10 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
     throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
   }
 
+  @Override
+  public void println(String text) throws AgencyFailedException {
+    print(text + "\n");
+  }
 
   /** コマンドを送って応答を待つ. */
   private boolean sendCmdAndWait(BhTextIoCmd cmd) {

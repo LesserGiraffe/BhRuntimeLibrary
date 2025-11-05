@@ -70,6 +70,11 @@ public class ScriptHelper {
       }
 
       @Override
+      public void print(String text) throws Exception {
+        textOutput.print(text);
+      }
+
+      @Override
       public void println(String text) throws Exception {
         textOutput.println(text);
       }
