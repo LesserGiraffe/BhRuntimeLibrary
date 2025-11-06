@@ -143,10 +143,11 @@ public class AudioControllerImpl implements AudioController {
         throw new LineUnavailableException("The specified audio format is not supported");
       }
       SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-      line.open(format);
+      // waveBuf のサイズを大きくしすぎると RaspberryPi で正常に音が出なくなる.
+      byte[] buffer = new byte[(int) (SAMPLE_RATE) * SAMPLE_SIZE / 8 / 2];
+      line.open(format, buffer.length);
       controlVolume((float) volume, line);
       line.start();
-      byte[] buffer = new byte[4096];
       int bytesRead;
       while ((bytesRead = audioStream.read(buffer, 0, buffer.length)) != -1) {
         line.write(buffer, 0, bytesRead);
