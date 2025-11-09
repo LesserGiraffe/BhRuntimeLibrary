@@ -35,6 +35,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 import net.seapanda.bunnyhop.runtime.script.PerItemLock;
@@ -139,10 +140,7 @@ public class AudioControllerImpl implements AudioController {
       AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
       AudioFormat format = audioStream.getFormat();
       DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-      if (!AudioSystem.isLineSupported(info)) {
-        throw new LineUnavailableException("The specified audio format is not supported");
-      }
-      SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+      SourceDataLine line = findSourceDataLine(info);
       // waveBuf のサイズを大きくしすぎると RaspberryPi で正常に音が出なくなる.
       byte[] buffer = new byte[(int) (SAMPLE_RATE) * SAMPLE_SIZE / 8 / 2];
       line.open(format, buffer.length);
@@ -158,6 +156,28 @@ public class AudioControllerImpl implements AudioController {
     } finally {
       lock.releaseReadLockFor(targetPath);
     }
+  }
+
+  @Override
+  public SourceDataLine findSourceDataLine(DataLine.Info info) throws LineUnavailableException {
+    Mixer mixer = getDefaultMixer();
+    if (mixer != null && mixer.isLineSupported(info)) {
+      return (SourceDataLine) mixer.getLine(info);
+    }
+    if (!AudioSystem.isLineSupported(info)) {
+      throw new LineUnavailableException("The specified audio format is not supported");
+    }
+    return (SourceDataLine) AudioSystem.getLine(info);
+  }
+
+  private Mixer getDefaultMixer() {
+    Mixer.Info[] infoList = AudioSystem.getMixerInfo();
+    for (Mixer.Info info : infoList) {
+      if (info.getName().contains("default")) {
+        return AudioSystem.getMixer(info);
+      }
+    }
+    return null;
   }
 
   /** 音量を調整する. */

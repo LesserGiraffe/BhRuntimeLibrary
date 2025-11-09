@@ -19,7 +19,9 @@ package net.seapanda.bunnyhop.runtime.script.platform;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 
 /**
  * 音声データの取得と再生のための機能を規定したインタフェース.
@@ -47,6 +49,14 @@ public interface AudioController {
    * @throws Exception 再生に失敗した場合
    */
   void play(String path, double volume) throws Exception;
+
+  /**
+   * {@code info} に対応する {@link SourceDataLine} オブジェクトを取得する.
+   *
+   * @param info この条件に対応する{@link SourceDataLine} オブジェクトを探す.
+   * @return {@code info} に対応する {@link SourceDataLine} オブジェクト
+   */
+  SourceDataLine findSourceDataLine(DataLine.Info info) throws LineUnavailableException;
 
   /**
    * 指定したパスのファイルを削除する.
