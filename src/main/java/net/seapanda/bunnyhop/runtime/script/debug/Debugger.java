@@ -18,6 +18,7 @@ package net.seapanda.bunnyhop.runtime.script.debug;
 
 import java.util.Collection;
 import java.util.SequencedCollection;
+import java.util.Set;
 import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchSymbolException;
 import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchThreadException;
@@ -164,4 +165,7 @@ public interface Debugger {
   
   /** デバッガが監視している全てのスレッドのコンテキストを BunnyHop に送信する. */
   void sendThreadContexts();
+
+  /** エントリポイントの ID 一覧を取得する. */
+  Set<BhSymbolId> getEntryPointIds();
 }

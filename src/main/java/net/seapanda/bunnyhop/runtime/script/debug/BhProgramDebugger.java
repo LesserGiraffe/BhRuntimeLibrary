@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.SequencedCollection;
@@ -29,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
 import net.seapanda.bunnyhop.bhprogram.common.BhThreadState;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
@@ -68,7 +70,9 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** BhProgram のデータを文字列に変換するメソッド. */
   private volatile Function toStr;
   /** グローバル変数のリスト. */
-  volatile List<?> globalVars = new ArrayList<>();
+  private volatile List<?> globalVars = new ArrayList<>();
+  /** イベントハンドラの ID のリスト. */
+  private volatile Set<BhSymbolId> entryPointIds = new HashSet<>();
   /** メモリ同期用のオブジェクト. */
   private final MemorySynchronizer memSync = new MemorySynchronizer();
 
@@ -560,6 +564,17 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     } catch (Exception e) {
       return false;
     }
+  }
+
+  @Override
+  public void setEntryPointIds(String... ids) {
+    entryPointIds = ConcurrentHashMap.newKeySet();
+    entryPointIds.addAll(Stream.of(ids).map(BhSymbolId::of).toList());
+  }
+
+  @Override
+  public Set<BhSymbolId> getEntryPointIds() {
+    return new HashSet<>(entryPointIds);
   }
 
   /** 

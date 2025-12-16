@@ -23,6 +23,8 @@ import net.seapanda.bunnyhop.bhprogram.common.message.debug.AddBreakpointsCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.AddBreakpointsResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.BhDebugCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.BhDebugResp;
+import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetEntryPointsCmd;
+import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetEntryPointsResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalListValsCmd;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalListValsResp;
 import net.seapanda.bunnyhop.bhprogram.common.message.debug.GetGlobalVarsCmd;
@@ -80,15 +82,14 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
       case GetLocalListValsCmd cmd -> process(cmd);
       case GetLocalVarsCmd cmd -> process(cmd);
       case GetThreadContextsCmd cmd -> process(cmd);
+      case GetEntryPointsCmd cmd -> process(cmd);
       case RemoveBreakpointsCmd cmd -> process(cmd);
       case ResumeThreadCmd cmd -> process(cmd);
       case SetBreakpointsCmd cmd -> process(cmd);
       case StepIntoCmd cmd -> process(cmd);
       case StepOutCmd cmd -> process(cmd);
       case StepOverCmd cmd -> process(cmd);
-      default -> {
-        yield null;
-      }
+      default -> null;
     };
     try {
       if (resp != null) {
@@ -167,6 +168,14 @@ public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> 
       return new GetThreadContextsResp(cmd.getId(), true);
     } catch (Exception e) {
       return new GetThreadContextsResp(cmd.getId(), e);
+    }
+  }
+
+  private GetEntryPointsResp process(GetEntryPointsCmd cmd) {
+    try {
+      return new GetEntryPointsResp(cmd.getId(), debugger.getEntryPointIds());
+    } catch (Exception e) {
+      return new GetEntryPointsResp(cmd.getId(), e);
     }
   }
 

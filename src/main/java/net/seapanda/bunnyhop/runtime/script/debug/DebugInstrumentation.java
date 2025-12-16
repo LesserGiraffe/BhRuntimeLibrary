@@ -69,4 +69,7 @@ public interface DebugInstrumentation {
  
   /** グローバル変数の一覧をデバッガに登録する. */
   void setGlobalVariables(List<?> vars);
+
+  /** エントリポイントの ID 一覧をデバッガに登録する. */
+  void setEntryPointIds(String... ids);
 }
