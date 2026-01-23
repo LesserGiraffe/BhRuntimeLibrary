@@ -39,7 +39,9 @@ public class BhThreadContext implements BhProgramNotification {
   private final BhProgramException exception;
   /** 次に実行する処理に対応するシンボルの ID. */
   private final BhSymbolId nextStep;
-  
+  /** 例外が発生した処理に対応するシンボルの ID. */
+  private final BhSymbolId errorStep;
+
   /**
    * コンストラクタ.
    *
@@ -52,6 +54,7 @@ public class BhThreadContext implements BhProgramNotification {
     this.callStack = new ArrayList<>();
     this.exception = null;
     this.nextStep = BhSymbolId.NONE;
+    this.errorStep = BhSymbolId.NONE;
     this.msgId = genId();
   }
 
@@ -61,18 +64,21 @@ public class BhThreadContext implements BhProgramNotification {
    * @param threadId スレッド ID 
    * @param state スレッドの状態
    * @param callStack コールスタック.
+   * @param errorStep 例外が発生した処理に対応するシンボルの ID
    * @param exception スレッドで発生した例外
    */
   public BhThreadContext(
       long threadId,
       BhThreadState state,
       SequencedCollection<BhCallStackItem> callStack,
+      BhSymbolId errorStep,
       BhProgramException exception) {
     this.threadId = threadId;
     this.state = state;
     this.callStack = new ArrayList<>(callStack);
     this.exception = exception;
     this.nextStep = BhSymbolId.NONE;
+    this.errorStep = errorStep;
     this.msgId = genId();
   }
 
@@ -94,6 +100,7 @@ public class BhThreadContext implements BhProgramNotification {
     this.callStack = new ArrayList<>(callStack);
     this.exception = null;
     this.nextStep = nextStep;
+    this.errorStep = BhSymbolId.NONE;
     this.msgId = genId();
   }
 
@@ -128,5 +135,9 @@ public class BhThreadContext implements BhProgramNotification {
   /** 次に実行される処理の ID. */
   public BhSymbolId getNextStep() {
     return nextStep;
+  }
+
+  public BhSymbolId getErrorStep() {
+    return errorStep;
   }
 }

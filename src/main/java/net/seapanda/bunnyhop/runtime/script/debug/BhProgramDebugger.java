@@ -485,17 +485,18 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** {@code info} と {@code exception} を元に {@link BhThreadContext} を作成する. */
   private static BhThreadContext createThreadContext(ThreadInfo info, Throwable exception) {
     BhProgramException threw = createBhProgramException(info, exception);
-    SequencedCollection<BhCallStackItem> callStack = createCallStack(info.context, true);
+    SequencedCollection<BhCallStackItem> callStack = createCallStack(info.context);
     return new BhThreadContext(
         info.context.getThreadId(),
         info.state.get(),
         callStack,
+        info.context.getNextNodeInstanceId(),
         threw);
   }
 
   /** {@code info} を元に {@link BhThreadContext} を作成する. */
   private static BhThreadContext createThreadContext(ThreadInfo info) {
-    SequencedCollection<BhCallStackItem> callStack = createCallStack(info.context, false);
+    SequencedCollection<BhCallStackItem> callStack = createCallStack(info.context);
     return new BhThreadContext(
         info.context.getThreadId(),
         info.state.get(),
@@ -521,23 +522,14 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
    * スレッドコンテキストからコールスタックを作成する.
    *
    * @param context このスレッドコンテキストを参照してコールスタックを作成する
-   * @param containNextNodeId 次に実行する処理の ID をコールスタックに追加する場合 true.
    */
-  private static SequencedCollection<BhCallStackItem> createCallStack(
-      ScriptThreadContext context, boolean containNextNodeId) {
+  private static SequencedCollection<BhCallStackItem> createCallStack(ScriptThreadContext context) {
     var callStack = new ArrayList<BhCallStackItem>();
     List<BhSymbolId> cs = context.getCallStack();
     for (int i = 0; i < cs.size(); ++i) {
       callStack.add(new BhCallStackItem(i, cs.get(i)));
     }
-    if (!containNextNodeId) {
-      return callStack;
-    }
-    BhSymbolId nextNodeId = context.getNextNodeInstanceId();
-    if (!nextNodeId.equals(BhSymbolId.NONE)) {
-      callStack.add(new BhCallStackItem(callStack.size(), nextNodeId));
-    }
-    return callStack;    
+    return callStack;
   }
 
   /**
