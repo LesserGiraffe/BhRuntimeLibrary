@@ -27,7 +27,7 @@ public class BhConstants {
   /** アプリケーションの名前. */
   public static final String APP_NAME = "BhRuntimeLibrary";
   /** アプリケーションのバージョン. */
-  public static final AppVersion APP_VERSION = AppVersion.of("bhrun-0.7.5");
+  public static final AppVersion APP_VERSION = AppVersion.of("bhrun-0.7.6");
   /** BhProgram に入力されたテキストデータを格納する FIFO のサイズ. */
   public static final int MAX_INPUT_TEXT_QUEUE_SIZE = 1024;
   /** BunnyHop との通信データを格納する FIFO のサイズ. */
