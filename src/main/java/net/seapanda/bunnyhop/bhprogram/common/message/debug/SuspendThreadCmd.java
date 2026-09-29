@@ -24,7 +24,7 @@ package net.seapanda.bunnyhop.bhprogram.common.message.debug;
 public class SuspendThreadCmd extends BhDebugCmd {
 
   /** {@link #threadId} がこの値である場合, 全てのスレッドが対象であることを表す. */
-  public static long ALL_THREADS = -1;
+  public static final long ALL_THREADS = -1;
 
   /** 一時停止条件を有効化するスレッドの ID. */
   public final long threadId;

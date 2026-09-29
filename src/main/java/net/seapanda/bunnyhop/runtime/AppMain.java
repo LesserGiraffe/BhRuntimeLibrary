@@ -86,7 +86,7 @@ public class AppMain {
       return;
     }
     if (cmd.hasOption("version")) {
-      System.out.println(BhConstants.APP_VERSION.toString());
+      System.out.println(BhConstants.APP_VERSION);
       return;
     }
     if (cmd.hasOption("run")) {
@@ -167,7 +167,7 @@ public class AppMain {
       outputLocalTcpPort(socketFactory);
     } catch (Exception e) {
       System.out.println("\n-1" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
-      LogManager.logger().error("Failed to export an rmi object.\n" + e);
+      LogManager.logger().error("Failed to export an rmi object.\n%s", e);
     }
   }
 
@@ -221,7 +221,7 @@ public class AppMain {
           dispatcher,
           audioCtrl,
           debugger);
-      var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
+      var executor = new JsBhProgramExecutor(helper);
       var shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
       var event = new BhProgramEvent(
           BhProgramEvent.Name.PROGRAM_START, Keywords.Funcs.GET_EVENT_HANDLER_NAMES);
@@ -264,7 +264,7 @@ public class AppMain {
         dispatcher,
         audioCtrl,
         debugger);
-    var executor = new JsBhProgramExecutor(helper, queueSet.sendNotifList());
+    var executor = new JsBhProgramExecutor(helper);
     var facade = new BhRuntimeFacadeImpl(
         queueSet,
         executor,

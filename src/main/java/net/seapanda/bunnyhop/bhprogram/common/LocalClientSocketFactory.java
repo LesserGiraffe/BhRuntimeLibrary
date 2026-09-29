@@ -17,6 +17,7 @@
 package net.seapanda.bunnyhop.bhprogram.common;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -29,9 +30,10 @@ import java.rmi.server.RMIClientSocketFactory;
  */
 public class LocalClientSocketFactory implements RMIClientSocketFactory, Serializable {
 
+  @Serial
   private static final long serialVersionUID = 1L;
   /** オブジェクトごとに一意な ID. */
-  private int id;
+  private final int id;
 
   /** コンストラクタ. */
   public LocalClientSocketFactory(int id) {
@@ -40,7 +42,7 @@ public class LocalClientSocketFactory implements RMIClientSocketFactory, Seriali
 
   @Override
   public Socket createSocket(String host, int port) throws IOException {
-    Socket socket = null;
+    Socket socket;
     try {
       socket = new Socket(InetAddress.getLoopbackAddress(), port);
     } catch (IOException e) {

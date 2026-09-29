@@ -142,7 +142,7 @@ public class AudioControllerImpl implements AudioController {
       DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
       SourceDataLine line = findSourceDataLine(info);
       // waveBuf のサイズを大きくしすぎると RaspberryPi で正常に音が出なくなる.
-      byte[] buffer = new byte[(int) (SAMPLE_RATE) * SAMPLE_SIZE / 8 / 2];
+      byte[] buffer = new byte[(int) SAMPLE_RATE * SAMPLE_SIZE / 8 / 2];
       line.open(format, buffer.length);
       controlVolume((float) volume, line);
       line.start();

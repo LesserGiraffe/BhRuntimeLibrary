@@ -127,7 +127,7 @@ public class BhProgramShell {
         }
       }
     } catch (Exception e) {
-      LogManager.logger().error("Failed to input string to BhProgram.\n%s".formatted(e));
+      LogManager.logger().error("Failed to input string to BhProgram.\n%s", e);
       e.printStackTrace();
     }
   }

@@ -28,7 +28,7 @@ import java.rmi.server.RMIServerSocketFactory;
  */
 public class LocalServerSocketFactory implements RMIServerSocketFactory {
   private int localPort;
-  private int id;
+  private final int id;
 
   /**
    * コンストラクタ.
@@ -41,7 +41,7 @@ public class LocalServerSocketFactory implements RMIServerSocketFactory {
 
   @Override
   public ServerSocket createServerSocket(int port) throws IOException {
-    ServerSocket serverSocket = null;
+    ServerSocket serverSocket;
     try {
       serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
     } catch (IOException e) {

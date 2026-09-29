@@ -21,12 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
 import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
@@ -47,41 +45,34 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
   private final AtomicBoolean isBhAppInitialized = new AtomicBoolean(false);
   private Script bhAppScript;
   /**  global this オブジェクト. */
-  private ScriptableObject bhAppScope;
+  private final ScriptableObject bhAppScope;
   private final ExecutorService bhProgramExec = Executors.newFixedThreadPool(16);
   /** BhProgram に公開するヘルパークラス. */
   private final ScriptHelper scriptHelper;
-  /** BunnyHop への送信データを格納するキュー. */
-  private final BlockingQueue<BhProgramNotification> sendNotifList;
 
   /**
    * コンストラクタ.
    *
    * @param scriptHelper BhProgram に公開するヘルパークラス.
-   * @param sendNotifList 発行した通知を格納する FIFO
    */
-  public JsBhProgramExecutor(
-        ScriptHelper scriptHelper, BlockingQueue<BhProgramNotification> sendNotifList) {
+  public JsBhProgramExecutor(ScriptHelper scriptHelper) {
     this.scriptHelper = scriptHelper;
-    this.sendNotifList = sendNotifList;
-    Context cx = Context.enter();
-    bhAppScope = cx.initStandardObjects();
-    Context.exit();
+    try (Context cx = Context.enter()) {
+      bhAppScope = cx.initStandardObjects();
+    }
   }
 
   @Override
   public synchronized boolean runScript(String fileName) {
     Path filePath = Paths.get(fileName);
     filePath = filePath.isAbsolute() ? filePath : Paths.get(Utility.execPath, fileName);
-    try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8)) {
-      Context context = Context.enter();
+    try (BufferedReader reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
+        Context context = Context.enter()) {
       context.setLanguageVersion(Context.VERSION_ES6);
       bhAppScript = context.compileReader(reader, filePath.getFileName().toString(), 1, null);
       return startBhApp(context, fileName);
     } catch (Exception e) {
-      LogManager.logger().error("Failed to run a script.  (%s)\n%s".formatted(fileName, e));
-    } finally {
-      Context.exit();
+      LogManager.logger().error("Failed to run a script.  (%s)\n%s", fileName, e);
     }
     return false;
   }
@@ -99,7 +90,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
       isBhAppInitialized.set(true);
       return success;
     } catch (Exception e) {
-      LogManager.logger().error("Failed to start a script.  (%s)\n%s".formatted(fileName, e));
+      LogManager.logger().error("Failed to start a script.  (%s)\n%s", fileName, e);
     }
     return false;
   }
@@ -120,8 +111,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
     if (!isBhAppInitialized.get()) {
       return;
     }
-    try {
-      Context cx = Context.enter();
+    try (Context cx = Context.enter()) {
       Function getEventHandlers = (Function) bhAppScope.get(event.eventHandlerResolver);
       var funcNameList = (NativeArray) getEventHandlers.call(
           cx, bhAppScope, bhAppScope, new String[] {event.name.toString()});
@@ -129,28 +119,24 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
         bhProgramExec.submit(() -> callFunc(funcName.toString()));
       }
     } catch (Exception e) {
-      LogManager.logger().error(
-          "Failed to fire an event.  (%s)\n%s".formatted(event, e));
-    } finally {
-      Context.exit();
+      LogManager.logger().error("Failed to fire an event.  (%s)\n%s", event, e);
     }
   }
 
   /** {@code funcName} で指定した JavaScript の関数を呼ぶ. */
   private Object callFunc(String funcName) {
-    Context cx = Context.enter();
-    ScriptableObject thisObj = cx.initStandardObjects(); // funcName.call(thisObj, args...);
-    try {
-      Function func = (Function) bhAppScope.get(funcName);
-      return func.call(cx, bhAppScope, thisObj, new Object[0]);
-    } catch (Throwable e) {
-      // 本来, この処理はスクリプトの中で呼びたいが, 
-      // Rhino の初期設定では catch 節で {@link Throwable} をキャッチできないので,
-      // Java 側でキャッチしてから JavaScript のメソッドを呼び出すことで対処する.
-      notifyThreadEnd(cx, thisObj, e);
-      LogManager.logger().error("Failed to call a function.  (%s)\n%s".formatted(funcName, e));
-    } finally {
-      Context.exit();
+    try (Context cx = Context.enter()) {
+      ScriptableObject thisObj = cx.initStandardObjects(); // funcName.call(thisObj, args...);
+      try {
+        Function func = (Function) bhAppScope.get(funcName);
+        return func.call(cx, bhAppScope, thisObj, new Object[0]);
+      } catch (Throwable e) {
+        // 本来, この処理はスクリプトの中で呼びたいが,
+        // Rhino の初期設定では catch 節で {@link Throwable} をキャッチできないので,
+        // Java 側でキャッチしてから JavaScript のメソッドを呼び出すことで対処する.
+        notifyThreadEnd(cx, thisObj, e);
+        LogManager.logger().error("Failed to call a function.  (%s)\n%s", funcName, e);
+      }
     }
     return null;
   }
@@ -163,7 +149,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
       Object[] args = new Object[] {Context.javaToJS(exception, thisObj)};
       func.call(cx, bhAppScope, thisObj, args);
     } catch (Throwable e) {
-      LogManager.logger().error("Failed to call a function.  (%s)\n%s".formatted(funcName, e));
+      LogManager.logger().error("Failed to call a function.  (%s)\n%s", funcName, e);
     }
   }
 }

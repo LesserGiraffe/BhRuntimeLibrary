@@ -32,7 +32,7 @@ public interface BhTextOutput {
    * @param text 書き込む文字列
    * @throws Exception 文字列の書き込みに失敗した
    */
-  public void print(String text) throws Exception;
+  void print(String text) throws Exception;
 
   /**
    * BunnyHop のテキスト I/O に改行付きで文字列を書き込む.
@@ -40,5 +40,5 @@ public interface BhTextOutput {
    * @param text 書き込む文字列
    * @throws Exception 文字列の書き込みに失敗した
    */
-  public void println(String text) throws Exception;
+  void println(String text) throws Exception;
 }

@@ -33,7 +33,7 @@ public interface HwCmdDispatcher {
    * @return {@code cmd} に対するレスポンス
    * @throws AgencyFailedException コマンドの送信もしくは, そのレスポンスの受信に失敗した
    */
-  public default List<String> sendCmd(String... cmd) throws AgencyFailedException {
+  default List<String> sendCmd(String... cmd) throws AgencyFailedException {
     throw new AgencyFailedException("Hardware control is not supported.");
   }
 }

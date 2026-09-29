@@ -25,7 +25,7 @@ import java.util.Arrays;
  */
 public class StringBhSimulatorCmd extends BhSimulatorCmd {
 
-  String[] cmd;
+  final String[] cmd;
 
   public StringBhSimulatorCmd(String[] cmd) {
     this.cmd = Arrays.copyOf(cmd, cmd.length);

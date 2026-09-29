@@ -32,5 +32,5 @@ public interface BhTextInput {
    * @return 読み出された文字列
    * @throws Exception 文字列の読み出しに失敗した
    */
-  public String scanln() throws Exception;
+  String scanln() throws Exception;
 }

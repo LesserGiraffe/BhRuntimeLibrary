@@ -59,7 +59,7 @@ public class BhListVariable extends BhVariable {
 
     public Slice(long startIdx, List<String> vals) {
       this.startIdx = startIdx;
-      this.vals = Collections.unmodifiableList(new ArrayList<>(vals));
+      this.vals = List.copyOf(vals);
     }
   }
 }

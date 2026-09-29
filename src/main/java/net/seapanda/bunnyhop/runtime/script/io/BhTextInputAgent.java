@@ -53,10 +53,9 @@ public class BhTextInputAgent implements BhTextInput, BhProgramMessageProcessor<
   @Override
   public String scanln() throws AgencyFailedException {
     try {
-      String text = inputTextList.take();
-      return text;
+      return inputTextList.take();
     } catch (InterruptedException e) {
-      throw new AgencyFailedException(Utility.getCurrentMethodName() + " failed");
+      throw new AgencyFailedException("%s failed".formatted(Utility.getCurrentMethodName()));
     }
   }
 

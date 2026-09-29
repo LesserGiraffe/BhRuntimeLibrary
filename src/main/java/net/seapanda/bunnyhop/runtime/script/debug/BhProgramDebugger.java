@@ -64,7 +64,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** スレッド ID とその ID のスレッドに関連する情報を格納したオブジェクトのマップ. */
   private final Map<Long, ThreadInfo> threadToInfo = new ConcurrentHashMap<>();
   /** ブレークポイント一覧. */
-  private final Set<String> breakpoints = ConcurrentHashMap.<String>newKeySet();
+  private final Set<String> breakpoints = ConcurrentHashMap.newKeySet();
   /** 発行した通知を格納する FIFO. */
   private final BlockingQueue<BhProgramNotification> sendNotifList;
   /** BhProgram のデータを文字列に変換するメソッド. */
@@ -223,7 +223,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
 
   @Override
   public void removeBreakpoints(Collection<BhSymbolId> ids) {
-    List<String> idList = ids.stream().map(BhSymbolId::toString).toList();
+    Set<String> idList = ids.stream().map(BhSymbolId::toString).collect(Collectors.toSet());
     breakpoints.removeAll(idList);
   }
 
@@ -250,16 +250,13 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
       throw new IndexOutOfBoundsException(
           "Stack Frame Size : %s.  %s was specified".formatted(varStackSize, frameIdx));
     }
-    try {
-      Context cx = ContextFactory.getGlobal().enterContext();
+    try (Context cx = ContextFactory.getGlobal().enterContext()) {
       ScriptableObject scope = cx.initStandardObjects();
       var frame = (SequencedCollection<?>) info.context.getVarStackFrame(frameIdx);
       return frame.stream()
           .filter(variable -> variable instanceof NativeObject)
           .map(variable -> createVarInfo(cx, scope, (NativeObject) variable))
           .collect(Collectors.toCollection(ArrayList::new));
-    } finally {
-      Context.exit();
     }
   }
 
@@ -285,31 +282,25 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
           "Stack Frame Size : %s.  %s was specified".formatted(varStackSize, frameIdx));
     }
     var frame = (SequencedCollection<?>) info.context.getVarStackFrame(frameIdx);
-    try {
-      Context cx = ContextFactory.getGlobal().enterContext();
+    try (Context cx = ContextFactory.getGlobal().enterContext()) {
       ScriptableObject scope = cx.initStandardObjects();
       Object val = findVal(varId, frame, cx, scope);
       if (val instanceof NativeArray list) {
         return getListElems(cx, scope, varId, list, startIdx, length);
       }
       throw new NoSuchSymbolException("Symbol (%s) is not a list.".formatted(varId));
-    } finally {
-      Context.exit();
     }
   }
 
   @Override
   public SequencedCollection<BhVariable> getGlobalVariables() {
     memSync.syncRead();
-    try {
-      Context cx = ContextFactory.getGlobal().enterContext();
+    try (Context cx = ContextFactory.getGlobal().enterContext()) {
       ScriptableObject scope = cx.initStandardObjects();
       return globalVars.stream()
           .filter(variable -> variable instanceof NativeObject)
           .map(variable -> createVarInfo(cx, scope, (NativeObject) variable))
           .collect(Collectors.toCollection(ArrayList::new));
-    } finally {
-      Context.exit();
     }
   }
 
@@ -317,16 +308,13 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   public BhListVariable getGlobalListValues(BhSymbolId varId, long startIdx, long length)
       throws NoSuchSymbolException {
     memSync.syncRead();
-    try {
-      Context cx = ContextFactory.getGlobal().enterContext();
+    try (Context cx = ContextFactory.getGlobal().enterContext()) {
       ScriptableObject scope = cx.initStandardObjects();
       Object val = findVal(varId, globalVars, cx, scope);
       if (val instanceof NativeArray list) {
         return getListElems(cx, scope, varId, list, startIdx, length);
       } 
       throw new NoSuchSymbolException("Symbol (%s) is not a list.".formatted(varId));
-    } finally {
-      Context.exit();
     }
   }
 
@@ -547,7 +535,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   private static boolean isSerializable(Object obj) {
     try (
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        ObjectOutputStream oos = new ObjectOutputStream(bos)
     ) {
       oos.writeObject(obj);
       oos.flush();

@@ -43,7 +43,7 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
   /** 発行した通知を格納する FIFO. */
   private final BlockingQueue<BhProgramNotification> sendNotifList;
   /** BunnyHop へのテキストデータの送信が有効な場合 true. */
-  private boolean isTextOutputEnabled = false;
+  private boolean isTextOutputEnabled;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
   private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */

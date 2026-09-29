@@ -18,7 +18,7 @@ package net.seapanda.bunnyhop.runtime.script.hw;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +50,7 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
   /** HW を制御するプログラムからコマンドの応答を取得する Executor. */
   private final ExecutorService respReader = Executors.newSingleThreadExecutor();
   /** HW を制御するプログラムに送信するコマンドの ID. */
-  private AtomicLong commandId = new AtomicLong();
+  private final AtomicLong commandId = new AtomicLong();
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
   private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */
@@ -75,28 +75,29 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
 
   /** HW を制御するプログラムからコマンドのレスポンスを読み続ける. */
   private void readResponse() {
-    while (true) {
-      String respStr = "";
-      BufferedReader ir = process.inputReader();
-      try {
-        if ((respStr = ir.readLine()) != null) {
-          List<String> resp = new ArrayList<>(Arrays.asList(respStr.split(delimiter)));
-          long respId = Long.valueOf(resp.removeFirst());
-          CountDownLatch latch = cmdIdToBarrier.remove(respId);
-          if (latch != null) {
-            cmdIdToResp.put(respId, resp);
-            latch.countDown();
-          }  
-        } else {
-          Thread.sleep(1);
+    try (BufferedReader ir = process.inputReader()) {
+      while (!Thread.currentThread().isInterrupted()) {
+        String respStr = ir.readLine();
+        if (respStr == null) {
+          break;
         }
-      } catch (IOException | InterruptedException e) {
-        break;
-      } catch (Exception e) {
-        LogManager.logger().error(
-            "Received an invalid HW ctrl response.  (%s)\n%s".formatted(respStr, e));
-      } catch (Throwable e) {
+        try {
+          onRespReceived(respStr);
+        } catch (Exception e) {
+          LogManager.logger().error("Received an invalid HW ctrl response.  (%s)\n%s", respStr, e);
+        } catch (Throwable ignored) { /* Do nothing. */  }
       }
+    } catch (IOException ignored) { /* Do nothing. */ }
+  }
+
+  /** 受信したレスポンス文字列を解析し, 対応するコマンドの待機を解除する. */
+  private void onRespReceived(String respStr) {
+    List<String> resp = new ArrayList<>(Arrays.asList(respStr.split(delimiter)));
+    long respId = Long.parseLong(resp.removeFirst());
+    CountDownLatch latch = cmdIdToBarrier.remove(respId);
+    if (latch != null) {
+      cmdIdToResp.put(respId, resp);
+      latch.countDown();
     }
   }
 
@@ -122,9 +123,9 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
       if (process == null) {
         throw new AgencyFailedException("HW Ctrl Program has ended.");
       }
-      process.outputWriter().write(createCmd(cmdId, cmd));
-      process.outputWriter().newLine();
-      process.outputWriter().flush();
+      byte[] cmdData = "%s\n".formatted(createCmd(cmdId, cmd)).getBytes(StandardCharsets.UTF_8);
+      process.getOutputStream().write(cmdData);
+      process.getOutputStream().flush();
       lock.unlock();
       unlocked = true;
     } catch (IOException e) {
@@ -150,7 +151,7 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
   }
 
   /** HW を制御するプログラムに送信するコマンドの文字列を作成する. */
-  private String createCmd(long cmdId, String... cmd) throws UnsupportedEncodingException {
+  private String createCmd(long cmdId, String... cmd) {
     StringJoiner joiner = new StringJoiner(delimiter);
     joiner.add(Long.toString(cmdId));
     for (String field : cmd) {
@@ -166,13 +167,16 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
     }
     try {
       lock.lock();
-      process.getOutputStream().write("terminate\n".getBytes("UTF-8"));
+      process.getOutputStream().write("terminate\n".getBytes(StandardCharsets.UTF_8));
       process.waitFor(BhConstants.PROC_END_TIMEOUT, TimeUnit.SECONDS);
       closeStreams();
-      respReader.close();
+      respReader.shutdownNow();
+      if (!respReader.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+        throw new Exception();
+      }
       process = null;
     } catch (Throwable e) {
-      LogManager.logger().error("Failed to end the HW ctrl program.\n" + e);
+      LogManager.logger().error("Failed to end the HW ctrl program.\n%s", e);
     } finally {
       lock.unlock();
     }

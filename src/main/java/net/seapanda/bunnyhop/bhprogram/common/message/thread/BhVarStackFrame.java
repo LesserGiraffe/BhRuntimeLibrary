@@ -17,8 +17,6 @@
 package net.seapanda.bunnyhop.bhprogram.common.message.thread;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.SequencedCollection;
 import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
 
@@ -35,6 +33,6 @@ public record BhVarStackFrame(int idx, SequencedCollection<BhVariable> variables
 
   public BhVarStackFrame(int idx, SequencedCollection<BhVariable> variables) {
     this.idx = idx;
-    this.variables = Collections.unmodifiableList(new ArrayList<>(variables));
+    this.variables = java.util.List.copyOf(variables);
   }
 }

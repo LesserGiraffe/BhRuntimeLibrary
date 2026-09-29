@@ -54,7 +54,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   /** BunnyHop から受信したメッセージを処理する Executor. */
   private final ExecutorService recvRespProcessor = Executors.newSingleThreadExecutor();
 
-  private final EventManager eventManager = this.new EventManager();
+  private final EventManager eventManager = new EventManager();
 
   /** コンストラクタ. */
   public BhRuntimeFacadeImpl(
@@ -70,8 +70,8 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
     this.textIoRespProcessor = textIoRespProcessor;
     this.simRespProcessor = simRespProcessor;
     this.debugCmdProcessor = debugCmdProcessor;
-    recvMsgProcessor.submit(() -> processRecvMsg());
-    recvRespProcessor.submit(() -> processRecvResp());
+    recvMsgProcessor.submit(this::processRecvMsg);
+    recvRespProcessor.submit(this::processRecvResp);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   /** BunnyHop から受信したメッセージを処理し続ける. */
   private void processRecvMsg() {
     while (true) {
-      BhProgramNotification notif = null;
+      BhProgramNotification notif;
       try {
         notif = queueSet.recvNotifList().take();
       } catch (InterruptedException e) {
@@ -151,7 +151,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   /** BunnyHop から受信したレスポンスを処理し続ける. */
   private void processRecvResp() {
     while (true) {
-      BhProgramResponse resp = null;
+      BhProgramResponse resp;
       try {
         resp = queueSet.recvRespList().take();
       } catch (InterruptedException e) {
@@ -175,12 +175,12 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   /** イベントハンドラの管理を行うクラス. */
-  public class EventManager {
+  public static class EventManager {
 
     /** このオブジェクトと BunnyHop の通信が有効化されたときに呼び出されるメソッドのリスト. */
-    private SequencedSet<Runnable> onConnected = new LinkedHashSet<>();
+    private final SequencedSet<Runnable> onConnected = new LinkedHashSet<>();
     /** このオブジェクトと BunnyHop の通信が無効化されたときに呼び出されるメソッドのリスト. */
-    private SequencedSet<Runnable> onDisconnected = new LinkedHashSet<>();
+    private final SequencedSet<Runnable> onDisconnected = new LinkedHashSet<>();
 
     /**
      * このオブジェクトと BunnyHop の通信が有効化されたときのイベントハンドラを追加する.

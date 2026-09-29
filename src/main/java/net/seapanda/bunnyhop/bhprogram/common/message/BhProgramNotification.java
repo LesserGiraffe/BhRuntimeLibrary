@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public interface BhProgramNotification extends BhProgramMessage {
 
-  public static final AtomicLong nextId = new AtomicLong(1);
+  AtomicLong nextId = new AtomicLong(1);
   
   default long genId() {
     return nextId.getAndIncrement();
