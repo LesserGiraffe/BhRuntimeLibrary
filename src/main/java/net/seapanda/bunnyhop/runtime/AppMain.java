@@ -29,7 +29,6 @@ import net.seapanda.bunnyhop.bhprogram.common.LocalClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.RemoteClientSocketFactory;
 import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
 import net.seapanda.bunnyhop.runtime.executor.JsBhProgramExecutor;
-import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.script.debug.BhProgramDebugger;
@@ -223,8 +222,7 @@ public class AppMain {
           debugger);
       var executor = new JsBhProgramExecutor(helper);
       var shell = new BhProgramShell(queueSet, executor, textInAgent, textOutAgent);
-      var event = new BhProgramEvent(
-          BhProgramEvent.Name.PROGRAM_START, Keywords.Funcs.GET_EVENT_HANDLER_NAMES);
+      var event = new BhProgramEvent(BhProgramEvent.Name.PROGRAM_START);
       shell.runScript(fileName, event);
     } catch (Exception e) {
       String msg = "Failed to run a script.  (%s)\n%s".formatted(fileName, e);

@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,9 +30,9 @@ import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 import net.seapanda.bunnyhop.utility.Utility;
+import org.mozilla.javascript.BaseFunction;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -108,15 +109,13 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
 
   @Override
   public synchronized void fireEvent(BhProgramEvent event) {
-    if (!isBhAppInitialized.get()) {
+    if (!isBhAppInitialized.get() || scriptHelper.eventHandlerResolver == null) {
       return;
     }
-    try (Context cx = Context.enter()) {
-      Function getEventHandlers = (Function) bhAppScope.get(event.eventHandlerResolver);
-      var funcNameList = (NativeArray) getEventHandlers.call(
-          cx, bhAppScope, bhAppScope, new String[] {event.name.toString()});
-      for (Object funcName : funcNameList) {
-        bhProgramExec.submit(() -> callFunc(funcName.toString()));
+    try {
+      List<?> functions = scriptHelper.eventHandlerResolver.apply(event.name.toString());
+      for (Object func : functions) {
+        bhProgramExec.submit(() -> call(func));
       }
     } catch (Exception e) {
       LogManager.logger().error("Failed to fire an event.  (%s)\n%s", event, e);
@@ -124,16 +123,17 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
   }
 
   /** {@code funcName} で指定した JavaScript の関数を呼ぶ. */
-  private Object callFunc(String funcName) {
+  private Object call(Object func) {
     try (Context cx = Context.enter()) {
       ScriptableObject thisObj = cx.initStandardObjects(); // funcName.call(thisObj, args...);
       try {
-        Function func = (Function) bhAppScope.get(funcName);
-        return func.call(cx, bhAppScope, thisObj, new Object[0]);
+        return ((Function) func).call(cx, bhAppScope, thisObj, new Object[0]);
       } catch (Throwable e) {
         // 本来, この処理はスクリプトの中で呼びたいが,
         // Rhino の初期設定では catch 節で {@link Throwable} をキャッチできないので,
         // Java 側でキャッチしてから JavaScript のメソッドを呼び出すことで対処する.
+        String funcName = (func instanceof BaseFunction baseFunc)
+            ? "(%s)".formatted(baseFunc.getFunctionName()) : "";
         notifyThreadEnd(cx, thisObj, e);
         LogManager.logger().error("Failed to call a function.  (%s)\n%s", funcName, e);
       }

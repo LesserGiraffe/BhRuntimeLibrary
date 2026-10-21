@@ -16,6 +16,9 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import net.seapanda.bunnyhop.runtime.script.debug.DebugInstrumentation;
 import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInput;
@@ -41,6 +44,8 @@ public class ScriptHelper {
   public final ScriptUtil util;
   public final FileManager file;
   public final Factory factory;
+  /** イベントに対応するイベントハンドラを解決する関数. */
+  public Function<String, List<?>> eventHandlerResolver = eventName -> new ArrayList<>();
 
   /** コンストラクタ. */
   public ScriptHelper(

@@ -21,19 +21,15 @@ public class BhProgramEvent implements BhProgramNotification {
 
   /** イベント名. */
   public final Name name;
-  /** イベントに対応する BhProgram の関数を解決する関数の名前. */
-  public final String eventHandlerResolver;
   private final long id;
 
   /**
    * コンストラクタ.
    *
    * @param name イベント名
-   * @param eventHandlerResolver {@code name} に指定したイベントから呼び出すべき BhProgram の関数を解決する関数の名前.
    */
-  public BhProgramEvent(Name name, String eventHandlerResolver) {
+  public BhProgramEvent(Name name) {
     this.name = name;
-    this.eventHandlerResolver = eventHandlerResolver;
     id = genId();
   }
 

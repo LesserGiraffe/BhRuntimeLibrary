@@ -33,7 +33,6 @@ public class Keywords {
 
   /** BhProgram に定義された関数名. */
   public static class Funcs {
-    public static final String GET_EVENT_HANDLER_NAMES = "_getEventHandlerNames";
     public static final String NOTIFY_THREAD_END = "_notifyThreadEnd";
   }
 }

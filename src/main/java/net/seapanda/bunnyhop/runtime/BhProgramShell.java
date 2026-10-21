@@ -31,7 +31,6 @@ import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhCallStackItem;
 import net.seapanda.bunnyhop.bhprogram.common.message.thread.BhThreadContext;
 import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
-import net.seapanda.bunnyhop.runtime.script.Keywords;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 
@@ -148,7 +147,7 @@ public class BhProgramShell {
       String eventName = splitted[1];
       try {
         var event = BhProgramEvent.Name.valueOf(eventName);
-        executor.fireEvent(new BhProgramEvent(event, Keywords.Funcs.GET_EVENT_HANDLER_NAMES));
+        executor.fireEvent(new BhProgramEvent(event));
       } catch (Exception e) {
         System.err.println("invalid event name  " + eventName);
       }
