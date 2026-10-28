@@ -19,7 +19,7 @@ package net.seapanda.bunnyhop.runtime.script;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
+import net.seapanda.bunnyhop.runtime.api.message.BhSymbolId;
 import org.mozilla.javascript.NativeObject;
 
 /**

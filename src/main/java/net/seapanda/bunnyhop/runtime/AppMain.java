@@ -24,10 +24,9 @@ import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import net.seapanda.bunnyhop.bhprogram.common.BhRuntimeFacade;
-import net.seapanda.bunnyhop.bhprogram.common.LocalClientSocketFactory;
-import net.seapanda.bunnyhop.bhprogram.common.RemoteClientSocketFactory;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
+import net.seapanda.bunnyhop.runtime.api.BhRuntimeFacade;
+import net.seapanda.bunnyhop.runtime.api.BhRuntimeInfo;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramEvent;
 import net.seapanda.bunnyhop.runtime.executor.JsBhProgramExecutor;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
@@ -41,7 +40,9 @@ import net.seapanda.bunnyhop.runtime.script.platform.AudioControllerImpl;
 import net.seapanda.bunnyhop.runtime.script.platform.TextFileManagerImpl;
 import net.seapanda.bunnyhop.runtime.script.simulator.BhSimulatorAgent;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
+import net.seapanda.bunnyhop.runtime.socket.LocalClientSocketFactory;
 import net.seapanda.bunnyhop.runtime.socket.LocalServerSocketFactory;
+import net.seapanda.bunnyhop.runtime.socket.RemoteClientSocketFactory;
 import net.seapanda.bunnyhop.runtime.socket.RemoteServerSocketFactory;
 import net.seapanda.bunnyhop.utility.Utility;
 import net.seapanda.bunnyhop.utility.log.FileLogger;
@@ -65,7 +66,7 @@ public class AppMain {
     FileLogger logger = null;
     try {
       logger = new FileLogger(
-          Paths.get(Utility.execPath, BhConstants.Path.LOG_DIR, BhConstants.APP_NAME),
+          Paths.get(Utility.execPath, BhConstants.Path.LOG_DIR, BhRuntimeInfo.getName()),
           BhConstants.Path.LOG_FILE_NAME,
           BhConstants.LOG_FILE_SIZE_LIMIT,
           BhConstants.MAX_LOG_FILE_NUM);
@@ -85,7 +86,7 @@ public class AppMain {
       return;
     }
     if (cmd.hasOption("version")) {
-      System.out.println(BhConstants.APP_VERSION);
+      System.out.println(BhRuntimeInfo.getVersion());
       return;
     }
     if (cmd.hasOption("run")) {

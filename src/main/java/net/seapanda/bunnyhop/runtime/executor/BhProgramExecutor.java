@@ -16,7 +16,7 @@
 
 package net.seapanda.bunnyhop.runtime.executor;
 
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramEvent;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramEvent;
 
 /**
  * BhProgram を実行処理を規定したインタフェース.

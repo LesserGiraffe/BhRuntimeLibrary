@@ -17,7 +17,7 @@
 package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.List;
-import net.seapanda.bunnyhop.bhprogram.common.message.exception.BhProgramException;
+import net.seapanda.bunnyhop.runtime.api.message.exception.BhProgramException;
 import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
 
 /**

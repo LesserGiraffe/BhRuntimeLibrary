@@ -18,11 +18,11 @@ package net.seapanda.bunnyhop.runtime.script.io;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
-import net.seapanda.bunnyhop.bhprogram.common.message.io.BhTextIoCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.io.InputTextCmd;
-import net.seapanda.bunnyhop.bhprogram.common.message.io.InputTextResp;
 import net.seapanda.bunnyhop.runtime.BhConstants;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoCmd;
+import net.seapanda.bunnyhop.runtime.api.message.io.InputTextCmd;
+import net.seapanda.bunnyhop.runtime.api.message.io.InputTextResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
 import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
 import net.seapanda.bunnyhop.runtime.service.LogManager;

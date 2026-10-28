@@ -16,7 +16,7 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramMessage;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramMessage;
 
 /**
  * {@link BhProgramMessage} オブジェクトを処理する機能を規定したインタフェース.

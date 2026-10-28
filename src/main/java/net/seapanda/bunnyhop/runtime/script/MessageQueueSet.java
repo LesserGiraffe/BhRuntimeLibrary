@@ -18,9 +18,9 @@ package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramNotification;
-import net.seapanda.bunnyhop.bhprogram.common.message.BhProgramResponse;
 import net.seapanda.bunnyhop.runtime.BhConstants;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
 
 /**
  * BunnyHop と BhRuntimeで送受信されるメッセージを格納するキューのセット.

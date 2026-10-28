@@ -19,12 +19,12 @@ package net.seapanda.bunnyhop.runtime.script.debug;
 import java.util.Collection;
 import java.util.SequencedCollection;
 import java.util.Set;
-import net.seapanda.bunnyhop.bhprogram.common.BhSymbolId;
-import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchSymbolException;
-import net.seapanda.bunnyhop.bhprogram.common.message.exception.NoSuchThreadException;
-import net.seapanda.bunnyhop.bhprogram.common.message.exception.ThreadNotSuspendedException;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhListVariable;
-import net.seapanda.bunnyhop.bhprogram.common.message.variable.BhVariable;
+import net.seapanda.bunnyhop.runtime.api.message.BhSymbolId;
+import net.seapanda.bunnyhop.runtime.api.message.exception.NoSuchSymbolException;
+import net.seapanda.bunnyhop.runtime.api.message.exception.NoSuchThreadException;
+import net.seapanda.bunnyhop.runtime.api.message.exception.ThreadNotSuspendedException;
+import net.seapanda.bunnyhop.runtime.api.message.variable.BhListVariable;
+import net.seapanda.bunnyhop.runtime.api.message.variable.BhVariable;
 
 /**
  * デバッガの機能を規定したインタフェース.
