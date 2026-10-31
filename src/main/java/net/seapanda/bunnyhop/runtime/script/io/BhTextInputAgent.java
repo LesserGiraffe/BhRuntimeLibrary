@@ -67,7 +67,7 @@ public class BhTextInputAgent implements BhTextInput, BhRuntimeMessageProcessor<
         sendRespList.put(new InputTextResp(cmd.getId(), success, inputTextCmd.text));
       }
     } catch (InterruptedException e) {
-      LogManager.logger().error(e.toString());
+      LogManager.logger().error(e);
     }
   }
 }

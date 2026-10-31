@@ -84,7 +84,7 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
         try {
           onRespReceived(respStr);
         } catch (Exception e) {
-          LogManager.logger().error("Received an invalid HW ctrl response.  (%s)\n%s", respStr, e);
+          LogManager.logger().error(e, "Received an invalid HW ctrl response.  (%s)", respStr);
         } catch (Throwable ignored) { /* Do nothing. */  }
       }
     } catch (IOException ignored) { /* Do nothing. */ }
@@ -176,7 +176,7 @@ public class StdioHwCmdDispatcher implements HwCmdDispatcher {
       }
       process = null;
     } catch (Throwable e) {
-      LogManager.logger().error("Failed to end the HW ctrl program.\n%s", e);
+      LogManager.logger().error("Failed to end the HW ctrl program.", e);
     } finally {
       lock.unlock();
     }

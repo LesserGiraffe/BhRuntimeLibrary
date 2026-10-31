@@ -137,9 +137,9 @@ public class AppMain {
     try {
       cmd = parser.parse(options, args);
     } catch (ParseException e) {
-      String msg = "Invalid command-line arguments.\n%s".formatted(e);
-      logger.error(msg);
-      System.err.println(msg);
+      String msg = "Invalid command-line arguments.";
+      logger.error(msg, e);
+      System.err.printf("%s\n%s%n", msg, e);
     }
     return cmd;
   }
@@ -167,7 +167,7 @@ public class AppMain {
       outputLocalTcpPort(socketFactory);
     } catch (Exception e) {
       System.out.println("\n-1" + BhConstants.RIM_TCP_PORT_SUFFIX);  //don't remove
-      LogManager.logger().error("Failed to export an rmi object.\n%s", e);
+      LogManager.logger().error("Failed to export an rmi object.", e);
     }
   }
 
@@ -226,9 +226,9 @@ public class AppMain {
       var event = new BhProgramEvent(BhProgramEvent.Name.PROGRAM_START);
       shell.runScript(fileName, event);
     } catch (Exception e) {
-      String msg = "Failed to run a script.  (%s)\n%s".formatted(fileName, e);
+      String msg = "Failed to run a script.  (%s)".formatted(fileName);
       System.err.println(msg);
-      LogManager.logger().error(msg);
+      LogManager.logger().error(msg, e);
     }
   }
 

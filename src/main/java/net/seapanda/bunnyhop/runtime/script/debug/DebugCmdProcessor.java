@@ -96,7 +96,7 @@ public class DebugCmdProcessor implements BhRuntimeMessageProcessor<BhDebugCmd> 
         sendRespList.put(resp);
       }
     } catch (InterruptedException e) {
-      LogManager.logger().error(e.toString());
+      LogManager.logger().error(e);
     }
   }
 

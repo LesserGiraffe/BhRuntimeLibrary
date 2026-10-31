@@ -73,7 +73,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
       bhAppScript = context.compileReader(reader, filePath.getFileName().toString(), 1, null);
       return execute(context, fileName);
     } catch (Exception e) {
-      LogManager.logger().error("Failed to run a script.  (%s)\n%s", fileName, e);
+      LogManager.logger().error(e, "Failed to run a script.  (%s)", fileName);
     }
     return false;
   }
@@ -91,7 +91,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
       isBhAppInitialized.set(true);
       return success;
     } catch (Exception e) {
-      LogManager.logger().error("Failed to start a script.  (%s)\n%s", fileName, e);
+      LogManager.logger().error(e, "Failed to start a script.  (%s)", fileName);
     }
     return false;
   }
@@ -118,7 +118,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
         bhProgramExec.submit(() -> call(func));
       }
     } catch (Exception e) {
-      LogManager.logger().error("Failed to fire an event.  (%s)\n%s", event, e);
+      LogManager.logger().error(e, "Failed to fire an event.  (%s)", event);
     }
   }
 
@@ -135,7 +135,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
         String funcName = (func instanceof BaseFunction baseFunc)
             ? "(%s)".formatted(baseFunc.getFunctionName()) : "";
         notifyThreadEnd(cx, thisObj, e);
-        LogManager.logger().error("Failed to call a function.  (%s)\n%s", funcName, e);
+        LogManager.logger().error(e, "Failed to call a function.  (%s)", funcName);
       }
     }
     return null;
@@ -149,7 +149,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
       Object[] args = new Object[] {Context.javaToJS(exception, thisObj)};
       func.call(cx, bhAppScope, thisObj, args);
     } catch (Throwable e) {
-      LogManager.logger().error("Failed to call a function.  (%s)\n%s", funcName, e);
+      LogManager.logger().error(e, "Failed to call a function.  (%s)", funcName);
     }
   }
 }
