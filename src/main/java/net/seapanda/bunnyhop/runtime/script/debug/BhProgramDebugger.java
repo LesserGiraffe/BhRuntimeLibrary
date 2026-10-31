@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 import net.seapanda.bunnyhop.runtime.api.message.BhSymbolId;
 import net.seapanda.bunnyhop.runtime.api.message.exception.BhProgramException;
 import net.seapanda.bunnyhop.runtime.api.message.exception.NoSuchSymbolException;
@@ -66,7 +66,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
   /** ブレークポイント一覧. */
   private final Set<String> breakpoints = ConcurrentHashMap.newKeySet();
   /** 発行した通知を格納する FIFO. */
-  private final BlockingQueue<BhProgramNotification> sendNotifList;
+  private final BlockingQueue<BhRuntimeNotification> sendNotifList;
   /** BhProgram のデータを文字列に変換するメソッド. */
   private volatile Function toStr;
   /** グローバル変数のリスト. */
@@ -81,7 +81,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
    *
    * @param sendNotifList 発行した通知を格納する FIFO
    */
-  public BhProgramDebugger(BlockingQueue<BhProgramNotification> sendNotifList) {
+  public BhProgramDebugger(BlockingQueue<BhRuntimeNotification> sendNotifList) {
     this.sendNotifList = sendNotifList;
   }
 
@@ -452,7 +452,7 @@ public class BhProgramDebugger implements Debugger, DebugInstrumentation {
     return threadToInfo.get(threadId);
   }
 
-  private void sendNotification(BhProgramNotification notif) {
+  private void sendNotification(BhRuntimeNotification notif) {
     try {
       sendNotifList.put(notif);
     } catch (InterruptedException e) { /* Do nothing. */ }

@@ -23,14 +23,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import net.seapanda.bunnyhop.runtime.api.BhRuntimeFacade;
 import net.seapanda.bunnyhop.runtime.api.message.BhProgramEvent;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 import net.seapanda.bunnyhop.runtime.api.message.debug.BhDebugCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoResp;
 import net.seapanda.bunnyhop.runtime.api.message.simulator.BhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 
 /**
@@ -44,10 +44,10 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   private boolean connected = false;
   private final MessageQueueSet queueSet;
   private final BhProgramExecutor executor;
-  private final BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
-  private final BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor;
-  private final BhProgramMessageProcessor<BhSimulatorResp> simRespProcessor;
-  private final BhProgramMessageProcessor<BhDebugCmd> debugCmdProcessor;
+  private final BhRuntimeMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
+  private final BhRuntimeMessageProcessor<BhTextIoResp> textIoRespProcessor;
+  private final BhRuntimeMessageProcessor<BhSimulatorResp> simRespProcessor;
+  private final BhRuntimeMessageProcessor<BhDebugCmd> debugCmdProcessor;
 
   /** BunnyHop から受信したメッセージを処理する Executor. */
   private final ExecutorService recvMsgProcessor = Executors.newSingleThreadExecutor();
@@ -60,10 +60,10 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   public BhRuntimeFacadeImpl(
       MessageQueueSet queueSet,
       BhProgramExecutor executor,
-      BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
-      BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor,
-      BhProgramMessageProcessor<BhSimulatorResp> simRespProcessor,
-      BhProgramMessageProcessor<BhDebugCmd> debugCmdProcessor) {
+      BhRuntimeMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
+      BhRuntimeMessageProcessor<BhTextIoResp> textIoRespProcessor,
+      BhRuntimeMessageProcessor<BhSimulatorResp> simRespProcessor,
+      BhRuntimeMessageProcessor<BhDebugCmd> debugCmdProcessor) {
     this.queueSet = queueSet;
     this.executor = executor;
     this.textIoCmdProcessor = textIoCmdProcessor;
@@ -80,7 +80,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   @Override
-  public boolean sendNotifToRuntime(BhProgramNotification notif) {
+  public boolean sendNotifToRuntime(BhRuntimeNotification notif) {
     try {
       return queueSet.recvNotifList().offer(
           notif, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -89,7 +89,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   @Override
-  public BhProgramResponse recvRespFromRuntime() {
+  public BhRuntimeResponse recvRespFromRuntime() {
     try {
       return queueSet.sendRespList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
@@ -97,7 +97,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   @Override
-  public BhProgramNotification recvNotifFromRuntime() {
+  public BhRuntimeNotification recvNotifFromRuntime() {
     try {
       return queueSet.sendNotifList().poll(BhConstants.POP_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) { /* do nothing */ }
@@ -105,7 +105,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   }
 
   @Override
-  public boolean sendRespToRuntime(BhProgramResponse resp) {
+  public boolean sendRespToRuntime(BhRuntimeResponse resp) {
     try {
       return queueSet.recvRespList().offer(
           resp, BhConstants.PUSH_MSG_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -133,7 +133,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   /** BunnyHop から受信したメッセージを処理し続ける. */
   private void processRecvMsg() {
     while (true) {
-      BhProgramNotification notif;
+      BhRuntimeNotification notif;
       try {
         notif = queueSet.recvNotifList().take();
       } catch (InterruptedException e) {
@@ -151,7 +151,7 @@ public class BhRuntimeFacadeImpl implements BhRuntimeFacade {
   /** BunnyHop から受信したレスポンスを処理し続ける. */
   private void processRecvResp() {
     while (true) {
-      BhProgramResponse resp;
+      BhRuntimeResponse resp;
       try {
         resp = queueSet.recvRespList().take();
       } catch (InterruptedException e) {

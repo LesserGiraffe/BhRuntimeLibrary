@@ -16,8 +16,8 @@
 
 package net.seapanda.bunnyhop.runtime.api.message;
 
-/** BunnyHop と BhProgram の間で送受信されるイベント. */
-public class BhProgramEvent implements BhProgramNotification {
+/** BunnyHop から BhProgram に送信されるイベント. */
+public class BhProgramEvent implements BhRuntimeNotification {
 
   /** イベント名. */
   public final Name name;

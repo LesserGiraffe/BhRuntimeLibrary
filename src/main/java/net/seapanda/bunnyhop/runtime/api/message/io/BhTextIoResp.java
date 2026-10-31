@@ -16,14 +16,14 @@
 
 package net.seapanda.bunnyhop.runtime.api.message.io;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 
 /**
  * {@link BhTextIoCmd} のレスポンス.
  *
  * @author K.Koike
  */
-public abstract class BhTextIoResp implements BhProgramResponse {
+public abstract class BhTextIoResp implements BhRuntimeResponse {
 
   private final long id;
   public final boolean success;

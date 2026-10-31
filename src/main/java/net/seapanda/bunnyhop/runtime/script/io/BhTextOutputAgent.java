@@ -24,13 +24,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoResp;
 import net.seapanda.bunnyhop.runtime.api.message.io.OutputTextCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.OutputTextResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.utility.Utility;
 
 /**
@@ -38,10 +38,10 @@ import net.seapanda.bunnyhop.utility.Utility;
  *
  * @author K.Koike
  */
-public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcessor<BhTextIoResp> {
+public class BhTextOutputAgent implements BhTextOutput, BhRuntimeMessageProcessor<BhTextIoResp> {
 
   /** 発行した通知を格納する FIFO. */
-  private final BlockingQueue<BhProgramNotification> sendNotifList;
+  private final BlockingQueue<BhRuntimeNotification> sendNotifList;
   /** BunnyHop へのテキストデータの送信が有効な場合 true. */
   private boolean isTextOutputEnabled;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
@@ -57,7 +57,7 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
    * @param enableTextOutput 初期状態で, BunnyHop へのテキストデータの送信を有効化する場合 true
    */
   public BhTextOutputAgent(
-      BlockingQueue<BhProgramNotification> sendNotifList,
+      BlockingQueue<BhRuntimeNotification> sendNotifList,
       boolean enableTextOutput) {
     this.sendNotifList = sendNotifList;
     this.isTextOutputEnabled = enableTextOutput;
@@ -152,7 +152,7 @@ public class BhTextOutputAgent implements BhTextOutput, BhProgramMessageProcesso
 
   /** BunnyHop にテキストデータを送信するコマンドをキャンセルする. */
   private void cancelTextOutput() {
-    List<BhProgramNotification> outputTextCmdList = sendNotifList.stream()
+    List<BhRuntimeNotification> outputTextCmdList = sendNotifList.stream()
         .filter(msg -> msg instanceof OutputTextCmd)
         .toList();
     sendNotifList.removeAll(outputTextCmdList);

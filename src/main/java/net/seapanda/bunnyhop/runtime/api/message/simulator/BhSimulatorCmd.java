@@ -16,14 +16,14 @@
 
 package net.seapanda.bunnyhop.runtime.api.message.simulator;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 
 /**
  * BhSimulator が処理するコマンド.
  *
  * @author K.Koike
  */
-public abstract class BhSimulatorCmd implements BhProgramNotification {
+public abstract class BhSimulatorCmd implements BhRuntimeNotification {
 
   private final long id;
 

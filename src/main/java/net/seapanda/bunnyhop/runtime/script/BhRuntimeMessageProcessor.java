@@ -16,15 +16,15 @@
 
 package net.seapanda.bunnyhop.runtime.script;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramMessage;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeMessage;
 
 /**
- * {@link BhProgramMessage} オブジェクトを処理する機能を規定したインタフェース.
+ * {@link BhRuntimeMessage} オブジェクトを処理する機能を規定したインタフェース.
  *
  * @author K.Koike
  */
 @FunctionalInterface
-public interface BhProgramMessageProcessor<T extends BhProgramMessage> {
+public interface BhRuntimeMessageProcessor<T extends BhRuntimeMessage> {
 
   /** {@code resp} を処理する. */
   void process(T resp);

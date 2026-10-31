@@ -18,8 +18,8 @@ package net.seapanda.bunnyhop.runtime.api;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 
 /**
  * BhRuntime (BhRuntime) に対する操作を規定したインタフェース.
@@ -51,21 +51,21 @@ public interface BhRuntimeFacade extends Remote {
    * @param notif 送信する通知. null不可.
    * @return 送信に成功した場合 true
    */
-  boolean sendNotifToRuntime(BhProgramNotification notif) throws RemoteException;
+  boolean sendNotifToRuntime(BhRuntimeNotification notif) throws RemoteException;
 
   /**
    * BhRuntime からレスポンスを受信する.
    *
    * @return 受信したレスポンス. 受信に失敗した場合もしくは受信可能なレスポンスがなかった場合 null.
    */
-  BhProgramResponse recvRespFromRuntime() throws RemoteException;
+  BhRuntimeResponse recvRespFromRuntime() throws RemoteException;
 
   /**
    * BhRuntime からメッセージを受信する.
    *
    * @return 受信したメッセージ. 受信に失敗した場合もしくは受信可能なメッセージがなかった場合 null.
    */
-  BhProgramNotification recvNotifFromRuntime() throws RemoteException;
+  BhRuntimeNotification recvNotifFromRuntime() throws RemoteException;
 
   /**
    * BhRuntime にレスポンスを送信する.
@@ -73,5 +73,5 @@ public interface BhRuntimeFacade extends Remote {
    * @param resp 送信するレスポンス. null不可.
    * @return 送信に成功した場合 true
    */
-  boolean sendRespToRuntime(BhProgramResponse resp) throws RemoteException;
+  boolean sendRespToRuntime(BhRuntimeResponse resp) throws RemoteException;
 }

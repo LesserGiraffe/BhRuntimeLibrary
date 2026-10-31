@@ -17,14 +17,14 @@
 package net.seapanda.bunnyhop.runtime.api.message.debug;
 
 import java.util.Optional;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 
 /**
  * {@link BhDebugCmd} のレスポンス.
  *
  * @author K.Koike
  */
-public abstract class BhDebugResp implements BhProgramResponse {
+public abstract class BhDebugResp implements BhRuntimeResponse {
 
   private final long id;
   private final boolean success;

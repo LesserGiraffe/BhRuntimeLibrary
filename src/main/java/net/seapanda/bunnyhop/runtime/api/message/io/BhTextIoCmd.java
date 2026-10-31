@@ -16,14 +16,14 @@
 
 package net.seapanda.bunnyhop.runtime.api.message.io;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 
 /**
  * BunnyHop のテキスト入力/出力処理を表すコマンド.
  *
  * @author K.Koike
  */
-public abstract class BhTextIoCmd implements BhProgramNotification {
+public abstract class BhTextIoCmd implements BhRuntimeNotification {
 
   private final long id;
 

@@ -20,7 +20,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.seapanda.bunnyhop.runtime.api.message.BhProgramEvent;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 import net.seapanda.bunnyhop.runtime.api.message.exception.BhProgramException;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoResp;
@@ -30,7 +30,7 @@ import net.seapanda.bunnyhop.runtime.api.message.io.OutputTextResp;
 import net.seapanda.bunnyhop.runtime.api.message.thread.BhCallStackItem;
 import net.seapanda.bunnyhop.runtime.api.message.thread.BhThreadContext;
 import net.seapanda.bunnyhop.runtime.executor.BhProgramExecutor;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 
@@ -45,15 +45,15 @@ public class BhProgramShell {
   private final ExecutorService inoutputExecutor = Executors.newSingleThreadExecutor();
   private final MessageQueueSet queueSet;
   private final BhProgramExecutor executor;
-  private final BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
-  private final BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor;
+  private final BhRuntimeMessageProcessor<BhTextIoCmd> textIoCmdProcessor;
+  private final BhRuntimeMessageProcessor<BhTextIoResp> textIoRespProcessor;
 
   /** コンストラクタ. */
   BhProgramShell(
       MessageQueueSet queueSet,
       BhProgramExecutor executor,
-      BhProgramMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
-      BhProgramMessageProcessor<BhTextIoResp> textIoRespProcessor) {
+      BhRuntimeMessageProcessor<BhTextIoCmd> textIoCmdProcessor,
+      BhRuntimeMessageProcessor<BhTextIoResp> textIoRespProcessor) {
     this.queueSet = queueSet;
     this.executor = executor;
     this.textIoCmdProcessor = textIoCmdProcessor;
@@ -63,7 +63,7 @@ public class BhProgramShell {
   }
 
   /**
-   * 標準入出力から BhProgram の入出力とデータをやり取りするためのクラス.
+   * {@code fileName} で指定した BhProgram を実行する.
    *
    * @param fileName 実行ファイル名
    * @param event 実行時にスクリプトに渡すイベントデータ
@@ -80,7 +80,7 @@ public class BhProgramShell {
   private void output() {
     while (true) {
       try {
-        BhProgramNotification notif = queueSet.sendNotifList().take();
+        BhRuntimeNotification notif = queueSet.sendNotifList().take();
         switch (notif) {
           case BhThreadContext context -> outputThreadInfo(context);
 
@@ -117,9 +117,9 @@ public class BhProgramShell {
     try (Scanner scan = new Scanner(System.in)) {
       while (true) {
         String line = scan.nextLine();
-        if (line.startsWith(BhConstants.BhProgram.STDIN_PREFIX)) {
+        if (line.startsWith(BhConstants.Shell.STDIN_PREFIX)) {
           pushToStdinBuf(line);
-        } else if (line.startsWith(BhConstants.BhProgram.EVENT_INPUT_PREFIX)) {
+        } else if (line.startsWith(BhConstants.Shell.EVENT_INPUT_PREFIX)) {
           fireEvent(line);
         } else {
           printCmdFormat();
@@ -158,8 +158,8 @@ public class BhProgramShell {
 
   private void printCmdFormat() {
     System.out.println("Input command format");
-    System.out.printf("  %s input string to stdin%n", BhConstants.BhProgram.STDIN_PREFIX);
-    System.out.printf("  %s EVENT_NAME%n", BhConstants.BhProgram.EVENT_INPUT_PREFIX);
+    System.out.printf("  %s input string to stdin%n", BhConstants.Shell.STDIN_PREFIX);
+    System.out.printf("  %s EVENT_NAME%n", BhConstants.Shell.EVENT_INPUT_PREFIX);
     System.out.println();
   }
 }

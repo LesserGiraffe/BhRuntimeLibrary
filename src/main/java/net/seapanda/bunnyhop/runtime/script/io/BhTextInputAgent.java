@@ -19,12 +19,12 @@ package net.seapanda.bunnyhop.runtime.script.io;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import net.seapanda.bunnyhop.runtime.BhConstants;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 import net.seapanda.bunnyhop.runtime.api.message.io.BhTextIoCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.InputTextCmd;
 import net.seapanda.bunnyhop.runtime.api.message.io.InputTextResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 import net.seapanda.bunnyhop.utility.Utility;
 
@@ -33,10 +33,10 @@ import net.seapanda.bunnyhop.utility.Utility;
  *
  * @author K.Koike
  */
-public class BhTextInputAgent implements BhTextInput, BhProgramMessageProcessor<BhTextIoCmd> {
+public class BhTextInputAgent implements BhTextInput, BhRuntimeMessageProcessor<BhTextIoCmd> {
 
   /** 発行したレスポンスを格納する FIFO. */
-  private final BlockingQueue<BhProgramResponse> sendRespList;
+  private final BlockingQueue<BhRuntimeResponse> sendRespList;
   /** BhProgram に入力された文字列のバッファ. */
   private final BlockingQueue<String> inputTextList =
       new ArrayBlockingQueue<>(BhConstants.MAX_INPUT_TEXT_QUEUE_SIZE);
@@ -46,7 +46,7 @@ public class BhTextInputAgent implements BhTextInput, BhProgramMessageProcessor<
    *
    * @param sendRespList 発行したレスポンスを格納する FIFO
    */
-  public BhTextInputAgent(BlockingQueue<BhProgramResponse> sendRespList) {
+  public BhTextInputAgent(BlockingQueue<BhRuntimeResponse> sendRespList) {
     this.sendRespList = sendRespList;
   }
 

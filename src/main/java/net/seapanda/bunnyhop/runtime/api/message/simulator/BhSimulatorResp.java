@@ -16,14 +16,14 @@
 
 package net.seapanda.bunnyhop.runtime.api.message.simulator;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 
 /**
  * {@link BhSimulatorCmd} のレスポンス.
  *
  * @author K.Koike
  */
-public abstract class BhSimulatorResp implements BhProgramResponse {
+public abstract class BhSimulatorResp implements BhRuntimeResponse {
 
   private final long id;
   private final boolean success;

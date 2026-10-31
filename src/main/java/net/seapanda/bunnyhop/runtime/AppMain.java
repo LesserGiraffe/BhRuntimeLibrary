@@ -166,7 +166,7 @@ public class AppMain {
       registry.rebind(BhRuntimeFacade.class.getSimpleName(), remote);
       outputLocalTcpPort(socketFactory);
     } catch (Exception e) {
-      System.out.println("\n-1" + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+      System.out.println("\n-1" + BhConstants.RIM_TCP_PORT_SUFFIX);  //don't remove
       LogManager.logger().error("Failed to export an rmi object.\n%s", e);
     }
   }
@@ -175,11 +175,11 @@ public class AppMain {
     if (socketFactory instanceof LocalServerSocketFactory localSocketFactory) {
       System.out.println("\n"
           + localSocketFactory.getLocalPort() 
-          + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+          + BhConstants.RIM_TCP_PORT_SUFFIX);  //don't remove
     } else {
       System.out.println("\n"
           + ((RemoteServerSocketFactory) socketFactory).getLocalPort() 
-          + BhConstants.BhProgram.RIM_TCP_PORT_SUFFIX);  //don't remove
+          + BhConstants.RIM_TCP_PORT_SUFFIX);  //don't remove
     }
   }
 

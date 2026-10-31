@@ -16,14 +16,14 @@
 
 package net.seapanda.bunnyhop.runtime.api.message.debug;
 
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 
 /**
  * デバッガに対する命令を表すクラスの基底クラス.
  *
  * @author K.Koike
  */
-public abstract class BhDebugCmd implements BhProgramNotification {
+public abstract class BhDebugCmd implements BhRuntimeNotification {
   
   private final long id;
 

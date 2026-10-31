@@ -18,7 +18,7 @@ package net.seapanda.bunnyhop.runtime.api.message.exception;
 
 
 /**
- * BhProgam 実行時に発生した例外情報を保持するクラス.
+ * BhProgram の実行時に発生した例外情報を保持するクラス.
  *
  * @author K.Koike
  */

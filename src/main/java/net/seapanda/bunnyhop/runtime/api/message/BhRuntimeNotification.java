@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author K.Koike
  */
-public interface BhProgramNotification extends BhProgramMessage {
+public interface BhRuntimeNotification extends BhRuntimeMessage {
 
   AtomicLong nextId = new AtomicLong(1);
   

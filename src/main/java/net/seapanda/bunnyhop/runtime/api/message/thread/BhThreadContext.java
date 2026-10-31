@@ -18,14 +18,14 @@ package net.seapanda.bunnyhop.runtime.api.message.thread;
 
 import java.util.ArrayList;
 import java.util.SequencedCollection;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 import net.seapanda.bunnyhop.runtime.api.message.BhSymbolId;
 import net.seapanda.bunnyhop.runtime.api.message.exception.BhProgramException;
 
 /**
  * BhProgram のスレッドに関連する情報を格納するクラス.
  */
-public class BhThreadContext implements BhProgramNotification {
+public class BhThreadContext implements BhRuntimeNotification {
  
   private final long msgId;
   /** コールスタック. */

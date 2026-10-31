@@ -16,13 +16,15 @@
 
 package net.seapanda.bunnyhop.runtime.api.message;
 
-import java.io.Serializable;
 
 /**
- * BunnyHop と BhRuntime 間で送受信されるメッセージ.
+ * BunnyHop と BhRuntime 間で送受信される応答データ.
+ * 特定の {@link BhRuntimeNotification} を受け取ったプログラムが, このオブジェクトを応答として返す.
  *
  * @author K.Koike
  */
-public interface BhProgramMessage extends Serializable {
-  long getId();
+public interface BhRuntimeResponse extends BhRuntimeMessage {
+
+  /** この応答の元となった通知の処理に成功した場合 true を返す. */
+  boolean isSuccessful();
 }

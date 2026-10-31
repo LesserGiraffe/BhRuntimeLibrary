@@ -21,13 +21,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
 import net.seapanda.bunnyhop.runtime.api.message.simulator.BhSimulatorCmd;
 import net.seapanda.bunnyhop.runtime.api.message.simulator.BhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.api.message.simulator.StringBhSimulatorCmd;
 import net.seapanda.bunnyhop.runtime.api.message.simulator.StringBhSimulatorResp;
 import net.seapanda.bunnyhop.runtime.script.AgencyFailedException;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.utility.Utility;
 
 /**
@@ -36,9 +36,9 @@ import net.seapanda.bunnyhop.utility.Utility;
  * @author K.Koike
  */
 public class BhSimulatorAgent implements
-    BhSimulatorCtrl, BhProgramMessageProcessor<BhSimulatorResp> {
+    BhSimulatorCtrl, BhRuntimeMessageProcessor<BhSimulatorResp> {
   /** コマンドを格納する FIFO. */
-  private final BlockingQueue<BhProgramNotification> sendNotifList;
+  private final BlockingQueue<BhRuntimeNotification> sendNotifList;
   /** コマンド ID とその ID のコマンドの完了を待つための同期用オブジェクトのマップ. */
   private final Map<Long, CountDownLatch> cmdIdToBarrier = new ConcurrentHashMap<>();
   /** コマンド ID とその ID のコマンドのレスポンスのマップ. */
@@ -49,7 +49,7 @@ public class BhSimulatorAgent implements
    *
    * @param sendNotifList 発行したコマンドを格納する FIFO
    */
-  public BhSimulatorAgent(BlockingQueue<BhProgramNotification> sendNotifList) {
+  public BhSimulatorAgent(BlockingQueue<BhRuntimeNotification> sendNotifList) {
     this.sendNotifList = sendNotifList;
   }
 

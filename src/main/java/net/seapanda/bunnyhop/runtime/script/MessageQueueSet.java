@@ -19,8 +19,8 @@ package net.seapanda.bunnyhop.runtime.script;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import net.seapanda.bunnyhop.runtime.BhConstants;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramNotification;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeNotification;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 
 /**
  * BunnyHop と BhRuntimeで送受信されるメッセージを格納するキューのセット.
@@ -31,10 +31,10 @@ import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
  * @param recvRespList BunnyHop から受信したレスポンスを格納する FIFO.
  */
 public record MessageQueueSet(
-    BlockingQueue<BhProgramNotification> sendNotifList,
-    BlockingQueue<BhProgramNotification> recvNotifList,
-    BlockingQueue<BhProgramResponse> sendRespList,
-    BlockingQueue<BhProgramResponse> recvRespList) {
+    BlockingQueue<BhRuntimeNotification> sendNotifList,
+    BlockingQueue<BhRuntimeNotification> recvNotifList,
+    BlockingQueue<BhRuntimeResponse> sendRespList,
+    BlockingQueue<BhRuntimeResponse> recvRespList) {
 
   /** コンストラクタ. */
   public MessageQueueSet() {

@@ -71,7 +71,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
         Context context = Context.enter()) {
       context.setLanguageVersion(Context.VERSION_ES6);
       bhAppScript = context.compileReader(reader, filePath.getFileName().toString(), 1, null);
-      return startBhApp(context, fileName);
+      return execute(context, fileName);
     } catch (Exception e) {
       LogManager.logger().error("Failed to run a script.  (%s)\n%s", fileName, e);
     }
@@ -80,14 +80,14 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
 
 
   /** BhProgram を実行する. */
-  private boolean startBhApp(Context cx, String fileName) {
+  private boolean execute(Context cx, String fileName) {
     try {
       // 初期化
       bhAppScope.put(
           Keywords.Properties.BH_SCRIPT_HELPER,
           bhAppScope,
           Context.javaToJS(scriptHelper, bhAppScope));
-      boolean success = executeScript(bhAppScript, cx, bhAppScope);
+      boolean success = execute(bhAppScript, cx, bhAppScope);
       isBhAppInitialized.set(true);
       return success;
     } catch (Exception e) {
@@ -97,7 +97,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
   }
 
   /** {@code cx} と {@code scope} を使って, {@code script} を実行する. */
-  private boolean executeScript(Script script, Context cx, ScriptableObject scope) {
+  private boolean execute(Script script, Context cx, ScriptableObject scope) {
     try {
       script.exec(cx, scope);
       return true;

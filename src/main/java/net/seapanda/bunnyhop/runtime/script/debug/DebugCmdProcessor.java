@@ -18,7 +18,7 @@ package net.seapanda.bunnyhop.runtime.script.debug;
 
 import java.util.SequencedCollection;
 import java.util.concurrent.BlockingQueue;
-import net.seapanda.bunnyhop.runtime.api.message.BhProgramResponse;
+import net.seapanda.bunnyhop.runtime.api.message.BhRuntimeResponse;
 import net.seapanda.bunnyhop.runtime.api.message.debug.AddBreakpointsCmd;
 import net.seapanda.bunnyhop.runtime.api.message.debug.AddBreakpointsResp;
 import net.seapanda.bunnyhop.runtime.api.message.debug.BhDebugCmd;
@@ -52,7 +52,7 @@ import net.seapanda.bunnyhop.runtime.api.message.debug.SuspendThreadResp;
 import net.seapanda.bunnyhop.runtime.api.message.thread.BhVarStackFrame;
 import net.seapanda.bunnyhop.runtime.api.message.variable.BhListVariable;
 import net.seapanda.bunnyhop.runtime.api.message.variable.BhVariable;
-import net.seapanda.bunnyhop.runtime.script.BhProgramMessageProcessor;
+import net.seapanda.bunnyhop.runtime.script.BhRuntimeMessageProcessor;
 import net.seapanda.bunnyhop.runtime.service.LogManager;
 
 /**
@@ -60,14 +60,14 @@ import net.seapanda.bunnyhop.runtime.service.LogManager;
  *
  * @author K.Koike
  */
-public class DebugCmdProcessor implements BhProgramMessageProcessor<BhDebugCmd> {
+public class DebugCmdProcessor implements BhRuntimeMessageProcessor<BhDebugCmd> {
   
   private final Debugger debugger;
   /** 発行したレスポンスを格納する FIFO. */
-  private final BlockingQueue<BhProgramResponse> sendRespList;
+  private final BlockingQueue<BhRuntimeResponse> sendRespList;
 
   /** コンストラクタ. */
-  public DebugCmdProcessor(Debugger debugger, BlockingQueue<BhProgramResponse> sendRespList) {
+  public DebugCmdProcessor(Debugger debugger, BlockingQueue<BhRuntimeResponse> sendRespList) {
     this.debugger = debugger;
     this.sendRespList = sendRespList;
   }

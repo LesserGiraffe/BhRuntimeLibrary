@@ -36,11 +36,11 @@ public class BhConstants {
   public static final int MAX_LOG_FILE_NUM = 4;
   /** プロセスの終了完了待ちタイムアウト時間 (sec). */
   public static final int PROC_END_TIMEOUT = 4;
+  /** BunnyHop との通信に使う RMI オブジェクトを探す際の TCP ポートに付けられる接尾辞. */
+  public static final String RIM_TCP_PORT_SUFFIX = "@RmiTcpPort";
 
-  /** BhProgram に関するパラメータ. */
-  public static class BhProgram {
-    /** BunnyHop との通信に使う RMI オブジェクトを探す際の TCP ポートに付けられる接尾辞. */
-    public static final String RIM_TCP_PORT_SUFFIX = "@RmiTcpPort";
+  /** BhProgram を実行するシェルに関するパラメータ. */
+  public static class Shell {
     public static final String STDIN_PREFIX = "i:";
     public static final String EVENT_INPUT_PREFIX = "e:";
   }
@@ -55,9 +55,9 @@ public class BhConstants {
     public static final String HW_CTRL = "hwctrl";
     /** BhProgram によって作成されたデータを格納する場所のルートディレクトリの名前. */
     public static final String USER_DATA = "UserData";
-    /** BhProgram によってテキストデータを格納するディレクトリの名前. */
+    /** BhProgram によって作成されたテキストデータを格納するディレクトリの名前. */
     public static final String TEXT = "Text";
-    /** BhProgram によって音声データを格納するディレクトリの名前. */
+    /** BhProgram によって作成された音声データを格納するディレクトリの名前. */
     public static final String AUDIO = "Audio";
   }
 }
