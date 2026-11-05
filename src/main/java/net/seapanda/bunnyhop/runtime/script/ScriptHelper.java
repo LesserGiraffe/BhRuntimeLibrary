@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import net.seapanda.bunnyhop.runtime.script.debug.DebugInstrumentation;
-import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInput;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextIo;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextOutput;
@@ -38,7 +37,6 @@ public class ScriptHelper {
 
   public final BhTextIo io;
   public final BhSimulatorCtrl simulator;
-  public final HwCmdDispatcher hw;
   public final AudioController audio;
   public final DebugInstrumentation debug;
   public final ScriptUtil util;
@@ -53,14 +51,12 @@ public class ScriptHelper {
       BhTextOutput textOutput,
       TextFileManager textFileManager,
       BhSimulatorCtrl simulator,
-      HwCmdDispatcher hw,
       AudioController audio,
       DebugInstrumentation debug) {
 
     this.io = createTextIo(textInput, textOutput);
     this.file = new FileManager(textFileManager);
     this.simulator = simulator;
-    this.hw = hw;
     this.audio = audio;
     this.debug = debug;
     this.util = new ScriptUtil();

@@ -34,8 +34,6 @@ public class BhConstants {
   public static final int LOG_FILE_SIZE_LIMIT = 1024 * 1024;
   /** ログファイルの最大個数. */
   public static final int MAX_LOG_FILE_NUM = 4;
-  /** プロセスの終了完了待ちタイムアウト時間 (sec). */
-  public static final int PROC_END_TIMEOUT = 4;
   /** BunnyHop との通信に使う RMI オブジェクトを探す際の TCP ポートに付けられる接尾辞. */
   public static final String RIM_TCP_PORT_SUFFIX = "@RmiTcpPort";
 
@@ -49,10 +47,6 @@ public class BhConstants {
   public static class Path {
     public static final String LOG_DIR = "Log";
     public static final String LOG_FILE_NAME = "msg";
-    /** HW 制御プログラムがあるディレクトリの名前. */
-    public static final String ACTIONS = "Actions";
-    /** HW 制御プログラムの名前. */
-    public static final String HW_CTRL = "hwctrl";
     /** BhProgram によって作成されたデータを格納する場所のルートディレクトリの名前. */
     public static final String USER_DATA = "UserData";
     /** BhProgram によって作成されたテキストデータを格納するディレクトリの名前. */

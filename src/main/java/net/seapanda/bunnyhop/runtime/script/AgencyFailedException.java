@@ -23,4 +23,9 @@ public class AgencyFailedException extends Exception {
   public AgencyFailedException(String msg) {
     super(msg);
   }
+
+  /** コンストラクタ. */
+  public AgencyFailedException(String msg, Throwable e) {
+    super(msg, e);
+  }
 }

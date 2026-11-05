@@ -18,6 +18,8 @@ package net.seapanda.bunnyhop.runtime.script;
 
 import java.util.List;
 import net.seapanda.bunnyhop.runtime.api.message.exception.BhProgramException;
+import net.seapanda.bunnyhop.runtime.script.ipc.StdioCmdDispatcher;
+import net.seapanda.bunnyhop.runtime.script.ipc.StdioCmdDispatcherImpl;
 import net.seapanda.bunnyhop.utility.concurrent.SynchronizingTimer;
 
 /**
@@ -54,6 +56,15 @@ public class Factory {
   /** {@link SynchronizingTimer} を新規作成する. */
   public SynchronizingTimer newSyncTimer(int count, boolean autoReset) {
     return new SynchronizingTimer(count, autoReset);
+  }
+
+  /**
+   * ｛@link StdioCmdDispatcher｝ オブジェクトを作成して返す.
+   *
+   * @param command コマンドの送受信先となるプロセスを起動するコマンドとその引数
+   */
+  public StdioCmdDispatcher newStdioCmdDispatcher(String... command) throws AgencyFailedException {
+    return new StdioCmdDispatcherImpl(command);
   }
 
   /**

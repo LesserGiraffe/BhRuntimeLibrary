@@ -32,8 +32,6 @@ import net.seapanda.bunnyhop.runtime.script.MessageQueueSet;
 import net.seapanda.bunnyhop.runtime.script.ScriptHelper;
 import net.seapanda.bunnyhop.runtime.script.debug.BhProgramDebugger;
 import net.seapanda.bunnyhop.runtime.script.debug.DebugCmdProcessor;
-import net.seapanda.bunnyhop.runtime.script.hw.HwCmdDispatcher;
-import net.seapanda.bunnyhop.runtime.script.hw.StdioHwCmdDispatcher;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextInputAgent;
 import net.seapanda.bunnyhop.runtime.script.io.BhTextOutputAgent;
 import net.seapanda.bunnyhop.runtime.script.platform.AudioControllerImpl;
@@ -78,7 +76,6 @@ public class AppMain {
     var options = new Options();
     CommandLine cmd = parseCmd(args, options, logger);
     boolean isLocal = !cmd.hasOption("remote");
-    boolean enableHwCtrl = cmd.hasOption("hwctrl");
 
     if (cmd.hasOption("help")) {
       HelpFormatter hf = new HelpFormatter();
@@ -90,9 +87,9 @@ public class AppMain {
       return;
     }
     if (cmd.hasOption("run")) {
-      executeScript(cmd.getOptionValue("run"), enableHwCtrl);
+      executeScript(cmd.getOptionValue("run"));
     } else {
-      exportRmiObject(isLocal, enableHwCtrl);
+      exportRmiObject(isLocal);
     }
   }
 
@@ -102,12 +99,6 @@ public class AppMain {
         .longOpt("remote")
         .hasArg(false)
         .desc("If set, BhRuntime can communicate with a remote machine.")
-        .build());
-
-    options.addOption(Option.builder()
-        .longOpt("hwctrl")
-        .hasArg(false)
-        .desc("If set, BhRuntime uses hwctrl.")
         .build());
 
     options.addOption(Option.builder()
@@ -148,11 +139,10 @@ public class AppMain {
    * BunnyHop と通信するための RMI オブジェクトをエクスポートする.
    *
    * @param isLocal BunnyHop と同じマシン上で動作する場合 true
-   * @param enableHwCtrl BhRuntime による HW 制御機能を有効にする場合 true
    */
-  private static void exportRmiObject(boolean isLocal, boolean enableHwCtrl) {
+  private static void exportRmiObject(boolean isLocal) {
     try {
-      BhRuntimeFacade facade = createRuntimeFacade(enableHwCtrl);
+      BhRuntimeFacade facade = createRuntimeFacade();
       Remote remote = UnicastRemoteObject.exportObject(
           facade,
           0,
@@ -195,13 +185,9 @@ public class AppMain {
    * 引数で指定したスクリプトを実行する.
    *
    * @param fileName スクリプトファイル名
-   * @param enableHwCtrl BhRuntime による HW 制御を有効にする場合 true
    */
-  private static void executeScript(String fileName, boolean enableHwCtrl) {
+  private static void executeScript(String fileName) {
     try {
-      String cmd = Paths.get(
-          Utility.execPath, BhConstants.Path.ACTIONS, BhConstants.Path.HW_CTRL).toString();
-      var dispatcher = enableHwCtrl ? new StdioHwCmdDispatcher(cmd) : new HwCmdDispatcher() {};
       var queueSet = new MessageQueueSet();
       var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
       var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
@@ -218,7 +204,6 @@ public class AppMain {
           textOutAgent,
           textFileManager,
           simAgent,
-          dispatcher,
           audioCtrl,
           debugger);
       var executor = new JsBhProgramExecutor(helper);
@@ -235,14 +220,9 @@ public class AppMain {
   /**
    * {@link BhRuntimeFacade} オブジェクトを作成する.
    *
-   * @param enableHwCtrl BhRuntime による HW 制御を有効にする場合 true
    * @return {@link BhRuntimeFacade} オブジェクト
-   * @throws Exception {@link BhRuntimeFacade} オブジェクトの作成に失敗した場合
    */
-  private static BhRuntimeFacade createRuntimeFacade(boolean enableHwCtrl) throws Exception {
-    String cmd = Paths.get(
-        Utility.execPath, BhConstants.Path.ACTIONS, BhConstants.Path.HW_CTRL).toString();
-    var dispatcher = enableHwCtrl ? new StdioHwCmdDispatcher(cmd) : new HwCmdDispatcher() {};
+  private static BhRuntimeFacade createRuntimeFacade() {
     var queueSet = new MessageQueueSet();
     var simAgent = new BhSimulatorAgent(queueSet.sendNotifList());
     var textInAgent = new BhTextInputAgent(queueSet.sendRespList());
@@ -260,7 +240,6 @@ public class AppMain {
         textOutAgent,
         textFileManager,
         simAgent,
-        dispatcher,
         audioCtrl,
         debugger);
     var executor = new JsBhProgramExecutor(helper);
