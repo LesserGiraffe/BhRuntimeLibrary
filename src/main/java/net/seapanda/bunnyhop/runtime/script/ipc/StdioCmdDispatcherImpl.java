@@ -27,8 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
@@ -268,7 +270,7 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
       if (!process.waitFor(timeout, SECONDS)) {
         LogManager.logger().error(
             "The process did not exit in %s seconds.  Kill it forcibly.", timeout);
-        process.destroyForcibly().waitFor(timeout, SECONDS);
+        killProcessTree(timeout);
       }
       closeStreams();
       respReader.shutdownNow();
@@ -283,6 +285,26 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
       ended = true;
       releaseAllBarriers();
       lock.unlock();
+    }
+  }
+
+  /**
+   * {@link #process} が管理するプロセスとその子孫プロセスを全て強制終了する.
+   *
+   * @param timeout 全てのプロセスの終了を待つ時間 (秒)
+   */
+  private void killProcessTree(int timeout) throws InterruptedException {
+    var procs = new ArrayList<ProcessHandle>();
+    procs.add(process.toHandle());
+    process.descendants().forEach(procs::add);
+    CompletableFuture<?>[] exits =
+        procs.stream().map(ProcessHandle::onExit).toArray(CompletableFuture[]::new);
+    procs.forEach(ProcessHandle::destroyForcibly);
+    try {
+      CompletableFuture.allOf(exits).get(timeout, SECONDS);
+    } catch (ExecutionException | TimeoutException e) {
+      LogManager.logger().error(
+          "Some of the processes did not exit in %s seconds.  (%s)", timeout, e);
     }
   }
 
