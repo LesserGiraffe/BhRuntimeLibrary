@@ -16,9 +16,12 @@
 
 package net.seapanda.bunnyhop.runtime.script.ipc;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,7 +57,9 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
   /** コマンドおよびレスポンスの終了を表す区切り文字. */
   private volatile String terminator = "\n";
   /** コマンドを送受信するプロセスの {@link Process} オブジェクト. */
-  private Process process;
+  private final Process process;
+  /** {@link #end} による終了処理が行われた場合 true. */
+  private boolean ended = false;
   /** プロセスからコマンドの応答を取得する Executor. */
   private final ExecutorService respReader = Executors.newSingleThreadExecutor();
   /** 送信するコマンドの ID. */
@@ -149,12 +153,7 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
    * これ以上レスポンスを受信できなくなったときに呼ぶこと.
    */
   private void releaseAllBarriers() {
-    for (Long cmdId : cmdIdToBarrier.keySet()) {
-      CountDownLatch latch = cmdIdToBarrier.remove(cmdId);
-      if (latch != null) {
-        latch.countDown();
-      }
-    }
+    cmdIdToBarrier.values().forEach(CountDownLatch::countDown);
   }
 
   /**
@@ -191,10 +190,10 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
     boolean unlocked = false;
     try {
       lock.lock();
-      if (process == null) {
+      if (ended) {
         throw new AgencyFailedException("Program has ended.");
       }
-      byte[] cmdData = createCmd(cmdId, cmd).getBytes(StandardCharsets.UTF_8);
+      byte[] cmdData = createCmd(cmdId, cmd).getBytes(UTF_8);
       process.getOutputStream().write(cmdData);
       process.getOutputStream().flush();
       lock.unlock();
@@ -262,23 +261,18 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
       throws AgencyFailedException {
     try {
       lock.lock();
-      if (process == null) {
+      if (ended) {
         return;
       }
-      String command = addCmdId
-          ? createCmd(commandId.getAndIncrement(), terminationCmd)
-          : createCmd(terminationCmd);
-      process.getOutputStream().write(command.getBytes(StandardCharsets.UTF_8));
-      process.getOutputStream().flush();
-      if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
+      sendTerminationCmd(addCmdId, terminationCmd);
+      if (!process.waitFor(timeout, SECONDS)) {
         LogManager.logger().error(
             "The process did not exit in %s seconds.  Kill it forcibly.", timeout);
-        process.destroyForcibly().waitFor(timeout, TimeUnit.SECONDS);
+        process.destroyForcibly().waitFor(timeout, SECONDS);
       }
       closeStreams();
-      process = null;
       respReader.shutdownNow();
-      if (!respReader.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+      if (!respReader.awaitTermination(100, MILLISECONDS)) {
         throw new TimeoutException("Failed to stop the thread reading responses.");
       }
     } catch (Throwable e) {
@@ -286,9 +280,19 @@ public class StdioCmdDispatcherImpl implements StdioCmdDispatcher {
       LogManager.logger().error(msg, e);
       throw new AgencyFailedException(msg, e);
     } finally {
+      ended = true;
       releaseAllBarriers();
       lock.unlock();
     }
+  }
+
+  /** プロセスを終了するためのコマンドを送信する. */
+  private void sendTerminationCmd(boolean addCmdId, String[] terminationCmd) throws IOException {
+    String command = addCmdId
+        ? createCmd(commandId.getAndIncrement(), terminationCmd)
+        : createCmd(terminationCmd);
+    process.getOutputStream().write(command.getBytes(UTF_8));
+    process.getOutputStream().flush();
   }
 
   /**
