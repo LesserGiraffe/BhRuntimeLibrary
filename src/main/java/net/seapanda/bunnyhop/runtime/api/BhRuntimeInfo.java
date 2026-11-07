@@ -28,7 +28,7 @@ public class BhRuntimeInfo {
   /** BhRuntimeLibrary の名前. */
   private static final String NAME = "BhRuntime";
   /** BhRuntimeLibrary のバージョン. */
-  private static final AppVersion VERSION = AppVersion.of("bhrun-0.7.8");
+  private static final AppVersion VERSION = AppVersion.of("bhrun-0.7.9");
 
   /**
    * BhRuntimeLibrary の名前を取得する.
