@@ -35,6 +35,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
 
 /**
  * JavaScript で書かれた BhProgram を実行する機能を提供するクラス.
@@ -99,7 +100,7 @@ public class JsBhProgramExecutor implements BhProgramExecutor {
   /** {@code cx} と {@code scope} を使って, {@code script} を実行する. */
   private boolean execute(Script script, Context cx, ScriptableObject scope) {
     try {
-      script.exec(cx, scope);
+      script.exec(cx, scope, Undefined.SCRIPTABLE_UNDEFINED);
       return true;
     } catch (Throwable e) {
       notifyThreadEnd(cx, scope, e);
